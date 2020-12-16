@@ -410,5 +410,11 @@ void close_console(struct SHEET *sht)
 	memman_free_4k(memman, (int) sht->buf, 256 * 165);
 	sheet_free(sht);
 	close_constask(task);
+	io_cli();                                               /* ココから */
+    task->flags = 0; /* task_free(task); の旗わり */
+    if (taskctl->task_fpu == task) {
+        taskctl->task_fpu = 0;
+    }
+    io_sti();                                               /* ココまで */
 	return;
 }

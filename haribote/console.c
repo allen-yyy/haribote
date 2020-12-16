@@ -4,6 +4,39 @@
 #include <stdio.h>
 #include <string.h>
 
+void readrtc(unsigned char *t)
+{
+    char err;
+    static unsigned char adr[7] = { 0x00, 0x02, 0x04, 0x07, 0x08, 0x09, 0x32 };
+    static unsigned char max[7] = { 0x60, 0x59, 0x23, 0x31, 0x12, 0x99, 0x99 };
+    int i;
+    for (;;) { /* ﾕi､ﾟﾞz､ﾟ､ｬｳﾉｹｦ､ｹ､�､ﾞ､ﾇﾀR､�ｷｵ､ｹ */
+        err = 0;
+        for (i = 0; i < 7; i++) {
+            io_out8(0x70, adr[i]);
+            t[i] = io_in8(0x71);
+        }
+        for (i = 0; i < 7; i++) {
+            io_out8(0x70, adr[i]);
+            if (t[i] != io_in8(0x71) || (t[i] & 0x0f) > 9 || t[i] > max[i]) {
+                err = 1;
+            }
+        }
+        if (err == 0) {
+            return;
+        }
+    }
+}
+
+void printtime(struct CONSOLE *cons)
+{
+    unsigned char s[24], t[7];
+    readrtc(t);
+    sprintf(s, "%02X%02X.%02X.%02X %02X:%02X:%02X\n", t[6], t[5], t[4], t[3], t[2], t[1], t[0]);
+    cons_putstr0(cons,s);
+}
+
+
 void console_task(struct SHEET *sheet, int memtotal)
 {
 	struct TASK *task = task_now();
@@ -218,6 +251,8 @@ void cons_runcmd(char *cmdline, struct CONSOLE *cons, int *fat, int memtotal)
 		cmd_ncst(cons, cmdline, memtotal);
 	} else if (strncmp(cmdline, "langmode ", 9) == 0) {
 		cmd_langmode(cons, cmdline);
+	} else if (strcmp(cmdline, "time") == 0){
+		printtime(cons);
 	} else if (cmdline[0] != 0) {
 		if (cmd_app(cons, fat, cmdline) == 0) {
 			/* コマンドではなく、アプリでもなく、さらに空行でもない */

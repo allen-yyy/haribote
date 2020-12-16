@@ -5,6 +5,18 @@
 struct TASKCTL *taskctl;
 struct TIMER *task_timer;
 
+void init_pid()
+{
+	int i;
+	struct pid_t *pid;
+	pid->next = 0;
+	for(i=0;i<=MAX_PID;++i)
+	{
+		pid->pido[i].pid = i;
+	}
+	*((int *) 0x0f0a) = pid;
+}
+
 struct TASK *task_now(void)
 {
 	struct TASKLEVEL *tl = &taskctl->level[taskctl->now_lv];
@@ -78,6 +90,8 @@ struct TASK *task_init(struct MEMMAN *memman)
 	struct TASK *task, *idle;
 	struct SEGMENT_DESCRIPTOR *gdt = (struct SEGMENT_DESCRIPTOR *) ADR_GDT;
 
+	init_pid();
+
 	taskctl = (struct TASKCTL *) memman_alloc_4k(memman, sizeof (struct TASKCTL));
 	for (i = 0; i < MAX_TASKS; i++) {
 		taskctl->tasks0[i].flags = 0;
@@ -111,6 +125,8 @@ struct TASK *task_init(struct MEMMAN *memman)
 	idle->tss.fs = 1 * 8;
 	idle->tss.gs = 1 * 8;
 	task_run(idle, MAX_TASKLEVELS - 1, 1);
+	
+	taskctl->task_fpu = 0; 
 
 	return task;
 }
@@ -137,6 +153,12 @@ struct TASK *task_alloc(void)
 			task->tss.gs = 0;
 			task->tss.iomap = 0x40000000;
 			task->tss.ss0 = 0;
+			task->fpu[0] = 0x037f; /* CW(control word) */  /* ¥³¥³¤«¤é */
+            task->fpu[1] = 0x0000; /* SW(status word)  */
+            task->fpu[2] = 0xffff; /* TW(tag word)     */
+            for (i = 3; i < 108 / 4; i++) {
+                task->fpu[i] = 0;
+            }                                              /* ¥³¥³¤Þ¤Ç */
 			return task;
 		}
 	}
@@ -145,6 +167,8 @@ struct TASK *task_alloc(void)
 
 void task_run(struct TASK *task, int level, int priority)
 {
+	//int i;
+	struct pid_t *pid = *((int *) 0x0f0a);
 	if (level < 0) {
 		level = task->level; /* ƒŒƒxƒ‹‚ð•ÏX‚µ‚È‚¢ */
 	}
@@ -153,6 +177,8 @@ void task_run(struct TASK *task, int level, int priority)
 	}
 
 	if (task->flags == 2 && task->level != level) { /* “®ì’†‚ÌƒŒƒxƒ‹‚Ì•ÏX */
+		pid->pido[pid->next].task = task;
+		pid->next++;
 		task_remove(task); /* ‚±‚ê‚ðŽÀs‚·‚é‚Æflags‚Í1‚É‚È‚é‚Ì‚Å‰º‚Ìif‚àŽÀs‚³‚ê‚é */
 	}
 	if (task->flags != 2) {
@@ -200,4 +226,20 @@ void task_switch(void)
 		farjmp(0, new_task->sel);
 	}
 	return;
+}
+
+int *inthandler07(int *esp)
+{
+    struct TASK *now = task_now();
+    io_cli();
+    clts();
+    if (taskctl->task_fpu != now) {
+        if (taskctl->task_fpu != 0) {
+            fnsave(taskctl->task_fpu->fpu);
+        }
+        frstor(now->fpu);
+        taskctl->task_fpu = now;
+    }
+    io_sti();
+    return 0;
 }

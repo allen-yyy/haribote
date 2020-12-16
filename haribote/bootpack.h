@@ -35,6 +35,10 @@ void farcall(int eip, int cs);
 void asm_hrb_api(void);
 void start_app(int eip, int cs, int esp, int ds, int *tss_esp0);
 void asm_end_app(void);
+void clts(void);
+void fnsave(int *addr);
+void frstor(int *addr);
+void asm_inthandler07(void);
 
 /* fifo.c */
 struct FIFO32 {
@@ -200,6 +204,7 @@ void timer_cancelall(struct FIFO32 *fifo);
 #define TASK_GDT0		3		/* TSSをGDTの何番から割り当てるのか */
 #define MAX_TASKS_LV	100
 #define MAX_TASKLEVELS	10
+#define MAX_PID			9999
 struct TSS32 {
 	int backlink, esp0, ss0, esp1, ss1, esp2, ss2, cr3;
 	int eip, eflags, eax, ecx, edx, ebx, esp, ebp, esi, edi;
@@ -211,6 +216,7 @@ struct TASK {
 	int level, priority;
 	struct FIFO32 fifo;
 	struct TSS32 tss;
+	int fpu[108 / 4];
 	struct SEGMENT_DESCRIPTOR ldt[2];
 	struct CONSOLE *cons;
 	int ds_base, cons_stack;
@@ -226,9 +232,17 @@ struct TASKLEVEL {
 };
 struct TASKCTL {
 	int now_lv; /* 現在動作中のレベル */
+	struct TASK *task_fpu;
 	char lv_change; /* 次回タスクスイッチのときに、レベルも変えたほうがいいかどうか */
 	struct TASKLEVEL level[MAX_TASKLEVELS];
 	struct TASK tasks0[MAX_TASKS];
+};
+struct pid_t{
+	struct{
+		int pid;
+		struct TASK *task;
+	}pido[MAX_PID];
+	int next;
 };
 extern struct TASKCTL *taskctl;
 extern struct TIMER *task_timer;
@@ -238,6 +252,8 @@ struct TASK *task_alloc(void);
 void task_run(struct TASK *task, int level, int priority);
 void task_switch(void);
 void task_sleep(struct TASK *task);
+void task_sleep(struct TASK *task);
+int *inthandler07(int *esp);
 
 /* window.c */
 void make_window8(unsigned char *buf, int xsize, int ysize, char *title, char act);

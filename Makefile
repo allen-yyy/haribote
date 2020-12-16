@@ -66,6 +66,8 @@ haribote.img : haribote/ipl09.bin haribote/haribote.sys Makefile \
 		copy from:pictdata/fujisan.jpg to:@: \
 		copy from:pictdata/night.bmp to:@: \
 		copy from:nihongo/nihongo.fnt to:@: \
+		copy from:pi/pi.hrb to:@: \
+		copy from:sincurve/sincurve.hrb to:@: \
 		imgout:haribote.img
 
 # ƒRƒ}ƒ“ƒh

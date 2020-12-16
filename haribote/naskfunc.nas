@@ -23,8 +23,45 @@
 		EXTERN	_inthandler2c, _inthandler0d
 		EXTERN	_inthandler0c
 		EXTERN	_hrb_api
+		GLOBAL  _clts, _fnsave, _frstor, _asm_inthandler07
+        EXTERN  _inthandler07
 
 [SECTION .text]
+
+_clts:          ; void clts(void);
+        CLTS
+        RET
+
+_fnsave:        ; void fnsave(int *addr);
+        MOV     EAX,[ESP+4]     ; addr
+        FNSAVE  [EAX]
+        RET
+
+_frstor:        ; void frstor(int *addr);
+        MOV     EAX,[ESP+4]     ; addr
+        FRSTOR  [EAX]
+        RET
+
+_asm_inthandler07:
+        STI
+        PUSH    ES
+        PUSH    DS
+        PUSHAD
+        MOV     EAX,ESP
+        PUSH    EAX
+        MOV     AX,SS
+        MOV     DS,AX
+        MOV     ES,AX
+        CALL    _inthandler07
+        CMP     EAX,0
+        JNE     _asm_end_app
+        POP     EAX
+        POPAD
+        POP     DS
+        POP     ES
+        IRETD                   ; INT07‚Å‚Í ESP += 4; ‚Í‚¢‚ç‚È‚¢
+
+
 
 _io_hlt:	; void io_hlt(void);
 		HLT
