@@ -24,6 +24,7 @@
 		EXTERN	_inthandler0c
 		EXTERN	_hrb_api
 		GLOBAL  _clts, _fnsave, _frstor, _asm_inthandler07
+		GLOBAL	_shutdown
         EXTERN  _inthandler07
 
 [SECTION .text]
