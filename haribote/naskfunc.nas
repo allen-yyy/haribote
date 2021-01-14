@@ -24,7 +24,7 @@
 		EXTERN	_inthandler0c
 		EXTERN	_hrb_api
 		GLOBAL  _clts, _fnsave, _frstor, _asm_inthandler07
-		GLOBAL	_shutdown
+		;GLOBAL	_shutdown
         EXTERN  _inthandler07
 
 [SECTION .text]
@@ -328,7 +328,7 @@ _start_app:		; void start_app(int eip, int cs, int esp, int ds, int *tss_esp0);
 		RETF
 ;	アプリが終了してもここには来ない
 
-_shutdown:
-		MOV AX,5301H
-		XOR BX,BX
-		INT 0x15 
+;_shutdown:
+;		MOV AX,5301H
+;		XOR BX,BX
+;		INT 0x15 

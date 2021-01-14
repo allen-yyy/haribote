@@ -39,7 +39,10 @@ void clts(void);
 void fnsave(int *addr);
 void frstor(int *addr);
 void asm_inthandler07(void);
-void shutdown();
+//void shutdown();
+
+/* realcall.nas */
+//void _TO_POWEROFF(void);
 
 /* fifo.c */
 struct FIFO32 {
@@ -225,6 +228,9 @@ struct TASK {
 	int *fat;
 	char *cmdline;
 	unsigned char langmode, langbyte1;
+	int pid;
+	int r_flags;
+	struct MESSAGE *message_r;
 };
 struct TASKLEVEL {
 	int running; /* 動作しているタスクの数 */
@@ -245,6 +251,18 @@ struct pid_t{
 	}pido[MAX_PID];
 	int next;
 };
+struct blocks_t{
+	struct{
+		int pid;
+		struct TASK *task;
+	}blocko[MAX_TASKS];
+	int next;
+};
+struct MESSAGE{
+	int type;
+	int *Param;
+	char *params;
+}; 
 extern struct TASKCTL *taskctl;
 extern struct TIMER *task_timer;
 struct TASK *task_now(void);
@@ -253,7 +271,9 @@ struct TASK *task_alloc(void);
 void task_run(struct TASK *task, int level, int priority);
 void task_switch(void);
 void task_sleep(struct TASK *task);
-void task_sleep(struct TASK *task);
+//void task_sleep(struct TASK *task);
+void task_block(struct TASK *task);
+void task_unblock(struct TASK *task);
 int *inthandler07(int *esp);
 
 /* window.c */

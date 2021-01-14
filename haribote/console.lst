@@ -1054,8 +1054,8 @@
   1047 00000960 8B 45 F0                        	MOV	EAX,DWORD [-16+EBP]
   1048 00000963 2B 05 [00000000]                	SUB	EAX,DWORD [_taskctl]
   1049 00000969 2D 00000FFC                     	SUB	EAX,4092
-  1050 0000096E C1 F8 02                        	SAR	EAX,2
-  1051 00000971 69 C0 962FC963                  	IMUL	EAX,EAX,-1775253149
+  1050 0000096E C1 F8 04                        	SAR	EAX,4
+  1051 00000971 69 C0 286BCA1B                  	IMUL	EAX,EAX,678152731
   1052 00000977 05 00000400                     	ADD	EAX,1024
   1053 0000097C EB C9                           	JMP	L207
   1054 0000097E                                 	GLOBAL	_cmd_start

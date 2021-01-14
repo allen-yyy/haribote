@@ -9,12 +9,19 @@ void init_pid()
 {
 	int i;
 	struct pid_t *pid;
+	struct blocks_t *block;
 	pid->next = 0;
+	block->next = 0;
 	for(i=0;i<=MAX_PID;++i)
 	{
 		pid->pido[i].pid = i;
 	}
+	for(i=0;i<=MAX_TASKS;++i)
+	{
+		block->blocko[i].pid = i;
+	}
 	*((int *) 0x0f0a) = pid;
+	*((int *) 0x0f0f) = block;
 }
 
 struct TASK *task_now(void)
@@ -36,7 +43,8 @@ void task_remove(struct TASK *task)
 {
 	int i;
 	struct TASKLEVEL *tl = &taskctl->level[task->level];
-
+	struct pid_t *pid = *((int *) 0x0f0a);
+	
 	/* taskがどこにいるかを探す */
 	for (i = 0; i < tl->running; i++) {
 		if (tl->tasks[i] == task) {
@@ -54,12 +62,13 @@ void task_remove(struct TASK *task)
 		tl->now = 0;
 	}
 	task->flags = 1; /* スリープ中 */
-
+	
 	/* ずらし */
 	for (; i < tl->running; i++) {
 		tl->tasks[i] = tl->tasks[i + 1];
 	}
-
+	
+	pid->pido[task->pid].task->flags=task->flags; 
 	return;
 }
 
@@ -177,11 +186,13 @@ void task_run(struct TASK *task, int level, int priority)
 	}
 
 	if (task->flags == 2 && task->level != level) { /* 動作中のレベルの変更 */
-		pid->pido[pid->next].task = task;
-		pid->next++;
+		
 		task_remove(task); /* これを実行するとflagsは1になるので下のifも実行される */
 	}
-	if (task->flags != 2) {
+	if (task->flags != 2||task->flags == 3) {
+		pid->pido[pid->next].task = task;
+		pid->next++;
+		task->pid=pid->next-1;
 		/* スリープから起こされる場合 */
 		task->level = level;
 		task_add(task);
@@ -242,4 +253,71 @@ int *inthandler07(int *esp)
     }
     io_sti();
     return 0;
+}
+
+void task_block(struct TASK *task)
+{
+	struct pid_t *pid = *((int *) 0x0f0a);
+	struct TASK *now_task;
+	struct blocks_t *block = *((int *) 0x0f0f);
+	if (task->flags == 2) {
+		
+		now_task = task_now();
+		task_remove(task);
+		task->flags=3;
+		pid->pido[task->pid].task->flags=task->flags;
+		block->blocko[block->next].task = task;
+		block->blocko[block->next].pid = task->pid; 
+		if (task == now_task) {
+			
+			task_switchsub();
+			now_task = task_now();
+			farjmp(0, now_task->sel);
+		}
+		
+	}
+	return;
+}
+
+void task_unblock(struct TASK *task)
+{
+	struct pid_t *pid = *((int *) 0x0f0a);
+	struct TASK *now_task;
+	struct blocks_t *block = *((int *) 0x0f0f);
+	int i; 
+	//if (task->flags == 2) {
+	
+	//now_task = task_now();
+	task_run(task,task->level,task->priority);
+	//task->flags=3;
+	pid->pido[task->pid].task->flags=task->flags;
+		//block->blocko[block->next].task = task; 
+		//if (task == now_task) {
+		//	
+		//	task_switchsub();
+		//	now_task = task_now();
+		//	farjmp(0, now_task->sel);
+		//}
+	for (i = 0; i < block->next; i++) {
+		if (block->blocko[i].task == task) {
+			/* ここにいた */
+			block->blocko[i].task = 0;
+			block->blocko[i].pid = 0;
+			break;
+		}
+	}
+	for (; i < block->next; i++) {
+		block->blocko[i] = block->blocko[i + 1];
+	}
+	block->next--;
+	//}
+	return;
+}
+
+int message_receive(int to_receive,struct MESSAGE *message)
+{
+	struct TASK *task = task_now();
+	/* TODO (Allen#1#): todo */
+	
+	return 0;
 }

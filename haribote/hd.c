@@ -1,79 +1,69 @@
 #include "bootpack.h"
-#include "ide.h"
+#include "hd.h"
 
 
-
-
-BOOL ReadHDSector(LPVOID lpBuffer,
-				  UCHAR byStartSector,
-				  UCHAR byCylinderLo,
-				  UCHAR byCylinderHi,
-				  UCHAR byCtrlDrvHdr)     //bit 0 - 3 : Header.
-				                          //bit 4     : Driver.
-										  //bit 5 - 7 : Controller.
+void print_identify_info(u16* hdinfo)
 {
-	BOOL          bResult      = FALSE;
-	DWORD         dwCounter    = 0x00000000;
-	UCHAR         byFlags      = 0x00;
-	UCHAR         byDrvHdr     = 0x00;
+	int i, k;
+	char s[64];
+	struct iden_info_ascii {
+		int idx;
+		int len;
+		char * desc;
+	} iinfo[] = {{10, 20, "HD SN"}, /* Serial number in ASCII */
+		     {27, 40, "HD Model"} /* Model number in ASCII */ };
 
-	if(NULL == lpBuffer)
-		return bResult;
-	if(byCtrlDrvHdr >= 32)               //Currently,the system can not support
-		                                 //more than one controller.
-        return bResult;
-
-	//---------- ** debug ** -------------
-	WriteByteToPort(0x00,IDE_CTRL0_PORT_CTRL);  //Build the controller method.
-
-	while(dwCounter < 0xFFFFFFFF)       //Wait for controller and driver ready.
-	{
-		ReadByteFromPort(&byFlags,IDE_CTRL0_PORT_STATUS);
-		if(!CONTROLLER_READY(byFlags) || !DRIVER_READY(byFlags))
-		{
-			dwCounter ++;
-			continue;
+	for (k = 0; k < sizeof(iinfo)/sizeof(iinfo[0]); k++) {
+		char * p = (char*)&hdinfo[iinfo[k].idx];
+		for (i = 0; i < iinfo[k].len/2; i++) {
+			s[i*2+1] = *p++;
+			s[i*2] = *p++;
 		}
-		break;
-	}
-	if(0xFFFFFFFF == dwCounter)        //Time out.
-	{
-		PrintLine("The controller or driver is not ready in waiting time.");
-		return bResult;
+		s[i*2] = 0;
+		printl("%s: %s\n", iinfo[k].desc, s);
 	}
 
-	switch(16 & byCtrlDrvHdr)         //Determine which driver is to be accessed.
-	{
-	case 0:
-		byDrvHdr = FORM_DRIVER_HEADER(IDE_DRV0_LBA,byCtrlDrvHdr);
-		break;
-	case 16:
-		byDrvHdr = FORM_DRIVER_HEADER(IDE_DRV1_LBA,byCtrlDrvHdr);
-		break;
-	default:
-		return bResult;
-		break;
-	}
+	int capabilities = hdinfo[49];
+	printl("LBA supported: %s\n",
+	       (capabilities & 0x0200) ? "Yes" : "No");
 
-	WriteByteToPort(0x4b,IDE_CTRL0_PORT_PRECOMP);
-	WriteByteToPort(0x01,IDE_CTRL0_PORT_SECTORNUM);
-	WriteByteToPort(byStartSector,IDE_CTRL0_PORT_STARTSECTOR);
-	WriteByteToPort(byCylinderLo,IDE_CTRL0_PORT_CYLINDLO);
-	WriteByteToPort(byCylinderHi,IDE_CTRL0_PORT_CYLINDHI);
-	WriteByteToPort(byDrvHdr,IDE_CTRL0_PORT_HEADER);
-	WriteByteToPort(IDE_CMD_READ,IDE_CTRL0_PORT_CMD);
+	int cmd_set_supported = hdinfo[83];
+	printl("LBA48 supported: %s\n",
+	       (cmd_set_supported & 0x0400) ? "Yes" : "No");
 
-	while(TRUE)
-	{
-		ReadByteFromPort(&byFlags,IDE_CTRL0_PORT_STATUS);
-		if(CONTROLLER_READY(byFlags))
-			break;
-	}
-
-    ReadWordStringFromPort(lpBuffer,512,IDE_CTRL0_PORT_DATA);
-
-	bResult = TRUE;
-	return bResult;
+	int sectors = ((int)hdinfo[61] << 16) + hdinfo[60];
+	printl("HD size: %dMB\n", sectors * 512 / 1000000);
 }
+void hd_cmd_out(struct hd_cmd* cmd)
+{
+	/**
+	 * For all commands, the host must first check if BSY=1,
+	 * and should proceed no further unless and until BSY=0
+	 */
+	//if (!(in_byte(REG_STATUS) & mask)
+	//	panic("hd error.");
 
+	/* Activate the Interrupt Enable (nIEN) bit */
+	out_byte(REG_DEV_CTRL, 0);
+	/* Load required parameters in the Command Block Registers */
+	out_byte(REG_FEATURES, cmd->features);
+	out_byte(REG_NSECTOR,  cmd->count);
+	out_byte(REG_LBA_LOW,  cmd->lba_low);
+	out_byte(REG_LBA_MID,  cmd->lba_mid);
+	out_byte(REG_LBA_HIGH, cmd->lba_high);
+	out_byte(REG_DEVICE,   cmd->device);
+	/* Write the command code to the Command Register */
+	out_byte(REG_CMD,     cmd->command);
+}
+void hd_identify(int drive)
+{
+	struct hd_cmd cmd;
+	cmd.device  = MAKE_DEVICE_REG(0, drive, 0);
+	cmd.command = ATA_IDENTIFY;
+	hd_cmd_out(&cmd);
+	//interrupt_wait();
+	port_read(REG_DATA, hdbuf, SECTOR_SIZE);
+
+	print_identify_info((u16*)hdbuf);
+}
 
