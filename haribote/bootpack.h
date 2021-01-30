@@ -337,3 +337,42 @@ int tek_decomp(unsigned char *p, char *q, int size);
 /* bootpack.c */
 struct TASK *open_constask(struct SHEET *sht, unsigned int memtotal);
 struct SHEET *open_console(struct SHTCTL *shtctl, unsigned int memtotal);
+
+/* types */
+#define BYTE                char
+#define CHAR                char
+#define TCHAR               short
+#define UCHAR               unsigned char
+#define UBYTE               unsigned char
+#define WORD                unsigned short
+#define UWORD               unsigned short
+#define DWORD               unsigned long
+#define LPSTR               char*
+#define LPCTSTR             const char*
+#define INT                 int
+#define UINT                unsigned int
+#define FLOAT               float
+#define DOUBLE              double
+
+#define __U8                unsigned char
+#define __U16               unsigned short
+#define __U32               unsigned int
+
+#define BOOL                DWORD
+#define FALSE               0x00000000
+#define TRUE                0x00000001
+#define NULL                0x00000000
+#define MAX_DWORD_VALUE     0xFFFFFFFF
+#define MAX_WORD_VALUE      0xFFFF
+#define MAX_BYTE_VALUE      0xFF
+#define MAX_QWORD_VALUE     0xFFFFFFFFFFFFFFFF
+
+#define VOID                void
+#define LPVOID              void*
+
+#define LOWORD(dw)          WORD(dw)
+#define HIWORD(dw)          WORD(dw >> 16)
+
+#define LOBYTE(wr)          BYTE(wr)
+#define HIBYTE(wr)          BYTE(wr >> 16)
+

@@ -270,3 +270,18 @@ struct hd_info
 
 
 #endif /* _ORANGES_HD_H_ */
+//Test controller ready flag.
+//If the 8th bit of status register is 0,the controller is ready,
+//otherwise,the controller is busying.
+#define CONTROLLER_READY(flags)     ((~flags) & 0x80)
+
+//Test driver ready flag.
+//The 7th bit of status register is 1,then the driver is ready,otherwise,
+//the driver is busying.
+#define DRIVER_READY(flags)         (flags & 0x40)
+
+//Test the command executing result.
+//The first bit of status is 1,then the result successfully,otherwise,
+//failed.
+#define COMMAND_SUCC(flags)         ((~flags) & 0x01)
+
