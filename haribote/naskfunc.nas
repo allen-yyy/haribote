@@ -24,7 +24,10 @@
 		EXTERN	_inthandler0c
 		EXTERN	_hrb_api
 		GLOBAL  _clts, _fnsave, _frstor, _asm_inthandler07
-		;GLOBAL	_shutdown
+		GLOBAL	_WriteByteToPort, _ReadByteStringFromPor
+		GLOBAL	_WriteByteStringToPort, _ReadWordFromPort
+		GLOBAL	_WriteWordToPort, _ReadWordStringFromPort
+		GLOBAL	_WriteWordStringToPort
         EXTERN  _inthandler07
 
 [SECTION .text]
@@ -332,3 +335,112 @@ _start_app:		; void start_app(int eip, int cs, int esp, int ds, int *tss_esp0);
 ;		MOV AX,5301H
 ;		XOR BX,BX
 ;		INT 0x15 
+
+_WriteByteToPort:
+		push ebp
+		mov ebp,esp
+		push edx
+		mov al,byte ptr [ebp + 8]
+		mov dx,word ptr [ebp + 12]
+		out dx,al
+		pop edx
+		leave
+		retn
+
+_ReadByteStringFromPort:
+		push ebp
+		mov ebp,esp
+		push ecx
+		push edx
+		push edi
+		mov edi,dword ptr [ebp + 8]
+		mov ecx,dword ptr [ebp + 12]
+		mov dx,word ptr [ebp + 16]
+		rep insb
+		pop edi
+		pop edx
+		pop ecx
+		leave
+		retn
+
+
+
+_WriteByteStringToPort:
+		push ebp
+		mov ebp,esp
+		push ecx
+		push edx
+		push esi
+		mov esi,dword ptr [ebp + 8]
+		mov ecx,dword ptr [ebp + 12]
+		mov dx,word ptr [ebp + 16]
+		rep outsb
+		pop esi
+		pop edx
+		pop ecx
+		leave
+		retn
+
+_ReadWordFromPort:
+		push ebp
+		mov ebp,esp
+		push ebx
+		push edx
+		mov dx,word ptr [ebp + 0x0c]
+		mov ebx,dword ptr [ebp + 0x08]
+		in ax,dx
+		mov word ptr [ebx],ax
+		pop edx
+		pop ebx
+		leave
+		retn
+
+
+_WriteWordToPort:
+		push ebp
+		mov ebp,esp
+		push dx
+		mov dx,word ptr [ebp + 0x0c]
+		mov ax,word ptr [ebp + 0x08]
+		out dx,ax
+		pop dx
+		leave
+		retn
+
+_ReadWordStringFromPort:
+		push ebp
+		mov ebp,esp
+		push ecx
+		push edx
+		push edi
+		mov edi,dword ptr [ebp + 0x08]
+		mov ecx,dword ptr [ebp + 0x0c]
+		shr ecx,0x01
+		mov dx,  word ptr [ebp + 0x10]
+		cld
+		rep insw
+		pop edi
+		pop edx
+		pop ecx
+		leave
+		retn
+
+
+
+
+_WriteWordStringToPort:
+		push ebp
+		mov ebp,esp
+		push ecx
+		push edx
+		push esi
+		mov esi,dword ptr [ebp + 0x08]
+		mov ecx,dword ptr [ebp + 0x0c]
+		shr ecx,0x02
+		mov dx,  word ptr [ebp + 0x10]
+		rep outsw
+		pop esi
+		pop edx
+		pop ecx
+		leave
+		retn

@@ -1,92 +1,98 @@
-	GLOBAL __START
-    align 4
-    bits 32 ;32 bits code since in protected mode present.
+	
+[BITS 32]
+[INSTRSET "i486p"]
+[FORMAT "WCOFF"]
+[FILE "realcall.nas"]
+
+		GLOBAL __START
+	
+[SECTION .text]
 __START:
-    jmp __32CODE_BEGIN
-    ;Following is data area used to save registers temporary.
-    align 4
+    JMP __32CODE_BEGIN
+   
+    ALIGN 16
 __P_IDTR:
-    dw 00     ;Limitation of IDTR
-    dd 00     ;Base of IDTR
-__CR3 dd 0x00 ;Used to save CR3
+    DW 00     ;LIMITATION OF IDTR
+    DD 00     ;Base of IDTR
+__CR3 DD 0X00 ;Used to save CR3
+
 __32CODE_BEGIN:
-    push ebx
-    push ecx
-    push edx
-    push esi
-    push edi
-    push ebp
-    cli  ;Disable interrupt
-    sidt [__P_IDTR + 4096] ;Save IDTR
-    push eax
-    mov eax,cr3
-    mov dword [__CR3 + 4096],eax ;Save CR3.
-    mov eax,cr0
+    PUSH EBX
+    PUSH ECX
+    PUSH EDX
+    PUSH ESI
+    PUSH EDI
+    PUSH EBP
+    CLI  ;Disable interrupt
+    SIDT [__P_IDTR] ;SAVE IDTR
+    PUSH EAX
+    MOV EAX,CR3
+    MOV DWORD [__CR3],EAX ;SAVE CR3.
+    MOV EAX,CR0
     and eax,0x7FFFFFFF ;Clear PG bit
     mov cr0,eax  ;Disable paging.
     xor eax,eax
-    mov cr3,eax  ;Flush TLB.
-    pop eax
-    jmp 0x38 : 4096 + __16BIT_ENTRY ;Jump to 16 bits code.
+    ;mov cr3,eax  ;Flush TLB.
+    POP EAX
+    JMP __16BIT_ENTRY ;Jump to 16 bits code.
  
-    align 4
-    bits 16  ;16 bits code.
+    ALIGN 16
 __16BIT_ENTRY:
     jmp __16CODE_BEGIN
-    align 4
+    ALIGN 16
 __R_IDTR:
-    dw 1024
-    dd 0x00
+    DW 1024
+    DD 0x00
+	
 __16CODE_BEGIN:
-    mov bx,0x30
-    mov ds,bx
-    mov ss,bx
-    mov es,bx
-    mov fs,bx
-    mov gs,bx
-    lidt [__R_IDTR + 4096] ;Load interrupt vector table,the lidt use physical address.
-    mov ebx,cr0
-    and bl,0xFE ;Clear PE bit
-    mov cr0,ebx
-    jmp 0x100 : __REAL_MODE_ENTRY  ;Jump to real mode.
+    MOV AX,0x30
+    MOV DS,AX
+    MOV SS,AX
+    MOV ES,AX
+    MOV FS,AX
+    MOV GS,AX
+    LIDT [__R_IDTR] ;Load interrupt vector table,the lidt use physical address.
+    MOV EAX,CR0
+    AND AL,0XFE ;Clear PE bit
+    MOV CR0,EAX
+    jmp __REAL_MODE_ENTRY  ;Jump to real mode.
  
-    align 4
-    bits 16
+    ALIGN 4
 __REINIT_8259:           ;Re-initialize the 8259 chip to comply real mode,
                          ;since it has been configured into different mode
                          ;for protected mode.
-    push ax
-    mov al,0x13
-    out 0x20,al
-    mov al,0x08
-    out 0x21,al
-    mov al,0x09
-    out 0x21,al
-    pop ax
-    ret
+    PUSH AX
+    MOV AL,0X13
+    OUT 0X20,AL
+    MOV AL,0X08
+    OUT 0X21,AL
+    MOV AL,0X09
+    OUT 0X21,AL
+    POP AX
+    RET
  
 __REINIT_8259_EX:
-    push ax
-    mov al,0x11
-    out 0x20,al
-    out 0xa0,al
-    mov al,0x08
-    out 0x21,al
-    mov al,0x70
-    out 0xa1,al
-    mov al,0x04
-    out 0x21,al
-    mov al,0x02
-    out 0xa1,al
-    mov al,0x01
-    out 0x21,al
-    out 0xa1,al
-    mov al,0xb8
-    out 0x21,al
-    mov al,0x8f
-    out 0xa1,al
+    PUSH AX
+    MOV AL,0X11
+    OUT 0X20,AL
+    OUT 0XA0,AL
+    MOV AL,0X08
+    OUT 0X21,AL
+    MOV AL,0X70
+    OUT 0XA1,AL
+    MOV AL,0X04
+    OUT 0X21,AL
+    MOV AL,0X02
+    OUT 0XA1,AL
+    MOV AL,0X01
+    OUT 0X21,AL
+    OUT 0XA1,AL
+    MOV AL,0XB8
+    OUT 0X21,AL
+    MOV AL,0X8F
+    OUT 0XA1,AL
  
-    mov al,0x20                  ;;Indicate the interrupt chip we have fin-
+    MOV AL,0X20                  ;;Indicate the interrupt chip we have fin-
                                  ;;ished handle the interrupt.
                                  ;;:-)
                                  ;;It is mandatory when switch back real
@@ -99,41 +105,42 @@ __REINIT_8259_EX:
                                  ;;mode.
                                  ;;So this code segment cancels all pending
                                  ;;interrupt(s) in real mode.
-    out 0x20,al
-    out 0xa0,al
+    OUT 0X20,AL
+    OUT 0XA0,AL
  
-    pop ax
-    ret
+    POP AX
+    RET
  
 __REAL_MODE_ENTRY:
-    jmp __REALCODE_BEGIN
-    align 4
+    JMP __REALCODE_BEGIN
+	
+    ALIGN 4
 __ESP dd 0x00  ;Save ESP
 __REALCODE_BEGIN:
-    mov bx,cs
-    mov ds,bx
-    mov es,bx
-    mov fs,bx
-    mov gs,bx
+    MOV AX,CS
+    MOV DS,AX
+    MOV ES,AX
+    MOV FS,AX
+    MOV GS,AX
 	;Save ESP.
-    mov dword [__ESP],esp
+    MOV DWORD [__ESP],ESP
 	;ss and esp must be updated together.
-	mov ss,bx
-    mov sp,0xff0
-    call __REINIT_8259_EX         ;Set 8259 to BIOS mode
-    sti ;Enable interrupt.
+	MOV SS,BX
+    MOV SP,0XFF0
+    CALL __REINIT_8259_EX         ;Set 8259 to BIOS mode
+    STI ;Enable interrupt.
     ;OK,can run BIOS code now.
 __BIOS_BEGIN:
-    ;mov bx,ax
-	mov ax,0x5301
-    xor bx,bx
-    int 0x15
-    mov ax,0x530e
-    mov cx,0x102
-    int 0x15
-    mov ax,5307
-    mov bl,0x01
-    mov cx,0x03
-    int 0x15
-    mov eax,0x01   ;Indicate the calling is success.
-    ret
+    MOV BX,AX
+	MOV AX,0X5301
+    XOR BX,BX
+    INT 0X15
+    MOV AX,0X530E
+    MOV CX,0X102
+    INT 0X15
+    MOV AX,5307
+    MOV BL,0X01
+    MOV CX,0X03
+    INT 0X15
+    ;mov eax,0x01   ;Indicate the calling is success.
+    RET

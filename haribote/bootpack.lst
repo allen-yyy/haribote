@@ -603,9 +603,9 @@
    600 0000045A 83 C4 10                        	ADD	ESP,16
    601 0000045D E9 FFFFFF0C                     	JMP	L14
    602 00000462                                 L99:
-   603 00000462 69 D2 00000130                  	IMUL	EDX,EDX,304
+   603 00000462 69 D2 00000138                  	IMUL	EDX,EDX,312
    604 00000468 03 15 [00000000]                	ADD	EDX,DWORD [_taskctl]
-   605 0000046E 8D 82 FFFB4FFC                  	LEA	EAX,DWORD [-307204+EDX]
+   605 0000046E 8D 82 FFFB2FFC                  	LEA	EAX,DWORD [-315396+EDX]
    606 00000474 50                              	PUSH	EAX
    607 00000475 E8 00000898                     	CALL	_close_constask
    608 0000047A                                 L89:

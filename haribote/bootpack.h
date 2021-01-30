@@ -42,7 +42,7 @@ void asm_inthandler07(void);
 //void shutdown();
 
 /* realcall.nas */
-//void _TO_POWEROFF(void);
+void _START(void);
 
 /* fifo.c */
 struct FIFO32 {
@@ -209,6 +209,7 @@ void timer_cancelall(struct FIFO32 *fifo);
 #define MAX_TASKS_LV	100
 #define MAX_TASKLEVELS	10
 #define MAX_PID			9999
+#define task2pid(task)	task->pid
 struct TSS32 {
 	int backlink, esp0, ss0, esp1, ss1, esp2, ss2, cr3;
 	int eip, eflags, eax, ecx, edx, ebx, esp, ebp, esi, edi;
@@ -262,6 +263,7 @@ struct MESSAGE{
 	int type;
 	int *Param;
 	char *params;
+	int src;
 }; 
 extern struct TASKCTL *taskctl;
 extern struct TIMER *task_timer;
@@ -274,7 +276,10 @@ void task_sleep(struct TASK *task);
 //void task_sleep(struct TASK *task);
 void task_block(struct TASK *task);
 void task_unblock(struct TASK *task);
+struct TASK *pid2task(int pid);
 int *inthandler07(int *esp);
+
+#define ANY 10000
 
 /* window.c */
 void make_window8(unsigned char *buf, int xsize, int ysize, char *title, char act);

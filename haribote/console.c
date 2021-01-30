@@ -253,19 +253,16 @@ void cons_runcmd(char *cmdline, struct CONSOLE *cons, int *fat, int memtotal)
 		cmd_langmode(cons, cmdline);
 	} else if (strcmp(cmdline, "time") == 0){
 		printtime(cons);
+	} else if (strcmp(cmdline, "shutdown") == 0){
+		_START();
 	} else if (cmdline[0] != 0) {
-		switch(cmdline)
-		{
-			case "ps":
-				ps(cons);
-			default:	
-				if (cmd_app(cons, fat, cmdline) == 0) {
-					/* コマンドではなく、アプリでもなく、さらに空行でもない */
-					cons_putstr0(cons, "Bad command.\n\n");
-				}
+			if (cmd_app(cons, fat, cmdline) == 0) {
+				/* コマンドではなく、アプリでもなく、さらに空行でもない */
+				cons_putstr0(cons, "Bad command.\n\n");
+			}
 		}
 		
-	}
+	
 	return;
 }
 

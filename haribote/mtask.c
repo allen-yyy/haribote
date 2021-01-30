@@ -5,6 +5,14 @@
 struct TASKCTL *taskctl;
 struct TIMER *task_timer;
 
+struct TASK *pid2task(int pid)
+{
+	struct TASK *task;
+	struct pid_t *pids = *((int *) 0x0f0a);
+	task = pids->pido[pid].task;
+	return task;
+}
+
 void init_pid()
 {
 	int i;
@@ -313,11 +321,54 @@ void task_unblock(struct TASK *task)
 	//}
 	return;
 }
-
+/*
 int message_receive(int to_receive,struct MESSAGE *message)
 {
 	struct TASK *task = task_now();
-	/* TODO (Allen#1#): todo */
+	struct TASK *to_task;
+	if(to_receive==ANY)
+	{
+		if(task->message_r != 0)
+		{
+			message = task->message_r;
+			return 1;
+		}else{
+			task->r_flags = 1;
+			event_wait(task->message_r);
+			message = task->message_r;
+			return 1;
+		}
+	}else{
+		to_task = pid2task(to_receive);
+		for(;;)
+		{
+			if(task->message_r != 0)
+			{
+				if(task->message_r->src==to_receive)
+				{
+					message = task->message_r;
+					return 1;
+			}else{
+				task->r_flags = 1;
+				event_wait(task->message_r);
+				if(task->message_r->src==to_receive)
+				{
+					message = task->message_r;
+					return 1;
+				}
+				//message = task->message_r;
+				//return 1;
+			}
+			
+		}else{
+			task->r_flags = 1;
+			event_wait(task->message_r);
+			message = task->message_r;
+			return 1;
+		}
+		}
+		
+	}
 	
 	return 0;
-}
+}*/
