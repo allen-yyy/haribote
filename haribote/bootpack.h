@@ -29,6 +29,7 @@ void asm_inthandler0d(void);
 void asm_inthandler20(void);
 void asm_inthandler21(void);
 void asm_inthandler2c(void);
+void asm_inthandler2e(void);
 unsigned int memtest_sub(unsigned int start, unsigned int end);
 void farjmp(int eip, int cs);
 void farcall(int eip, int cs);
@@ -39,7 +40,7 @@ void clts(void);
 void fnsave(int *addr);
 void frstor(int *addr);
 void asm_inthandler07(void);
-//void shutdown();
+void inws(char *b,long len,short port); 
 
 /* realcall.nas */
 void _START(void);
@@ -376,3 +377,11 @@ struct SHEET *open_console(struct SHTCTL *shtctl, unsigned int memtotal);
 #define LOBYTE(wr)          BYTE(wr)
 #define HIBYTE(wr)          BYTE(wr >> 16)
 
+
+/* hd.c */
+void inthandler2e(int *esp);
+BOOL Identify(int nHdNum,BYTE* pBuffer);
+static BOOL CmdSucc(WORD wPort);
+static BOOL WaitForDrq(WORD wPort,DWORD dwMillionSecond);
+static BOOL WaitForBsy(WORD wPort,DWORD dwMillionSecond);
+static BOOL WaitForRdy(WORD wPort,DWORD dwMillionSecond);

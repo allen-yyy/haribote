@@ -270,19 +270,19 @@ void task_block(struct TASK *task)
 	struct blocks_t *block = *((int *) 0x0f0f);
 	if (task->flags == 2) {
 		
-		now_task = task_now();
-		task_remove(task);
+		//now_task = task_now();
+		//task_remove(task);
 		task->flags=3;
 		pid->pido[task->pid].task->flags=task->flags;
 		block->blocko[block->next].task = task;
 		block->blocko[block->next].pid = task->pid; 
-		if (task == now_task) {
-			
-			task_switchsub();
-			now_task = task_now();
-			farjmp(0, now_task->sel);
-		}
-		
+		//if (task == now_task) {
+		//	
+		//	task_switchsub();
+		//	now_task = task_now();
+		//	farjmp(0, now_task->sel);
+		//}
+		block->next++; 
 	}
 	return;
 }
@@ -296,8 +296,8 @@ void task_unblock(struct TASK *task)
 	//if (task->flags == 2) {
 	
 	//now_task = task_now();
-	task_run(task,task->level,task->priority);
-	//task->flags=3;
+	//task_run(task,task->level,task->priority);
+	task->flags=1;
 	pid->pido[task->pid].task->flags=task->flags;
 		//block->blocko[block->next].task = task; 
 		//if (task == now_task) {
@@ -321,54 +321,16 @@ void task_unblock(struct TASK *task)
 	//}
 	return;
 }
-/*
+
 int message_receive(int to_receive,struct MESSAGE *message)
 {
 	struct TASK *task = task_now();
 	struct TASK *to_task;
-	if(to_receive==ANY)
+	task->r_flags = 1;
+	for(;;)
 	{
-		if(task->message_r != 0)
-		{
-			message = task->message_r;
-			return 1;
-		}else{
-			task->r_flags = 1;
-			event_wait(task->message_r);
-			message = task->message_r;
-			return 1;
-		}
-	}else{
-		to_task = pid2task(to_receive);
-		for(;;)
-		{
-			if(task->message_r != 0)
-			{
-				if(task->message_r->src==to_receive)
-				{
-					message = task->message_r;
-					return 1;
-			}else{
-				task->r_flags = 1;
-				event_wait(task->message_r);
-				if(task->message_r->src==to_receive)
-				{
-					message = task->message_r;
-					return 1;
-				}
-				//message = task->message_r;
-				//return 1;
-			}
-			
-		}else{
-			task->r_flags = 1;
-			event_wait(task->message_r);
-			message = task->message_r;
-			return 1;
-		}
-		}
-		
+		if(task->message_r)
 	}
 	
 	return 0;
-}*/
+}

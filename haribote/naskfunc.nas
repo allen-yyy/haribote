@@ -16,18 +16,19 @@
 		GLOBAL	_asm_inthandler20, _asm_inthandler21
 		GLOBAL	_asm_inthandler2c, _asm_inthandler0c
 		GLOBAL	_asm_inthandler0d, _asm_end_app
+		GLOBAL  _asm_inthandler2e
 		GLOBAL	_memtest_sub
 		GLOBAL	_farjmp, _farcall
 		GLOBAL	_asm_hrb_api, _start_app
 		EXTERN	_inthandler20, _inthandler21
 		EXTERN	_inthandler2c, _inthandler0d
-		EXTERN	_inthandler0c
+		EXTERN	_inthandler0c, _inthandler2e
 		EXTERN	_hrb_api
 		GLOBAL  _clts, _fnsave, _frstor, _asm_inthandler07
 		GLOBAL	_WriteByteToPort, _ReadByteStringFromPor
 		GLOBAL	_WriteByteStringToPort, _ReadWordFromPort
 		GLOBAL	_WriteWordToPort, _ReadWordStringFromPort
-		GLOBAL	_WriteWordStringToPort
+		GLOBAL	_WriteWordStringToPort, _inws
         EXTERN  _inthandler07
 
 [SECTION .text]
@@ -243,6 +244,23 @@ _asm_inthandler0d:
 		ADD		ESP,4			; INT 0x0d では、これが必要
 		IRETD
 
+_asm_inthandler2e:
+		PUSH	ES
+		PUSH	DS
+		PUSHAD
+		MOV		EAX,ESP
+		PUSH	EAX
+		MOV		AX,SS
+		MOV		DS,AX
+		MOV		ES,AX
+		CALL	_inthandler2e
+		POP		EAX
+		POPAD
+		POP		DS
+		POP		ES
+		IRETD
+
+
 _memtest_sub:	; unsigned int memtest_sub(unsigned int start, unsigned int end)
 		PUSH	EDI						; （EBX, ESI, EDI も使いたいので）
 		PUSH	ESI
@@ -444,3 +462,12 @@ _WriteWordStringToPort:
 		pop ecx
 		leave
 		retn
+
+_inws:
+	mov	edi, [esp + 4]	; buf
+	mov	ecx, [esp + 4 + 4]	; port
+	mov	edx, [esp + 4 + 4 + 4]   ; n
+	shr	ecx, 1
+	cld
+	rep	insw
+	ret
