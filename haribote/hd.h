@@ -7,9 +7,9 @@
  *****************************************************************************
  *****************************************************************************/
 
-#ifndef	_ORANGES_HD_H_
-#define	_ORANGES_HD_H_
-
+//#ifndef	_ORANGES_HD_H_
+//#define	_ORANGES_HD_H_
+//
 /**
  * @struct part_ent
  * @brief  Partition Entry struct.
@@ -28,73 +28,6 @@
  *   It is essentially a link list with many tricks. See
  *   http://en.wikipedia.org/wiki/Extended_boot_record for details.
  */
-struct part_ent {
-	u8 boot_ind;		/**
-				 * boot indicator
-				 *   Bit 7 is the active partition flag,
-				 *   bits 6-0 are zero (when not zero this
-				 *   byte is also the drive number of the
-				 *   drive to boot so the active partition
-				 *   is always found on drive 80H, the first
-				 *   hard disk).
-				 */
-
-	u8 start_head;		/**
-				 * Starting Head
-				 */
-
-	u8 start_sector;	/**
-				 * Starting Sector.
-				 *   Only bits 0-5 are used. Bits 6-7 are
-				 *   the upper two bits for the Starting
-				 *   Cylinder field.
-				 */
-
-	u8 start_cyl;		/**
-				 * Starting Cylinder.
-				 *   This field contains the lower 8 bits
-				 *   of the cylinder value. Starting cylinder
-				 *   is thus a 10-bit number, with a maximum
-				 *   value of 1023.
-				 */
-
-	u8 sys_id;		/**
-				 * System ID
-				 * e.g.
-				 *   01: FAT12
-				 *   81: MINIX
-				 *   83: Linux
-				 */
-
-	u8 end_head;		/**
-				 * Ending Head
-				 */
-
-	u8 end_sector;		/**
-				 * Ending Sector.
-				 *   Only bits 0-5 are used. Bits 6-7 are
-				 *   the upper two bits for the Ending
-				 *    Cylinder field.
-				 */
-
-	u8 end_cyl;		/**
-				 * Ending Cylinder.
-				 *   This field contains the lower 8 bits
-				 *   of the cylinder value. Ending cylinder
-				 *   is thus a 10-bit number, with a maximum
-				 *   value of 1023.
-				 */
-
-	u32 start_sect;	/**
-				 * starting sector counting from
-				 * 0 / Relative Sector. / start in LBA
-				 */
-
-	u32 nr_sects;		/**
-				 * nr of sectors in partition
-				 */
-
-} PARTITION_ENTRY;
 
 
 /********************************************/
@@ -225,7 +158,7 @@ struct part_ent {
 #define REG_DRV_ADDR	0x3F7		/*	Drive Address			I		*/
 
 
-struct hd_cmd {
+/*struct hd_cmd {
 	u8	features;
 	u8	count;
 	u8	lba_low;
@@ -236,9 +169,9 @@ struct hd_cmd {
 };
 
 struct part_info {
-	u32	base;	/* # of start sector (NOT byte offset, but SECTOR) */
-	u32	size;	/* how many sectors in this partition (NOT byte size, but SECTOR number) */
-};
+	u32	base;	/* # of start sector (NOT byte offset, but SECTOR) 
+	u32	size;	/* how many sectors in this partition (NOT byte size, but SECTOR number) 
+};*/
 
 /* main drive struct, one entry per drive */
 struct hd_info
@@ -250,8 +183,8 @@ struct hd_info
 	/* int			lzone; */
 	/* int			ctl; */
 	int			open_cnt;
-	struct part_info	primary[NR_PRIM_PER_DRIVE];
-	struct part_info	logical[NR_SUB_PER_DRIVE];
+	//struct part_info	primary[NR_PRIM_PER_DRIVE];
+	//struct part_info	logical[NR_SUB_PER_DRIVE];
 };
 
 
@@ -269,7 +202,7 @@ struct hd_info
 					      (lba_highest & 0xF) | 0xA0)
 
 
-#endif /* _ORANGES_HD_H_ */
+//#endif /* _ORANGES_HD_H_ */
 //Test controller ready flag.
 //If the 8th bit of status register is 0,the controller is ready,
 //otherwise,the controller is busying.

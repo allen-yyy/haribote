@@ -29,7 +29,7 @@ void init_gdtidt(void)
 	set_gatedesc(idt + 0x20, (int) asm_inthandler20, 2 * 8, AR_INTGATE32);
 	set_gatedesc(idt + 0x21, (int) asm_inthandler21, 2 * 8, AR_INTGATE32);
 	set_gatedesc(idt + 0x2c, (int) asm_inthandler2c, 2 * 8, AR_INTGATE32);
-	set_gatedesc(idt + 0x2e, (int) asm_inthandler2, 2 * 8, AR_INTGATE32);
+	set_gatedesc(idt + 0x2e, (int) asm_inthandler2e, 2 * 8, AR_INTGATE32);
 	set_gatedesc(idt + 0x40, (int) asm_hrb_api,      2 * 8, AR_INTGATE32 + 0x60);
 
 	return;

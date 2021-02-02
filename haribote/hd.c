@@ -1,6 +1,6 @@
 #include "bootpack.h"
 #include "hd.h"
-
+#include "ide.h" 
 
 //Several low level routines to test specified flags in hard disk driver registers.
 static BOOL WaitForRdy(WORD wPort,DWORD dwMillionSecond)
@@ -117,7 +117,7 @@ BOOL IdeInitialize()
 {
 	WaitForBsy(IDE_CTRL0_PORT_STATUS,0);
 	WaitForRdy(IDE_CTRL0_PORT_STATUS,0);
-	__outb(0x0E,IDE_CTRL0_PORT_CTRL);    //Reset controller,disable interrupt.
+	io_out8(0x0E,IDE_CTRL0_PORT_CTRL);    //Reset controller,disable interrupt.
 	WaitForBsy(IDE_CTRL0_PORT_STATUS,0);
 	WaitForRdy(IDE_CTRL0_PORT_STATUS,0);
 	return TRUE;
