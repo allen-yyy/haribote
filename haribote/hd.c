@@ -129,3 +129,14 @@ void inthandler2e(int *esp)
 	io_out8(PIC0_OCW2, 0x62);
 	return;
 }
+
+BOOL HDEntry()
+{
+	DWORD dwLba;
+	UCHAR Buff[512];
+	//IdeInitialize();
+	Identify(0,(BYTE*)&Buff[0]);
+	dwLba = ((DWORD)Buff[123] << 24) + ((DWORD)Buff[122] << 16) 
+			+ ((DWORD)Buff[121] << 8) + (DWORD)Buff[120];
+	return TRUE;
+} 

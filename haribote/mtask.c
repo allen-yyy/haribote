@@ -192,7 +192,11 @@ void task_run(struct TASK *task, int level, int priority)
 	if (priority > 0) {
 		task->priority = priority;
 	}
-
+	if(task->flags == 1){
+		pid->pido[pid->next].task = task;
+		pid->next++;
+		task->pid=pid->next-1;
+	}
 	if (task->flags == 2 && task->level != level) { /* 動作中のレベルの変更 */
 		
 		task_remove(task); /* これを実行するとflagsは1になるので下のifも実行される */
@@ -296,8 +300,8 @@ void task_unblock(struct TASK *task)
 	//if (task->flags == 2) {
 	
 	//now_task = task_now();
-	//task_run(task,task->level,task->priority);
-	task->flags=1;
+	task_run(task,task->level,task->priority);
+	//task->flags=1;
 	pid->pido[task->pid].task->flags=task->flags;
 		//block->blocko[block->next].task = task; 
 		//if (task == now_task) {
@@ -325,12 +329,37 @@ void task_unblock(struct TASK *task)
 int message_receive(int to_receive,struct MESSAGE *message)
 {
 	struct TASK *task = task_now();
-	struct TASK *to_task;
+	//struct TASK *to_task;
 	task->r_flags = 1;
+	task_block(task);
 	for(;;)
 	{
-		if(task->message_r)
+		if(task->message_r!=0)
+		{
+			if(to_receive==ANY)
+			{
+				message=task->message_r;
+				return 0;
+			}else{
+				if(task->message_r->src==to_receive)
+				{
+					message = task->message_r;
+					return 0;
+				}
+			}
+		} 
 	}
 	
+	return -1;
+}
+
+int message_send(int to_send,struct MESSAGE *message)
+{
+	struct TASK *task = pid2task(to_send);
+	if(task==NULL)
+	{
+		return -1;
+	}
+	task->message_r = message;
 	return 0;
 }

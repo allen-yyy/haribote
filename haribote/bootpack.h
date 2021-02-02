@@ -385,3 +385,6 @@ static BOOL CmdSucc(WORD wPort);
 static BOOL WaitForDrq(WORD wPort,DWORD dwMillionSecond);
 static BOOL WaitForBsy(WORD wPort,DWORD dwMillionSecond);
 static BOOL WaitForRdy(WORD wPort,DWORD dwMillionSecond);
+BOOL HDEntry();
+
+/* drive.c */
