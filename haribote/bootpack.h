@@ -387,4 +387,4 @@ static BOOL WaitForBsy(WORD wPort,DWORD dwMillionSecond);
 static BOOL WaitForRdy(WORD wPort,DWORD dwMillionSecond);
 BOOL HDEntry();
 
-/* drive.c */
+/* driver.c */
