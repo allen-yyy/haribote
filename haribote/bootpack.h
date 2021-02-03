@@ -377,14 +377,26 @@ struct SHEET *open_console(struct SHTCTL *shtctl, unsigned int memtotal);
 #define LOBYTE(wr)          BYTE(wr)
 #define HIBYTE(wr)          BYTE(wr >> 16)
 
+struct Dobject;
+typedef BOOL (*DEntry) (Dobject);
+
 
 /* hd.c */
+#define HD_OPEN 0x1
 void inthandler2e(int *esp);
 BOOL Identify(int nHdNum,BYTE* pBuffer);
 static BOOL CmdSucc(WORD wPort);
 static BOOL WaitForDrq(WORD wPort,DWORD dwMillionSecond);
 static BOOL WaitForBsy(WORD wPort,DWORD dwMillionSecond);
 static BOOL WaitForRdy(WORD wPort,DWORD dwMillionSecond);
-BOOL HDEntry();
+BOOL HDEntry(struct Dobject Dobj);
 
 /* driver.c */
+struct Dobject{
+	char *name;
+};
+BOOL LDevs();
+//typedef BOOL (*DEntry) (Dobject);
+
+/* fs.c */
+BOOL FSEntry(struct Dobject Dobj); 

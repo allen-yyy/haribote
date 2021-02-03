@@ -68,6 +68,7 @@ void HariMain(void)
 	memman_init(memman);
 	memman_free(memman, 0x00001000, 0x0009e000); /* 0x00001000 - 0x0009efff */
 	memman_free(memman, 0x00400000, memtotal - 0x00400000);
+	*((int *) 0x0ef0) = memman;
 
 	init_palette();
 	shtctl = shtctl_init(memman, binfo->vram, binfo->scrnx, binfo->scrny);
@@ -100,6 +101,8 @@ void HariMain(void)
 	sheet_updown(key_win,   1);
 	sheet_updown(sht_mouse, 2);
 	keywin_on(key_win);
+
+	LDevs();
 
 	/* 最初にキーボード状態との食い違いがないように、設定しておくことにする */
 	fifo32_put(&keycmd, KEYCMD_LED);

@@ -113,6 +113,25 @@ BOOL Identify(int nHdNum,BYTE* pBuffer)
 	return FALSE;
 }
 
+void task_hd()
+{
+	struct MESSAGE *message;
+	for(;;)
+	{
+		message_receive(ANY,message);
+		switch(message->type)
+		{
+			case HD_OPEN:
+				Identify(0,message->params);
+				message_send(message->src,message);
+			default:
+				message->params = (char *)0;
+				message_send(message->src,message);	
+		}
+	}
+	return;
+}
+
 BOOL IdeInitialize()
 {
 	WaitForBsy(IDE_CTRL0_PORT_STATUS,0);
@@ -130,13 +149,29 @@ void inthandler2e(int *esp)
 	return;
 }
 
-BOOL HDEntry()
+BOOL HDEntry(struct Dobject Dobj)
 {
+	struct MEMMAN *memman = *((int *) 0x0ef0);
+	struct TASK *hdtask;
 	DWORD dwLba;
 	UCHAR Buff[512];
 	//IdeInitialize();
 	Identify(0,(BYTE*)&Buff[0]);
 	dwLba = ((DWORD)Buff[123] << 24) + ((DWORD)Buff[122] << 16) 
 			+ ((DWORD)Buff[121] << 8) + (DWORD)Buff[120];
+			
+	hdtask = task_alloc();
+	hdtask->tss.esp = memman_alloc_4k(memman, 64 * 1024) + 64 * 1024;
+	hdtask->tss.eip = (int) &task_hd;
+	hdtask->tss.es = 1 * 8;
+	hdtask->tss.cs = 2 * 8;
+	hdtask->tss.ss = 1 * 8;
+	hdtask->tss.ds = 1 * 8;
+	hdtask->tss.fs = 1 * 8;
+	hdtask->tss.gs = 1 * 8;
+	task_run(hdtask, 3, 1);
+	
+	*((int *) 0x0f01) = hdtask;
+	
 	return TRUE;
 } 

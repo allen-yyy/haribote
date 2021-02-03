@@ -338,11 +338,13 @@ int message_receive(int to_receive,struct MESSAGE *message)
 		{
 			if(to_receive==ANY)
 			{
+				task_unblock(task);
 				message=task->message_r;
 				return 0;
 			}else{
 				if(task->message_r->src==to_receive)
 				{
+					task_unblock(task);
 					message = task->message_r;
 					return 0;
 				}
@@ -360,6 +362,7 @@ int message_send(int to_send,struct MESSAGE *message)
 	{
 		return -1;
 	}
+	message->src = task2pid(task_now());
 	task->message_r = message;
 	return 0;
 }
