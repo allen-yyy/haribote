@@ -279,14 +279,15 @@ void task_block(struct TASK *task)
 		task->flags=3;
 		pid->pido[task->pid].task->flags=task->flags;
 		block->blocko[block->next].task = task;
-		block->blocko[block->next].pid = task->pid; 
+		block->blocko[block->next].pid = task->pid;
+		block->next++;
 		//if (task == now_task) {
 		//	
-		//	task_switchsub();
-		//	now_task = task_now();
-		//	farjmp(0, now_task->sel);
+			task_switchsub();
+			now_task = task_now();
+			farjmp(0, now_task->sel);
 		//}
-		block->next++; 
+		 
 	}
 	return;
 }

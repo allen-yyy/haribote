@@ -358,8 +358,8 @@ _WriteByteToPort:
 		push ebp
 		mov ebp,esp
 		push edx
-		mov al,byte ptr [ebp + 8]
-		mov dx,word ptr [ebp + 12]
+		mov al,BYTE [ebp + 8]
+		mov dx,WORD [ebp + 12]
 		out dx,al
 		pop edx
 		leave
@@ -371,9 +371,9 @@ _ReadByteStringFromPort:
 		push ecx
 		push edx
 		push edi
-		mov edi,dword ptr [ebp + 8]
-		mov ecx,dword ptr [ebp + 12]
-		mov dx,word ptr [ebp + 16]
+		mov edi,dword [ebp + 8]
+		mov ecx,dword [ebp + 12]
+		mov dx,word [ebp + 16]
 		rep insb
 		pop edi
 		pop edx
@@ -389,9 +389,9 @@ _WriteByteStringToPort:
 		push ecx
 		push edx
 		push esi
-		mov esi,dword ptr [ebp + 8]
-		mov ecx,dword ptr [ebp + 12]
-		mov dx,word ptr [ebp + 16]
+		mov esi,dword [ebp + 8]
+		mov ecx,dword [ebp + 12]
+		mov dx,word [ebp + 16]
 		rep outsb
 		pop esi
 		pop edx
@@ -404,10 +404,10 @@ _ReadWordFromPort:
 		mov ebp,esp
 		push ebx
 		push edx
-		mov dx,word ptr [ebp + 0x0c]
-		mov ebx,dword ptr [ebp + 0x08]
+		mov dx,word [ebp + 0x0c]
+		mov ebx,dword [ebp + 0x08]
 		in ax,dx
-		mov word ptr [ebx],ax
+		mov word [ebx],ax
 		pop edx
 		pop ebx
 		leave
@@ -418,8 +418,8 @@ _WriteWordToPort:
 		push ebp
 		mov ebp,esp
 		push dx
-		mov dx,word ptr [ebp + 0x0c]
-		mov ax,word ptr [ebp + 0x08]
+		mov dx,word [ebp + 0x0c]
+		mov ax,word [ebp + 0x08]
 		out dx,ax
 		pop dx
 		leave
@@ -431,10 +431,10 @@ _ReadWordStringFromPort:
 		push ecx
 		push edx
 		push edi
-		mov edi,dword ptr [ebp + 0x08]
-		mov ecx,dword ptr [ebp + 0x0c]
+		mov edi,dword [ebp + 0x08]
+		mov ecx,dword [ebp + 0x0c]
 		shr ecx,0x01
-		mov dx,  word ptr [ebp + 0x10]
+		mov dx,  word [ebp + 0x10]
 		cld
 		rep insw
 		pop edi
@@ -452,10 +452,10 @@ _WriteWordStringToPort:
 		push ecx
 		push edx
 		push esi
-		mov esi,dword ptr [ebp + 0x08]
-		mov ecx,dword ptr [ebp + 0x0c]
+		mov esi,dword [ebp + 0x08]
+		mov ecx,dword  [ebp + 0x0c]
 		shr ecx,0x02
-		mov dx,  word ptr [ebp + 0x10]
+		mov dx,  word [ebp + 0x10]
 		rep outsw
 		pop esi
 		pop edx

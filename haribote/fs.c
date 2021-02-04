@@ -14,5 +14,5 @@ BOOL FSEntry(struct Dobject Dobj)
 	struct MESSAGE *message;
 	message->type = HD_OPEN;
 	message_send(task2pid(task),message);
-	return FALSE;
+	return TRUE;
 }

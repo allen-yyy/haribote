@@ -1,0 +1,20 @@
+     1 00000000                                 [FORMAT "WCOFF"]
+     2 00000000                                 [INSTRSET "i486p"]
+     3 00000000                                 [OPTIMIZE 1]
+     4 00000000                                 [OPTION 1]
+     5 00000000                                 [BITS 32]
+     6 00000000                                 	EXTERN	_message_send
+     7 00000000                                 [FILE "fs.c"]
+     8                                          [SECTION .text]
+     9 00000000                                 	GLOBAL	_FSEntry
+    10 00000000                                 _FSEntry:
+    11 00000000 55                              	PUSH	EBP
+    12 00000001 A1 00000F01                     	MOV	EAX,DWORD [3841]
+    13 00000006 89 E5                           	MOV	EBP,ESP
+    14 00000008 C7 02 00000001                  	MOV	DWORD [EDX],1
+    15 0000000E 52                              	PUSH	EDX
+    16 0000000F FF B0 0000012C                  	PUSH	DWORD [300+EAX]
+    17 00000015 E8 [00000000]                   	CALL	_message_send
+    18 0000001A B8 00000001                     	MOV	EAX,1
+    19 0000001F C9                              	LEAVE
+    20 00000020 C3                              	RET

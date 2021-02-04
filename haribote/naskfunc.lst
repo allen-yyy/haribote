@@ -358,135 +358,116 @@
    358 000001F9 55                              		push ebp
    359 000001FA 89 E5                           		mov ebp,esp
    360 000001FC 52                              		push edx
-   361 000001FD                                 		mov al,byte ptr [ebp + 8]
-      >> [ERROR #002] parameter error.
-   362 000001FD                                 		mov dx,word ptr [ebp + 12]
-      >> [ERROR #002] parameter error.
-   363 000001FD EE                              		out dx,al
-   364 000001FE 5A                              		pop edx
-   365 000001FF C9                              		leave
-   366 00000200 C3                              		retn
-   367 00000201                                 
-   368 00000201                                 _ReadByteStringFromPort:
-   369 00000201 55                              		push ebp
-   370 00000202 89 E5                           		mov ebp,esp
-   371 00000204 51                              		push ecx
-   372 00000205 52                              		push edx
-   373 00000206 57                              		push edi
-   374 00000207                                 		mov edi,dword ptr [ebp + 8]
-      >> [ERROR #002] parameter error.
-   375 00000207                                 		mov ecx,dword ptr [ebp + 12]
-      >> [ERROR #002] parameter error.
-   376 00000207                                 		mov dx,word ptr [ebp + 16]
-      >> [ERROR #002] parameter error.
-   377 00000207 F3 6C                           		rep insb
-   378 00000209 5F                              		pop edi
-   379 0000020A 5A                              		pop edx
-   380 0000020B 59                              		pop ecx
-   381 0000020C C9                              		leave
-   382 0000020D C3                              		retn
-   383 0000020E                                 
-   384 0000020E                                 
-   385 0000020E                                 
-   386 0000020E                                 _WriteByteStringToPort:
-   387 0000020E 55                              		push ebp
-   388 0000020F 89 E5                           		mov ebp,esp
-   389 00000211 51                              		push ecx
-   390 00000212 52                              		push edx
-   391 00000213 56                              		push esi
-   392 00000214                                 		mov esi,dword ptr [ebp + 8]
-      >> [ERROR #002] parameter error.
-   393 00000214                                 		mov ecx,dword ptr [ebp + 12]
-      >> [ERROR #002] parameter error.
-   394 00000214                                 		mov dx,word ptr [ebp + 16]
-      >> [ERROR #002] parameter error.
-   395 00000214 F3 6E                           		rep outsb
-   396 00000216 5E                              		pop esi
-   397 00000217 5A                              		pop edx
-   398 00000218 59                              		pop ecx
-   399 00000219 C9                              		leave
-   400 0000021A C3                              		retn
-   401 0000021B                                 
-   402 0000021B                                 _ReadWordFromPort:
-   403 0000021B 55                              		push ebp
-   404 0000021C 89 E5                           		mov ebp,esp
-   405 0000021E 53                              		push ebx
-   406 0000021F 52                              		push edx
-   407 00000220                                 		mov dx,word ptr [ebp + 0x0c]
-      >> [ERROR #002] parameter error.
-   408 00000220                                 		mov ebx,dword ptr [ebp + 0x08]
-      >> [ERROR #002] parameter error.
-   409 00000220 66 ED                           		in ax,dx
-   410 00000222                                 		mov word ptr [ebx],ax
-      >> [ERROR #002] parameter error.
-   411 00000222 5A                              		pop edx
-   412 00000223 5B                              		pop ebx
-   413 00000224 C9                              		leave
-   414 00000225 C3                              		retn
-   415 00000226                                 
-   416 00000226                                 
-   417 00000226                                 _WriteWordToPort:
-   418 00000226 55                              		push ebp
-   419 00000227 89 E5                           		mov ebp,esp
-   420 00000229 66 52                           		push dx
-   421 0000022B                                 		mov dx,word ptr [ebp + 0x0c]
-      >> [ERROR #002] parameter error.
-   422 0000022B                                 		mov ax,word ptr [ebp + 0x08]
-      >> [ERROR #002] parameter error.
-   423 0000022B 66 EF                           		out dx,ax
-   424 0000022D 66 5A                           		pop dx
-   425 0000022F C9                              		leave
-   426 00000230 C3                              		retn
-   427 00000231                                 
-   428 00000231                                 _ReadWordStringFromPort:
-   429 00000231 55                              		push ebp
-   430 00000232 89 E5                           		mov ebp,esp
-   431 00000234 51                              		push ecx
-   432 00000235 52                              		push edx
-   433 00000236 57                              		push edi
-   434 00000237                                 		mov edi,dword ptr [ebp + 0x08]
-      >> [ERROR #002] parameter error.
-   435 00000237                                 		mov ecx,dword ptr [ebp + 0x0c]
-      >> [ERROR #002] parameter error.
-   436 00000237 D1 E9                           		shr ecx,0x01
-   437 00000239                                 		mov dx,  word ptr [ebp + 0x10]
-      >> [ERROR #002] parameter error.
-   438 00000239 FC                              		cld
-   439 0000023A F3 66 6D                        		rep insw
-   440 0000023D 5F                              		pop edi
-   441 0000023E 5A                              		pop edx
-   442 0000023F 59                              		pop ecx
-   443 00000240 C9                              		leave
-   444 00000241 C3                              		retn
-   445 00000242                                 
-   446 00000242                                 
-   447 00000242                                 
-   448 00000242                                 
-   449 00000242                                 _WriteWordStringToPort:
-   450 00000242 55                              		push ebp
-   451 00000243 89 E5                           		mov ebp,esp
-   452 00000245 51                              		push ecx
-   453 00000246 52                              		push edx
-   454 00000247 56                              		push esi
-   455 00000248                                 		mov esi,dword ptr [ebp + 0x08]
-      >> [ERROR #002] parameter error.
-   456 00000248                                 		mov ecx,dword ptr [ebp + 0x0c]
-      >> [ERROR #002] parameter error.
-   457 00000248 C1 E9 02                        		shr ecx,0x02
-   458 0000024B                                 		mov dx,  word ptr [ebp + 0x10]
-      >> [ERROR #002] parameter error.
-   459 0000024B F3 66 6F                        		rep outsw
-   460 0000024E 5E                              		pop esi
-   461 0000024F 5A                              		pop edx
-   462 00000250 59                              		pop ecx
-   463 00000251 C9                              		leave
-   464 00000252 C3                              		retn
-   465 00000253                                 
-   466 00000253                                 _inws:
-   467 00000253 8B 7C 24 04                     	mov	edi, [esp + 4]	; buf
-   468 00000257 8B 4C 24 08                     	mov	ecx, [esp + 4 + 4]	; port
-   469 0000025B 8B 54 24 0C                     	mov	edx, [esp + 4 + 4 + 4]   ; n
-   470 0000025F D1 E9                           	shr	ecx, 1
-   471 00000261 FC                              	cld
-   472 00000262 F3 66 6D                        	rep	insw
-   473 00000265 C3                              	ret
+   361 000001FD 8A 45 08                        		mov al,BYTE [ebp + 8]
+   362 00000200 66 8B 55 0C                     		mov dx,WORD [ebp + 12]
+   363 00000204 EE                              		out dx,al
+   364 00000205 5A                              		pop edx
+   365 00000206 C9                              		leave
+   366 00000207 C3                              		retn
+   367 00000208                                 
+   368 00000208                                 _ReadByteStringFromPort:
+   369 00000208 55                              		push ebp
+   370 00000209 89 E5                           		mov ebp,esp
+   371 0000020B 51                              		push ecx
+   372 0000020C 52                              		push edx
+   373 0000020D 57                              		push edi
+   374 0000020E 8B 7D 08                        		mov edi,dword [ebp + 8]
+   375 00000211 8B 4D 0C                        		mov ecx,dword [ebp + 12]
+   376 00000214 66 8B 55 10                     		mov dx,word [ebp + 16]
+   377 00000218 F3 6C                           		rep insb
+   378 0000021A 5F                              		pop edi
+   379 0000021B 5A                              		pop edx
+   380 0000021C 59                              		pop ecx
+   381 0000021D C9                              		leave
+   382 0000021E C3                              		retn
+   383 0000021F                                 
+   384 0000021F                                 
+   385 0000021F                                 
+   386 0000021F                                 _WriteByteStringToPort:
+   387 0000021F 55                              		push ebp
+   388 00000220 89 E5                           		mov ebp,esp
+   389 00000222 51                              		push ecx
+   390 00000223 52                              		push edx
+   391 00000224 56                              		push esi
+   392 00000225 8B 75 08                        		mov esi,dword [ebp + 8]
+   393 00000228 8B 4D 0C                        		mov ecx,dword [ebp + 12]
+   394 0000022B 66 8B 55 10                     		mov dx,word [ebp + 16]
+   395 0000022F F3 6E                           		rep outsb
+   396 00000231 5E                              		pop esi
+   397 00000232 5A                              		pop edx
+   398 00000233 59                              		pop ecx
+   399 00000234 C9                              		leave
+   400 00000235 C3                              		retn
+   401 00000236                                 
+   402 00000236                                 _ReadWordFromPort:
+   403 00000236 55                              		push ebp
+   404 00000237 89 E5                           		mov ebp,esp
+   405 00000239 53                              		push ebx
+   406 0000023A 52                              		push edx
+   407 0000023B 66 8B 55 0C                     		mov dx,word [ebp + 0x0c]
+   408 0000023F 8B 5D 08                        		mov ebx,dword [ebp + 0x08]
+   409 00000242 66 ED                           		in ax,dx
+   410 00000244 66 89 03                        		mov word [ebx],ax
+   411 00000247 5A                              		pop edx
+   412 00000248 5B                              		pop ebx
+   413 00000249 C9                              		leave
+   414 0000024A C3                              		retn
+   415 0000024B                                 
+   416 0000024B                                 
+   417 0000024B                                 _WriteWordToPort:
+   418 0000024B 55                              		push ebp
+   419 0000024C 89 E5                           		mov ebp,esp
+   420 0000024E 66 52                           		push dx
+   421 00000250 66 8B 55 0C                     		mov dx,word [ebp + 0x0c]
+   422 00000254 66 8B 45 08                     		mov ax,word [ebp + 0x08]
+   423 00000258 66 EF                           		out dx,ax
+   424 0000025A 66 5A                           		pop dx
+   425 0000025C C9                              		leave
+   426 0000025D C3                              		retn
+   427 0000025E                                 
+   428 0000025E                                 _ReadWordStringFromPort:
+   429 0000025E 55                              		push ebp
+   430 0000025F 89 E5                           		mov ebp,esp
+   431 00000261 51                              		push ecx
+   432 00000262 52                              		push edx
+   433 00000263 57                              		push edi
+   434 00000264 8B 7D 08                        		mov edi,dword [ebp + 0x08]
+   435 00000267 8B 4D 0C                        		mov ecx,dword [ebp + 0x0c]
+   436 0000026A D1 E9                           		shr ecx,0x01
+   437 0000026C 66 8B 55 10                     		mov dx,  word [ebp + 0x10]
+   438 00000270 FC                              		cld
+   439 00000271 F3 66 6D                        		rep insw
+   440 00000274 5F                              		pop edi
+   441 00000275 5A                              		pop edx
+   442 00000276 59                              		pop ecx
+   443 00000277 C9                              		leave
+   444 00000278 C3                              		retn
+   445 00000279                                 
+   446 00000279                                 
+   447 00000279                                 
+   448 00000279                                 
+   449 00000279                                 _WriteWordStringToPort:
+   450 00000279 55                              		push ebp
+   451 0000027A 89 E5                           		mov ebp,esp
+   452 0000027C 51                              		push ecx
+   453 0000027D 52                              		push edx
+   454 0000027E 56                              		push esi
+   455 0000027F 8B 75 08                        		mov esi,dword [ebp + 0x08]
+   456 00000282 8B 4D 0C                        		mov ecx,dword  [ebp + 0x0c]
+   457 00000285 C1 E9 02                        		shr ecx,0x02
+   458 00000288 66 8B 55 10                     		mov dx,  word [ebp + 0x10]
+   459 0000028C F3 66 6F                        		rep outsw
+   460 0000028F 5E                              		pop esi
+   461 00000290 5A                              		pop edx
+   462 00000291 59                              		pop ecx
+   463 00000292 C9                              		leave
+   464 00000293 C3                              		retn
+   465 00000294                                 
+   466 00000294                                 _inws:
+   467 00000294 8B 7C 24 04                     	mov	edi, [esp + 4]	; buf
+   468 00000298 8B 4C 24 08                     	mov	ecx, [esp + 4 + 4]	; port
+   469 0000029C 8B 54 24 0C                     	mov	edx, [esp + 4 + 4 + 4]   ; n
+   470 000002A0 D1 E9                           	shr	ecx, 1
+   471 000002A2 FC                              	cld
+   472 000002A3 F3 66 6D                        	rep	insw
+   473 000002A6 C3                              	ret
