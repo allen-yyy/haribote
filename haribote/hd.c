@@ -1,6 +1,7 @@
 #include "bootpack.h"
 #include "hd.h"
 #include "ide.h" 
+#include <stdio.h>
 
 //Several low level routines to test specified flags in hard disk driver registers.
 static BOOL WaitForRdy(WORD wPort,DWORD dwMillionSecond)
@@ -116,8 +117,15 @@ BOOL Identify(int nHdNum,BYTE* pBuffer)
 void task_hd()
 {
 	struct MESSAGE *message;
+	int i=0;
 	for(;;)
 	{
+		char s[31];
+		i++;
+		struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
+		boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 - 1, 15);
+		sprintf(s,"taskrun %d",i);
+		putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, s);
 		message_receive(ANY,message);
 		switch(message->type)
 		{
@@ -149,9 +157,9 @@ void inthandler2e(int *esp)
 	return;
 }
 
-BOOL HDEntry(struct Dobject Dobj)
+BOOL HDEntry(struct Dobject *Dobj)
 {
-	struct MEMMAN *memman = *((int *) 0x0ef0);
+	//struct MEMMAN *memman = *((int *) 0x0ef0);
 	struct TASK *hdtask;
 	DWORD dwLba;
 	UCHAR Buff[512];
@@ -161,7 +169,7 @@ BOOL HDEntry(struct Dobject Dobj)
 			+ ((DWORD)Buff[121] << 8) + (DWORD)Buff[120];
 			
 	hdtask = task_alloc();
-	hdtask->tss.esp = memman_alloc_4k(memman, 64 * 1024) + 64 * 1024;
+	hdtask->tss.esp = memman_alloc_4k(Dobj->memman, 64 * 1024) + 64 * 1024;
 	hdtask->tss.eip = (int) &task_hd;
 	hdtask->tss.es = 1 * 8;
 	hdtask->tss.cs = 2 * 8;
@@ -169,9 +177,13 @@ BOOL HDEntry(struct Dobject Dobj)
 	hdtask->tss.ds = 1 * 8;
 	hdtask->tss.fs = 1 * 8;
 	hdtask->tss.gs = 1 * 8;
-	task_run(hdtask, 3, 1);
+	task_run(hdtask, 4, 1);
 	
 	*((int *) 0x0f01) = hdtask;
-	
+	struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
+		boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 - 1, 15);
+		//sprintf(s,"taskrun %d",i);
+		putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, "looooo");
+
 	return TRUE;
 } 

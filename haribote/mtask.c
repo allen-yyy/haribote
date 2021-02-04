@@ -283,9 +283,9 @@ void task_block(struct TASK *task)
 		block->next++;
 		//if (task == now_task) {
 		//	
-			task_switchsub();
-			now_task = task_now();
-			farjmp(0, now_task->sel);
+			//task_switchsub();
+			//now_task = task_now();
+			//farjmp(0, now_task->sel);
 		//}
 		 
 	}
@@ -307,9 +307,7 @@ void task_unblock(struct TASK *task)
 		//block->blocko[block->next].task = task; 
 		//if (task == now_task) {
 		//	
-		//	task_switchsub();
-		//	now_task = task_now();
-		//	farjmp(0, now_task->sel);
+		//	
 		//}
 	for (i = 0; i < block->next; i++) {
 		if (block->blocko[i].task == task) {
@@ -350,6 +348,11 @@ int message_receive(int to_receive,struct MESSAGE *message)
 					return 0;
 				}
 			}
+		}else{
+			//task_switchsub();
+			//now_task = task_now();
+			//farjmp(0, now_task->sel);
+			continue; 
 		} 
 	}
 	

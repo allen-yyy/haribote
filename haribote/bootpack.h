@@ -378,7 +378,7 @@ struct SHEET *open_console(struct SHTCTL *shtctl, unsigned int memtotal);
 #define HIBYTE(wr)          BYTE(wr >> 16)
 
 struct Dobject;
-typedef BOOL (*DEntry) (Dobject);
+typedef BOOL (*DEntry)(Dobject);
 
 
 /* hd.c */
@@ -389,14 +389,15 @@ static BOOL CmdSucc(WORD wPort);
 static BOOL WaitForDrq(WORD wPort,DWORD dwMillionSecond);
 static BOOL WaitForBsy(WORD wPort,DWORD dwMillionSecond);
 static BOOL WaitForRdy(WORD wPort,DWORD dwMillionSecond);
-BOOL HDEntry(struct Dobject Dobj);
+BOOL HDEntry(struct Dobject *Dobj);
 
 /* driver.c */
 struct Dobject{
 	char *name;
+	struct MEMMAN *memman;
 };
-BOOL LDevs();
+BOOL LDevs(struct MEMMAN *memman);
 //typedef BOOL (*DEntry) (Dobject);
 
 /* fs.c */
-BOOL FSEntry(struct Dobject Dobj); 
+BOOL FSEntry(struct Dobject *Dobj); 

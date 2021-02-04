@@ -18,14 +18,15 @@ struct dDevEntry dDevs[2]={
 	"FS",FSEntry
 };
 
-BOOL LDevs()
+BOOL LDevs(struct MEMMAN *memman)
 {
 	int i;
 	for(i=0;i<2;i++)
 	{
 		struct Dobject Devobj;
 		Devobj.name = dDevs[i].name;
-		if((dDevs[i].entry)(Devobj))
+		Devobj.memman = memman;
+		if((dDevs[i].entry)(&Devobj))
 		{
 			return FALSE;
 		}

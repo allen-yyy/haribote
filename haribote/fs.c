@@ -8,7 +8,7 @@
 
 #include "bootpack.h"
 
-BOOL FSEntry(struct Dobject Dobj)
+BOOL FSEntry(struct Dobject *Dobj)
 {
 	struct TASK *task = (struct TASK *)*((int *) 0x0f01);
 	struct MESSAGE *message;
