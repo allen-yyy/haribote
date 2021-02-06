@@ -3,41 +3,51 @@
      3 00000000                                 [OPTIMIZE 1]
      4 00000000                                 [OPTION 1]
      5 00000000                                 [BITS 32]
-     6 00000000                                 	EXTERN	_HDEntry
-     7 00000000                                 	EXTERN	_FSEntry
+     6 00000000                                 	EXTERN	_FSEntry
+     7 00000000                                 	EXTERN	_HDEntry
      8 00000000                                 [FILE "driver.c"]
      9 00000000                                 	GLOBAL	_dDevs
     10                                          [SECTION .data]
     11 00000000                                 LC0:
-    12 00000000 49 64 65 20 48 44 00            	DB	"Ide HD",0x00
-    13 00000007                                 LC1:
-    14 00000007 46 53 00                        	DB	"FS",0x00
+    12 00000000 46 53 00                        	DB	"FS",0x00
+    13 00000003                                 LC1:
+    14 00000003 49 64 65 20 48 44 00            	DB	"Ide HD",0x00
     15 0000000A 00 00                           	ALIGNB	4
     16 0000000C                                 _dDevs:
     17 0000000C [00000000]                      	DD	LC0
-    18 00000010 [00000000]                      	DD	_HDEntry
-    19 00000014 [00000007]                      	DD	LC1
-    20 00000018 [00000000]                      	DD	_FSEntry
+    18 00000010 [00000000]                      	DD	_FSEntry
+    19 00000014 [00000003]                      	DD	LC1
+    20 00000018 [00000000]                      	DD	_HDEntry
     21                                          [SECTION .text]
     22 00000000                                 	GLOBAL	_LDevs
     23 00000000                                 _LDevs:
     24 00000000 55                              	PUSH	EBP
     25 00000001 89 E5                           	MOV	EBP,ESP
-    26 00000003 53                              	PUSH	EBX
-    27 00000004 31 DB                           	XOR	EBX,EBX
-    28 00000006                                 L7:
-    29 00000006 FF 34 DD [0000000C]             	PUSH	DWORD [_dDevs+EBX*8]
-    30 0000000D FF 14 DD [00000010]             	CALL	DWORD [_dDevs+4+EBX*8]
-    31 00000014 5A                              	POP	EDX
-    32 00000015 31 D2                           	XOR	EDX,EDX
-    33 00000017 85 C0                           	TEST	EAX,EAX
-    34 00000019 75 0B                           	JNE	L1
-    35 0000001B 43                              	INC	EBX
-    36 0000001C 83 FB 01                        	CMP	EBX,1
-    37 0000001F 7E E5                           	JLE	L7
-    38 00000021 BA 00000001                     	MOV	EDX,1
-    39 00000026                                 L1:
-    40 00000026 89 D0                           	MOV	EAX,EDX
-    41 00000028 8B 5D FC                        	MOV	EBX,DWORD [-4+EBP]
-    42 0000002B C9                              	LEAVE
-    43 0000002C C3                              	RET
+    26 00000003 56                              	PUSH	ESI
+    27 00000004 53                              	PUSH	EBX
+    28 00000005 31 DB                           	XOR	EBX,EBX
+    29 00000007 51                              	PUSH	ECX
+    30 00000008 51                              	PUSH	ECX
+    31 00000009 8B 75 08                        	MOV	ESI,DWORD [8+EBP]
+    32 0000000C                                 L7:
+    33 0000000C 8B 04 DD [0000000C]             	MOV	EAX,DWORD [_dDevs+EBX*8]
+    34 00000013 89 75 F4                        	MOV	DWORD [-12+EBP],ESI
+    35 00000016 89 45 F0                        	MOV	DWORD [-16+EBP],EAX
+    36 00000019 8D 45 F0                        	LEA	EAX,DWORD [-16+EBP]
+    37 0000001C 50                              	PUSH	EAX
+    38 0000001D FF 14 DD [00000010]             	CALL	DWORD [_dDevs+4+EBX*8]
+    39 00000024 5A                              	POP	EDX
+    40 00000025 31 D2                           	XOR	EDX,EDX
+    41 00000027 85 C0                           	TEST	EAX,EAX
+    42 00000029 75 0B                           	JNE	L1
+    43 0000002B 43                              	INC	EBX
+    44 0000002C 83 FB 01                        	CMP	EBX,1
+    45 0000002F 7E DB                           	JLE	L7
+    46 00000031 BA 00000001                     	MOV	EDX,1
+    47 00000036                                 L1:
+    48 00000036 8D 65 F8                        	LEA	ESP,DWORD [-8+EBP]
+    49 00000039 89 D0                           	MOV	EAX,EDX
+    50 0000003B 5B                              	POP	EBX
+    51 0000003C 5E                              	POP	ESI
+    52 0000003D 5D                              	POP	EBP
+    53 0000003E C3                              	RET

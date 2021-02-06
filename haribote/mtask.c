@@ -278,9 +278,9 @@ void task_block(struct TASK *task)
 		//task_remove(task);
 		task->flags=3;
 		pid->pido[task->pid].task->flags=task->flags;
-		block->blocko[block->next].task = task;
-		block->blocko[block->next].pid = task->pid;
-		block->next++;
+		//block->blocko[block->next].task = task;
+		//block->blocko[block->next].pid = task->pid;
+		//block->next++;
 		//if (task == now_task) {
 		//	
 			//task_switchsub();
@@ -309,19 +309,19 @@ void task_unblock(struct TASK *task)
 		//	
 		//	
 		//}
-	for (i = 0; i < block->next; i++) {
+	/*for (i = 0; i < block->next; i++) {
 		if (block->blocko[i].task == task) {
-			/* ‚±‚±‚É‚¢‚½ */
+			/* ‚±‚±‚É‚¢‚½ 
 			block->blocko[i].task = 0;
 			block->blocko[i].pid = 0;
 			break;
 		}
 	}
-	for (; i < block->next; i++) {
+	for (i=0; i < block->next; i++) {
 		block->blocko[i] = block->blocko[i + 1];
 	}
 	block->next--;
-	//}
+	//}*/
 	return;
 }
 
@@ -346,15 +346,19 @@ int message_receive(int to_receive,struct MESSAGE *message)
 					task_unblock(task);
 					message = task->message_r;
 					return 0;
+				}else{
+					task->message_r = NULL;
+					task_switch(); 
 				}
 			}
 		}else{
 			//task_switchsub();
 			//now_task = task_now();
 			//farjmp(0, now_task->sel);
+			task_switch(); 
 			continue; 
 		} 
-	}
+	} 
 	
 	return -1;
 }

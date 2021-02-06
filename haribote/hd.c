@@ -118,14 +118,18 @@ void task_hd()
 {
 	struct MESSAGE *message;
 	int i=0;
+	io_cli();
 	for(;;)
 	{
 		char s[31];
 		i++;
 		struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
+		//---DEBUG--- 
+		//io_cli(); 
 		boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 - 1, 15);
 		sprintf(s,"taskrun %d",i);
 		putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, s);
+		 
 		message_receive(ANY,message);
 		switch(message->type)
 		{
@@ -136,7 +140,9 @@ void task_hd()
 				message->params = (char *)0;
 				message_send(message->src,message);	
 		}
+		//io_hlt(); 
 	}
+	io_sti();
 	return;
 }
 
@@ -161,6 +167,7 @@ BOOL HDEntry(struct Dobject *Dobj)
 {
 	//struct MEMMAN *memman = *((int *) 0x0ef0);
 	struct TASK *hdtask;
+	char s[31]; 
 	DWORD dwLba;
 	UCHAR Buff[512];
 	//IdeInitialize();
@@ -180,10 +187,12 @@ BOOL HDEntry(struct Dobject *Dobj)
 	task_run(hdtask, 4, 1);
 	
 	*((int *) 0x0f01) = hdtask;
+	//---DEBUG--- 
+	/*io_cli();
 	struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
 		boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 - 1, 15);
 		//sprintf(s,"taskrun %d",i);
 		putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, "looooo");
-
+	io_sti();*/
 	return TRUE;
 } 

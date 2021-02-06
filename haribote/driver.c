@@ -14,14 +14,14 @@ struct dDevEntry{
 };
 
 struct dDevEntry dDevs[2]={
-	"Ide HD",HDEntry,
-	"FS",FSEntry
+	"FS",FSEntry, 
+	"Ide HD",HDEntry
 };
 
 BOOL LDevs(struct MEMMAN *memman)
 {
 	int i;
-	for(i=0;i<2;i++)
+	for(i=0;i<2;++i)
 	{
 		struct Dobject Devobj;
 		Devobj.name = dDevs[i].name;

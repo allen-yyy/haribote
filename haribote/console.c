@@ -255,6 +255,8 @@ void cons_runcmd(char *cmdline, struct CONSOLE *cons, int *fat, int memtotal)
 		printtime(cons);
 	} else if (strcmp(cmdline, "shutdown") == 0){
 		_START();
+	} else if (strcmp(cmdline, "version") == 0){
+		ver(cons);
 	} else if (cmdline[0] != 0) {
 			if (cmd_app(cons, fat, cmdline) == 0) {
 				/* コマンドではなく、アプリでもなく、さらに空行でもない */
@@ -263,6 +265,13 @@ void cons_runcmd(char *cmdline, struct CONSOLE *cons, int *fat, int memtotal)
 		}
 		
 	
+	return;
+}
+
+void ver(struct CONSOLE *cons)
+{
+	char s[61];
+	cons_putstr0(cons, "Haribote version 0.2\n\n");
 	return;
 }
 
