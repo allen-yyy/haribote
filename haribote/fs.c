@@ -10,7 +10,8 @@
 
 void FS_task(struct MEMMAN *memman)
 {
-	struct TASK *task = (struct TASK *)*((int *) 0x0f01);
+	struct Dobject mydobj = GetMyObj("FS");
+	struct Dobject hddobj = GetMyObj("Ide HD");
 	int i=0;
 	struct MESSAGE *message;
 	message->type = HD_OPEN;
@@ -42,6 +43,7 @@ BOOL FSEntry(struct Dobject *Dobj)
 	task->tss.fs = 1 * 8;
 	task->tss.gs = 1 * 8;
 	task_run(task, 4, 1);
+	Dobj->task = task; 
 	/*struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
 		boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 - 1, 15);
 		//sprintf(s,"taskrun %d",i);

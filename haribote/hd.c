@@ -126,9 +126,9 @@ void task_hd()
 		struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
 		//---DEBUG--- 
 		//io_cli(); 
-		boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 - 1, 15);
-		sprintf(s,"taskrun %d",i);
-		putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, s);
+		//boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 - 1, 15);
+		//sprintf(s,"taskrun %d",i);
+		//putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, s);
 		 
 		message_receive(ANY,message);
 		switch(message->type)
@@ -187,6 +187,7 @@ BOOL HDEntry(struct Dobject *Dobj)
 	task_run(hdtask, 4, 1);
 	
 	*((int *) 0x0f01) = hdtask;
+	Dobj->task = hdtask;
 	//---DEBUG--- 
 	/*io_cli();
 	struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;

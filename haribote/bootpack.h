@@ -392,12 +392,26 @@ static BOOL WaitForRdy(WORD wPort,DWORD dwMillionSecond);
 BOOL HDEntry(struct Dobject *Dobj);
 
 /* driver.c */
+#include DR_NUM 2
 struct Dobject{
 	char *name;
 	struct MEMMAN *memman;
+	struct TASK *task;
+	void (*unload)(Dobject *this); 
 };
 BOOL LDevs(struct MEMMAN *memman);
+Dobject *GetMyObj(char *name);
 //typedef BOOL (*DEntry) (Dobject);
 
 /* fs.c */
 BOOL FSEntry(struct Dobject *Dobj); 
+
+/* code.c */
+struct _codecore{
+	//char name;
+	int next;
+
+	int code[0xff];
+	//struct _codecore *next; 
+};
+int code_alloc();

@@ -11,21 +11,23 @@
 struct dDevEntry{
 	char *name;
 	DEntry entry;
+	Dobject *Dobj;
 };
 
-struct dDevEntry dDevs[2]={
-	"FS",FSEntry, 
+struct dDevEntry dDevs[DR_NUM]={
+	"FS",FSEntry,
 	"Ide HD",HDEntry
 };
 
 BOOL LDevs(struct MEMMAN *memman)
 {
 	int i;
-	for(i=0;i<2;++i)
+	for(i=0;i<DR_NUM;++i)
 	{
 		struct Dobject Devobj;
 		Devobj.name = dDevs[i].name;
 		Devobj.memman = memman;
+		dDevs[i].Dobj = Devobj;
 		if((dDevs[i].entry)(&Devobj))
 		{
 			return FALSE;
@@ -33,3 +35,16 @@ BOOL LDevs(struct MEMMAN *memman)
 	}
 	return TRUE;	
 } 
+
+Dobject *GetMyObj(char *name)
+{
+	int i;
+	for(i=0;i<DR_NUM;++i)
+	{
+		if(strcmp(dDevs[i].name,name) == 0)
+		{
+			return dDevs[i].Dobj;
+		}
+	}
+	return NULL;
+}
