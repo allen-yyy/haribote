@@ -31,5 +31,20 @@ int code_alloc()
 	//		return codecore[i].codes[codecore[i].next];
 	//	}
 	//} 
-	
+	code.code[code.next] = rand()%10000;
+	code.next++;
+	return code.code[code.next-1];	
+}
+
+BOOL VEcode(int vcode)
+{
+	int i;
+	for(i=0;i<0xff;++i)
+	{
+		if(code.code[i]==vcode)
+		{
+			return TRUE;
+		}
+	}
+	return FALSE;
 }
