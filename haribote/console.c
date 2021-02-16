@@ -36,6 +36,14 @@ void printtime(struct CONSOLE *cons)
     cons_putstr0(cons,s);
 }
 
+struct TIME time2TIME()
+{
+	struct TIME time;
+	unsigned char *t;
+	readrtc(t);
+	time.year = (t[6]<<100)+t[5];
+	time.moon = t[4];
+} 
 
 void console_task(struct SHEET *sheet, int memtotal)
 {
@@ -482,6 +490,7 @@ int *hrb_api(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx, int 
 	struct FILEINFO *finfo;
 	struct FILEHANDLE *fh;
 	struct MEMMAN *memman = (struct MEMMAN *) MEMMAN_ADDR;
+	struct TIME time = time2TIME();
 
 	if (edx == 1) {
 		cons_putchar(cons, eax & 0xff, 1);
@@ -678,7 +687,9 @@ int *hrb_api(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx, int 
 		reg[7] = i;
 	} else if (edx == 27) {
 		reg[7] = task->langmode;
-	}
+	} else if (edx == 28) {
+		reg[7] = (int)time;
+	} 
 	return 0;
 }
 

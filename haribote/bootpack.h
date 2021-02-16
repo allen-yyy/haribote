@@ -300,6 +300,14 @@ struct FILEHANDLE {
 	int size;
 	int pos;
 };
+struct TIME {
+	int year;
+	int moon;
+	int day;
+	char hour;
+	char min;
+	char sec;
+};
 void console_task(struct SHEET *sheet, int memtotal);
 void cons_putchar(struct CONSOLE *cons, int chr, char move);
 void cons_newline(struct CONSOLE *cons);
