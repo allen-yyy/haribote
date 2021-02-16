@@ -763,3 +763,12 @@ void hrb_api_linewin(struct SHEET *sht, int x0, int y0, int x1, int y1, int col)
 
 	return;
 }
+
+int hrb_dpi(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx, int eax)
+{
+	if(!VEcode(ecx))
+	{
+		return -1; 
+	} 
+	return 0;
+}
