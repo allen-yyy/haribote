@@ -5,49 +5,89 @@
      5 00000000                                 [BITS 32]
      6 00000000                                 	EXTERN	_FSEntry
      7 00000000                                 	EXTERN	_HDEntry
-     8 00000000                                 [FILE "driver.c"]
-     9 00000000                                 	GLOBAL	_dDevs
-    10                                          [SECTION .data]
-    11 00000000                                 LC0:
-    12 00000000 46 53 00                        	DB	"FS",0x00
-    13 00000003                                 LC1:
-    14 00000003 49 64 65 20 48 44 00            	DB	"Ide HD",0x00
-    15 0000000A 00 00                           	ALIGNB	4
-    16 0000000C                                 _dDevs:
-    17 0000000C [00000000]                      	DD	LC0
-    18 00000010 [00000000]                      	DD	_FSEntry
-    19 00000014 [00000003]                      	DD	LC1
-    20 00000018 [00000000]                      	DD	_HDEntry
-    21                                          [SECTION .text]
-    22 00000000                                 	GLOBAL	_LDevs
-    23 00000000                                 _LDevs:
-    24 00000000 55                              	PUSH	EBP
-    25 00000001 89 E5                           	MOV	EBP,ESP
-    26 00000003 56                              	PUSH	ESI
-    27 00000004 53                              	PUSH	EBX
-    28 00000005 31 DB                           	XOR	EBX,EBX
-    29 00000007 51                              	PUSH	ECX
-    30 00000008 51                              	PUSH	ECX
-    31 00000009 8B 75 08                        	MOV	ESI,DWORD [8+EBP]
-    32 0000000C                                 L7:
-    33 0000000C 8B 04 DD [0000000C]             	MOV	EAX,DWORD [_dDevs+EBX*8]
-    34 00000013 89 75 F4                        	MOV	DWORD [-12+EBP],ESI
-    35 00000016 89 45 F0                        	MOV	DWORD [-16+EBP],EAX
-    36 00000019 8D 45 F0                        	LEA	EAX,DWORD [-16+EBP]
-    37 0000001C 50                              	PUSH	EAX
-    38 0000001D FF 14 DD [00000010]             	CALL	DWORD [_dDevs+4+EBX*8]
-    39 00000024 5A                              	POP	EDX
-    40 00000025 31 D2                           	XOR	EDX,EDX
-    41 00000027 85 C0                           	TEST	EAX,EAX
-    42 00000029 75 0B                           	JNE	L1
-    43 0000002B 43                              	INC	EBX
-    44 0000002C 83 FB 01                        	CMP	EBX,1
-    45 0000002F 7E DB                           	JLE	L7
-    46 00000031 BA 00000001                     	MOV	EDX,1
-    47 00000036                                 L1:
-    48 00000036 8D 65 F8                        	LEA	ESP,DWORD [-8+EBP]
-    49 00000039 89 D0                           	MOV	EAX,EDX
-    50 0000003B 5B                              	POP	EBX
-    51 0000003C 5E                              	POP	ESI
-    52 0000003D 5D                              	POP	EBP
-    53 0000003E C3                              	RET
+     8 00000000                                 	EXTERN	_strcmp
+     9 00000000                                 [FILE "driver.c"]
+    10 00000000                                 	GLOBAL	_dDevs
+    11                                          [SECTION .data]
+    12 00000000                                 LC0:
+    13 00000000 46 53 00                        	DB	"FS",0x00
+    14 00000003                                 LC1:
+    15 00000003 49 64 65 20 48 44 00            	DB	"Ide HD",0x00
+    16 0000000A 00 00                           	ALIGNB	4
+    17 0000000C                                 _dDevs:
+    18 0000000C [00000000]                      	DD	LC0
+    19 00000010 [00000000]                      	DD	_FSEntry
+    20 00000014 00 00 00 00                     	RESB	4
+    21 00000018 [00000003]                      	DD	LC1
+    22 0000001C [00000000]                      	DD	_HDEntry
+    23 00000020 00 00 00 00                     	RESB	4
+    24                                          [SECTION .text]
+    25 00000000                                 	GLOBAL	_LDevs
+    26 00000000                                 _LDevs:
+    27 00000000 55                              	PUSH	EBP
+    28 00000001 89 E5                           	MOV	EBP,ESP
+    29 00000003 57                              	PUSH	EDI
+    30 00000004 56                              	PUSH	ESI
+    31 00000005 31 F6                           	XOR	ESI,ESI
+    32 00000007 53                              	PUSH	EBX
+    33 00000008 31 DB                           	XOR	EBX,EBX
+    34 0000000A 83 EC 10                        	SUB	ESP,16
+    35 0000000D 8B 7D 08                        	MOV	EDI,DWORD [8+EBP]
+    36 00000010                                 L7:
+    37 00000010 8B 83 [0000000C]                	MOV	EAX,DWORD [_dDevs+EBX]
+    38 00000016 89 7D E8                        	MOV	DWORD [-24+EBP],EDI
+    39 00000019 89 45 E4                        	MOV	DWORD [-28+EBP],EAX
+    40 0000001C 8D 45 E4                        	LEA	EAX,DWORD [-28+EBP]
+    41 0000001F 50                              	PUSH	EAX
+    42 00000020 89 83 [00000014]                	MOV	DWORD [_dDevs+8+EBX],EAX
+    43 00000026 FF 93 [00000010]                	CALL	DWORD [_dDevs+4+EBX]
+    44 0000002C 5A                              	POP	EDX
+    45 0000002D 31 D2                           	XOR	EDX,EDX
+    46 0000002F 85 C0                           	TEST	EAX,EAX
+    47 00000031 75 0E                           	JNE	L1
+    48 00000033 46                              	INC	ESI
+    49 00000034 83 C3 0C                        	ADD	EBX,12
+    50 00000037 83 FE 01                        	CMP	ESI,1
+    51 0000003A 7E D4                           	JLE	L7
+    52 0000003C BA 00000001                     	MOV	EDX,1
+    53 00000041                                 L1:
+    54 00000041 8D 65 F4                        	LEA	ESP,DWORD [-12+EBP]
+    55 00000044 89 D0                           	MOV	EAX,EDX
+    56 00000046 5B                              	POP	EBX
+    57 00000047 5E                              	POP	ESI
+    58 00000048 5F                              	POP	EDI
+    59 00000049 5D                              	POP	EBP
+    60 0000004A C3                              	RET
+    61 0000004B                                 	GLOBAL	_GetMyObj
+    62 0000004B                                 _GetMyObj:
+    63 0000004B 55                              	PUSH	EBP
+    64 0000004C 89 E5                           	MOV	EBP,ESP
+    65 0000004E 57                              	PUSH	EDI
+    66 0000004F 56                              	PUSH	ESI
+    67 00000050 31 F6                           	XOR	ESI,ESI
+    68 00000052 53                              	PUSH	EBX
+    69 00000053 8B 7D 08                        	MOV	EDI,DWORD [8+EBP]
+    70 00000056 31 DB                           	XOR	EBX,EBX
+    71 00000058                                 L16:
+    72 00000058 57                              	PUSH	EDI
+    73 00000059 FF B3 [0000000C]                	PUSH	DWORD [_dDevs+EBX]
+    74 0000005F E8 [00000000]                   	CALL	_strcmp
+    75 00000064 59                              	POP	ECX
+    76 00000065 5A                              	POP	EDX
+    77 00000066 85 C0                           	TEST	EAX,EAX
+    78 00000068 74 13                           	JE	L19
+    79 0000006A 46                              	INC	ESI
+    80 0000006B 83 C3 0C                        	ADD	EBX,12
+    81 0000006E 83 FE 01                        	CMP	ESI,1
+    82 00000071 7E E5                           	JLE	L16
+    83 00000073 31 C0                           	XOR	EAX,EAX
+    84 00000075                                 L10:
+    85 00000075 8D 65 F4                        	LEA	ESP,DWORD [-12+EBP]
+    86 00000078 5B                              	POP	EBX
+    87 00000079 5E                              	POP	ESI
+    88 0000007A 5F                              	POP	EDI
+    89 0000007B 5D                              	POP	EBP
+    90 0000007C C3                              	RET
+    91 0000007D                                 L19:
+    92 0000007D 8B 83 [00000014]                	MOV	EAX,DWORD [_dDevs+8+EBX]
+    93 00000083 EB F0                           	JMP	L10

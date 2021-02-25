@@ -10,12 +10,12 @@
 
 void FS_task(struct MEMMAN *memman)
 {
-	struct Dobject mydobj = GetMyObj("FS");
-	struct Dobject hddobj = GetMyObj("Ide HD");
+	struct Dobject *mydobj = GetMyObj("FS");
+	struct Dobject *hddobj = GetMyObj("Ide HD");
 	int i=0;
 	struct MESSAGE *message;
 	message->type = HD_OPEN;
-	message_send(task2pid(task),message);
+	message_send(task2pid(hddobj->task),message);
 	message_receive(ANY,message);
 	for(;;)
 	{

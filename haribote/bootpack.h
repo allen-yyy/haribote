@@ -10,6 +10,44 @@ struct BOOTINFO { /* 0x0ff0-0x0fff */
 #define ADR_BOOTINFO	0x00000ff0
 #define ADR_DISKIMG		0x00100000
 
+/* types */
+#define BYTE                char
+#define CHAR                char
+#define TCHAR               short
+#define UCHAR               unsigned char
+#define UBYTE               unsigned char
+#define WORD                unsigned short
+#define UWORD               unsigned short
+#define DWORD               unsigned long
+#define LPSTR               char*
+#define LPCTSTR             const char*
+#define INT                 int
+#define UINT                unsigned int
+#define FLOAT               float
+#define DOUBLE              double
+
+#define __U8                unsigned char
+#define __U16               unsigned short
+#define __U32               unsigned int
+
+#define BOOL                DWORD
+#define FALSE               0x00000000
+#define TRUE                0x00000001
+#define NULL                0x00000000
+#define MAX_DWORD_VALUE     0xFFFFFFFF
+#define MAX_WORD_VALUE      0xFFFF
+#define MAX_BYTE_VALUE      0xFF
+#define MAX_QWORD_VALUE     0xFFFFFFFFFFFFFFFF
+
+#define VOID                void
+#define LPVOID              void*
+
+#define LOWORD(dw)          WORD(dw)
+#define HIWORD(dw)          WORD(dw >> 16)
+
+#define LOBYTE(wr)          BYTE(wr)
+#define HIBYTE(wr)          BYTE(wr >> 16)
+
 /* naskfunc.nas */
 void io_hlt(void);
 void io_cli(void);
@@ -40,7 +78,27 @@ void clts(void);
 void fnsave(int *addr);
 void frstor(int *addr);
 void asm_inthandler07(void);
-void inws(char *b,long len,short port); 
+void inws(char *b,long len,short port);
+ 	VOID WriteByteToPort(UCHAR, WORD);
+
+	//
+	//Read string of data from port.
+	//
+	VOID ReadByteStringFromPort(LPVOID, DWORD, WORD);
+
+	//
+	//Write string data to port.
+	//
+	VOID WriteByteStringToPort(LPVOID, DWORD, WORD);
+
+	VOID ReadWordFromPort(WORD* pWord, WORD  wPort);
+
+	VOID WriteWordToPort(WORD, WORD);
+
+	VOID ReadWordStringFromPort(LPVOID, DWORD, WORD);
+
+	VOID WriteWordStringToPort(LPVOID, DWORD, WORD);
+
 
 /* realcall.nas */
 void _START(void);
@@ -348,43 +406,7 @@ int tek_decomp(unsigned char *p, char *q, int size);
 struct TASK *open_constask(struct SHEET *sht, unsigned int memtotal);
 struct SHEET *open_console(struct SHTCTL *shtctl, unsigned int memtotal);
 
-/* types */
-#define BYTE                char
-#define CHAR                char
-#define TCHAR               short
-#define UCHAR               unsigned char
-#define UBYTE               unsigned char
-#define WORD                unsigned short
-#define UWORD               unsigned short
-#define DWORD               unsigned long
-#define LPSTR               char*
-#define LPCTSTR             const char*
-#define INT                 int
-#define UINT                unsigned int
-#define FLOAT               float
-#define DOUBLE              double
 
-#define __U8                unsigned char
-#define __U16               unsigned short
-#define __U32               unsigned int
-
-#define BOOL                DWORD
-#define FALSE               0x00000000
-#define TRUE                0x00000001
-#define NULL                0x00000000
-#define MAX_DWORD_VALUE     0xFFFFFFFF
-#define MAX_WORD_VALUE      0xFFFF
-#define MAX_BYTE_VALUE      0xFF
-#define MAX_QWORD_VALUE     0xFFFFFFFFFFFFFFFF
-
-#define VOID                void
-#define LPVOID              void*
-
-#define LOWORD(dw)          WORD(dw)
-#define HIWORD(dw)          WORD(dw >> 16)
-
-#define LOBYTE(wr)          BYTE(wr)
-#define HIBYTE(wr)          BYTE(wr >> 16)
 
 struct Dobject;
 typedef BOOL (*DEntry)(Dobject);
@@ -401,15 +423,20 @@ static BOOL WaitForRdy(WORD wPort,DWORD dwMillionSecond);
 BOOL HDEntry(struct Dobject *Dobj);
 
 /* driver.c */
-#include DR_NUM 2
+#define DR_NUM 2
 struct Dobject{
 	char *name;
 	struct MEMMAN *memman;
 	struct TASK *task;
-	void (*unload)(Dobject *this); 
+	void (*unload)(struct Dobject *this); 
+};
+struct dDevEntry{
+	char *name;
+	DEntry entry;
+	struct Dobject *Dobj;
 };
 BOOL LDevs(struct MEMMAN *memman);
-Dobject *GetMyObj(char *name);
+struct Dobject *GetMyObj(char *name);
 //typedef BOOL (*DEntry) (Dobject);
 
 /* fs.c */

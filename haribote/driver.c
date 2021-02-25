@@ -8,15 +8,11 @@
 
 #include "bootpack.h"
 
-struct dDevEntry{
-	char *name;
-	DEntry entry;
-	Dobject *Dobj;
-};
 
-struct dDevEntry dDevs[DR_NUM]={
-	"FS",FSEntry,
-	"Ide HD",HDEntry
+
+struct dDevEntry dDevs[2]={
+	{"FS",FSEntry},
+	{"Ide HD",HDEntry}
 };
 
 BOOL LDevs(struct MEMMAN *memman)
@@ -27,7 +23,7 @@ BOOL LDevs(struct MEMMAN *memman)
 		struct Dobject Devobj;
 		Devobj.name = dDevs[i].name;
 		Devobj.memman = memman;
-		dDevs[i].Dobj = Devobj;
+		dDevs[i].Dobj = &Devobj;
 		if((dDevs[i].entry)(&Devobj))
 		{
 			return FALSE;
@@ -36,7 +32,7 @@ BOOL LDevs(struct MEMMAN *memman)
 	return TRUE;	
 } 
 
-Dobject *GetMyObj(char *name)
+struct Dobject *GetMyObj(char *name)
 {
 	int i;
 	for(i=0;i<DR_NUM;++i)
