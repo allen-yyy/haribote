@@ -26,12 +26,12 @@ __32CODE_BEGIN:
     CLI  ;Disable interrupt
     SIDT [__P_IDTR] ;SAVE IDTR
     PUSH EAX
-    MOV EAX,CR3
-    MOV DWORD [__CR3],EAX ;SAVE CR3.
-    MOV EAX,CR0
-    and eax,0x7FFFFFFF ;Clear PG bit
-    mov cr0,eax  ;Disable paging.
-    xor eax,eax
+    ;MOV EAX,CR3
+    ;MOV DWORD [__CR3],EAX ;SAVE CR3.
+    ;MOV EAX,CR0
+    ;and eax,0x7FFFFFFF ;Clear PG bit
+    ;mov cr0,eax  ;Disable paging.
+    ;xor eax,eax
     ;mov cr3,eax  ;Flush TLB.
     POP EAX
     JMP __16BIT_ENTRY ;Jump to 16 bits code.
@@ -45,7 +45,7 @@ __R_IDTR:
     DD 0x00
 	
 __16CODE_BEGIN:
-    MOV AX,0x30
+    MOV AX,0x0
     MOV DS,AX
     MOV SS,AX
     MOV ES,AX
