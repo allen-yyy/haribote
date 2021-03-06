@@ -51,6 +51,7 @@ void HariMain(void)
 	unsigned char *nihongo;
 	struct FILEINFO *finfo;
 	extern char hankaku[4096];
+	struct TIMER *time; 
 
 	init_gdtidt();
 	init_pic();
@@ -103,6 +104,8 @@ void HariMain(void)
 	keywin_on(key_win);
 
 	LDevs(memman);
+	time = timer_alloc();
+	timer_init(time, &fifo, 1);
 
 	/* 最初にキーボード状態との食い違いがないように、設定しておくことにする */
 	fifo32_put(&keycmd, KEYCMD_LED);
