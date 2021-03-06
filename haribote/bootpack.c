@@ -104,8 +104,11 @@ void HariMain(void)
 	keywin_on(key_win);
 
 	LDevs(memman);
+
 	time = timer_alloc();
-	timer_init(time, &fifo, 1);
+	timer_init(time,&fifo,2280);
+	timer_settime(time,100);
+
 
 	/* 最初にキーボード状態との食い違いがないように、設定しておくことにする */
 	fifo32_put(&keycmd, KEYCMD_LED);
@@ -342,6 +345,9 @@ void HariMain(void)
 				sht2 = shtctl->sheets0 + (i - 2024);
 				memman_free_4k(memman, (int) sht2->buf, 256 * 165);
 				sheet_free(sht2);
+			} else if (i == 2280) {		/* time out */
+				printtime2();
+				timer_settime(time,100);
 			}
 		}
 	}
@@ -423,4 +429,32 @@ void close_console(struct SHEET *sht)
     }
     io_sti();                                               /* ･ｳ･ｳ､ﾞ､ﾇ */
 	return;
+}
+void printtime2()
+{
+	struct BOOTINFO *binfo = ADR_BOOTINFO;
+	struct TASK *task = task_now();
+    unsigned char s[24], t[7];
+    char *vram = binfo->vram;
+    int x = binfo->scrnx;
+    int y = binfo->scrny;
+    readrtc(t);
+    sprintf(s, "%02X:%02X",t[2], t[1]);
+    
+    //boxfill8(vram, x, COL8_FFFFFF,  3,     y - 24, 59,     y - 24);
+	//boxfill8(vram, x, COL8_FFFFFF,  2,     y - 24,  2,     y -  4);
+	//boxfill8(vram, x, COL8_848484,  3,     y -  4, 59,     y -  4);
+	//boxfill8(vram, x, COL8_848484, 59,     y - 23, 59,     y -  5);
+	//boxfill8(vram, x, COL8_000000,  2,     y -  3, 59,     y -  3);
+	//boxfill8(vram, x, COL8_000000, 60,     y - 24, 60,     y -  3);
+
+    
+    boxfill8(vram, x, COL8_848484, x - 47, y - 24, x-47, y-24); 
+    boxfill8(vram, x, COL8_848484, x - 47, y - 24, x -  4, y - 24);
+	boxfill8(vram, x, COL8_848484, x - 47, y - 23, x - 47, y -  4);
+	boxfill8(vram, x, COL8_FFFFFF, x - 47, y -  3, x -  4, y -  3);
+	boxfill8(vram, x, COL8_FFFFFF, x -  3, y - 24, x -  3, y -  3);
+	
+    putfonts8_asc(vram,x,x-46,y-22,COL8_FFFFFF,s);
+    sheet_refresh(task->cons->sht,x-48,y-25,x-1,y-1);
 }

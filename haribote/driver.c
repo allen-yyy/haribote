@@ -9,8 +9,13 @@
 #include "bootpack.h"
 
 
+struct dDevEntry{
+	char *name;
+	DEntry entry;
+	struct Dobject *Dobj;
+};
 
-struct dDevEntry dDevs[2]={
+struct dDevEntry dDevs[DR_NUM]={
 	{"FS",FSEntry},
 	{"Ide HD",HDEntry}
 };

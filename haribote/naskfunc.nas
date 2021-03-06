@@ -19,11 +19,11 @@
 		GLOBAL  _asm_inthandler2e
 		GLOBAL	_memtest_sub
 		GLOBAL	_farjmp, _farcall
-		GLOBAL	_asm_hrb_api, _start_app
+		GLOBAL	_asm_hrb_api, _start_app, _asm_hrb_dpi
 		EXTERN	_inthandler20, _inthandler21
 		EXTERN	_inthandler2c, _inthandler0d
 		EXTERN	_inthandler0c, _inthandler2e
-		EXTERN	_hrb_api
+		EXTERN	_hrb_api, _hrb_dpi
 		GLOBAL  _clts, _fnsave, _frstor, _asm_inthandler07
 		GLOBAL	_WriteByteToPort, _ReadByteStringFromPor
 		GLOBAL	_WriteByteStringToPort, _ReadWordFromPort
@@ -327,6 +327,24 @@ _asm_end_app:
 		MOV		DWORD [EAX+4],0
 		POPAD
 		RET					; cmd_appへ帰る
+
+_asm_hrb_dpi:
+		STI
+		PUSH	DS
+		PUSH	ES
+		PUSHAD		; 保存のためのPUSH
+		PUSHAD		; hrb_apiにわたすためのPUSH
+		MOV		AX,SS
+		MOV		DS,AX		; OS用のセグメントをDSとESにも入れる
+		MOV		ES,AX
+		CALL	_hrb_dpi
+		;CMP		EAX,0		; EAXが0でなければアプリ終了処理
+		;JNE		_asm_end_app
+		ADD		ESP,32
+		POPAD
+		POP		ES
+		POP		DS
+		IRETD
 
 _start_app:		; void start_app(int eip, int cs, int esp, int ds, int *tss_esp0);
 		PUSHAD		; 32ビットレジスタを全部保存しておく

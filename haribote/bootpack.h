@@ -72,6 +72,7 @@ unsigned int memtest_sub(unsigned int start, unsigned int end);
 void farjmp(int eip, int cs);
 void farcall(int eip, int cs);
 void asm_hrb_api(void);
+void asm_hrb_dpi(void);
 void start_app(int eip, int cs, int esp, int ds, int *tss_esp0);
 void asm_end_app(void);
 void clts(void);
@@ -385,6 +386,8 @@ int hrb_dpi(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx, int e
 int *inthandler0d(int *esp);
 int *inthandler0c(int *esp);
 void hrb_api_linewin(struct SHEET *sht, int x0, int y0, int x1, int y1, int col);
+void printtime(struct CONSOLE *cons);
+void readrtc(unsigned char *t);
 
 /* file.c */
 struct FILEINFO {
@@ -429,11 +432,6 @@ struct Dobject{
 	struct MEMMAN *memman;
 	struct TASK *task;
 	void (*unload)(struct Dobject *this); 
-};
-struct dDevEntry{
-	char *name;
-	DEntry entry;
-	struct Dobject *Dobj;
 };
 BOOL LDevs(struct MEMMAN *memman);
 struct Dobject *GetMyObj(char *name);

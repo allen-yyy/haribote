@@ -731,7 +731,7 @@ int *hrb_api(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx, int 
 	} else if (edx == 27) {
 		reg[7] = task->langmode;
 	} else if (edx == 28) {
-		//reg[7] = (int*)time;
+		//reg[7] = *((int *)time);
 	} 
 	return 0;
 }
