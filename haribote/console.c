@@ -36,6 +36,41 @@ void printtime(struct CONSOLE *cons)
     cons_putstr0(cons,s);
 }
 
+void print_identify_info(short* hdinfo)
+{
+	int i, k;
+	char s[64];
+	char b[800]; 
+
+	struct iden_info_ascii {
+		int idx;
+		int len;
+		char * desc;
+	} iinfo[] = {{10, 20, "HD SN"}, /* Serial number in ASCII */
+		     {27, 40, "HD Model"} /* Model number in ASCII */ };
+
+	for (k = 0; k < sizeof(iinfo)/sizeof(iinfo[0]); k++) {
+		char * p = (char*)&hdinfo[iinfo[k].idx];
+		for (i = 0; i < iinfo[k].len/2; i++) {
+			s[i*2+1] = *p++;
+			s[i*2] = *p++;
+		}
+		s[i*2] = 0;
+		sprintf(b,"%s: %s\n", iinfo[k].desc, s);
+	}
+
+	int capabilities = hdinfo[49];
+	sprintf(b,"LBA supported: %s\n",
+	       (capabilities & 0x0200) ? "Yes" : "No");
+
+	int cmd_set_supported = hdinfo[83];
+	sprintf(b,"LBA48 supported: %s\n",
+	       (cmd_set_supported & 0x0400) ? "Yes" : "No");
+
+	int sectors = ((int)hdinfo[61] << 16) + hdinfo[60];
+	sprintf(b,"HD size: %dMB\n", sectors * 512 / 1000000);
+}
+
 struct TIME time2TIME()
 {
 	struct TIME time;
@@ -43,6 +78,12 @@ struct TIME time2TIME()
 	readrtc(t);
 	time.year = (t[6]<<100)+t[5];
 	time.moon = t[4];
+}
+
+void hdinfo(struct CONSOLE *cons)
+{
+	
+	return;
 } 
 
 void console_task(struct SHEET *sheet, int memtotal)
@@ -265,6 +306,8 @@ void cons_runcmd(char *cmdline, struct CONSOLE *cons, int *fat, int memtotal)
 		_START();
 	} else if (strcmp(cmdline, "version") == 0){
 		ver(cons);
+	} else if (strcmp(cmdline, "hdinfo") == 0){
+		hdinfo(cons);
 	} else if (cmdline[0] != 0) {
 			if (cmd_app(cons, fat, cmdline) == 0) {
 				/* コマンドではなく、アプリでもなく、さらに空行でもない */
@@ -688,7 +731,7 @@ int *hrb_api(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx, int 
 	} else if (edx == 27) {
 		reg[7] = task->langmode;
 	} else if (edx == 28) {
-		reg[7] = (int)time;
+		//reg[7] = (int*)time;
 	} 
 	return 0;
 }
