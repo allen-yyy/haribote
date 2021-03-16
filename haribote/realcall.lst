@@ -8,7 +8,7 @@
      8 00000000                                 	
      9                                          [SECTION .text]
     10 00000000                                 __START:
-    11 00000000 EB 18                               JMP __32CODE_BEGIN
+    11 00000000 EB 1E                               JMP __32CODE_BEGIN
     12 00000002                                    
     13 00000002 90 90 90 90 90 90 90 90 90 90       ALIGN 16
        0000000C 90 90 90 90 
@@ -16,133 +16,131 @@
     15 00000010 0000                                DW 00     ;LIMITATION OF IDTR
     16 00000012 00000000                            DD 00     ;Base of IDTR
     17 00000016 00000000                        __CR3 DD 0X00 ;Used to save CR3
-    18 0000001A                                 
-    19 0000001A                                 __32CODE_BEGIN:
-    20 0000001A 53                                  PUSH EBX
-    21 0000001B 51                                  PUSH ECX
-    22 0000001C 52                                  PUSH EDX
-    23 0000001D 56                                  PUSH ESI
-    24 0000001E 57                                  PUSH EDI
-    25 0000001F 55                                  PUSH EBP
-    26 00000020 FA                                  CLI  ;Disable interrupt
-    27 00000021 0F 01 0D [00000010]                 SIDT [__P_IDTR] ;SAVE IDTR
-    28 00000028 50                                  PUSH EAX
-    29 00000029                                     ;MOV EAX,CR3
-    30 00000029                                     ;MOV DWORD [__CR3],EAX ;SAVE CR3.
-    31 00000029                                     ;MOV EAX,CR0
-    32 00000029                                     ;and eax,0x7FFFFFFF ;Clear PG bit
-    33 00000029                                     ;mov cr0,eax  ;Disable paging.
-    34 00000029                                     ;xor eax,eax
-    35 00000029                                     ;mov cr3,eax  ;Flush TLB.
-    36 00000029 58                                  POP EAX
-    37 0000002A EB 04                               JMP __16BIT_ENTRY ;Jump to 16 bits code.
-    38 0000002C                                  
-    39 0000002C 90 90 90 90                         ALIGN 16
-    40 00000030                                 __16BIT_ENTRY:
-    41 00000030 EB 14                               jmp __16CODE_BEGIN
-    42 00000032 90 90 90 90 90 90 90 90 90 90       ALIGN 16
-       0000003C 90 90 90 90 
-    43 00000040                                 __R_IDTR:
-    44 00000040 0400                                DW 1024
-    45 00000042 00000000                            DD 0x00
-    46 00000046                                 	
-    47 00000046                                 __16CODE_BEGIN:
-    48 00000046 66 B8 0000                          MOV AX,0x0
-    49 0000004A 8E D8                               MOV DS,AX
-    50 0000004C 8E D0                               MOV SS,AX
-    51 0000004E 8E C0                               MOV ES,AX
-    52 00000050 8E E0                               MOV FS,AX
-    53 00000052 8E E8                               MOV GS,AX
-    54 00000054 0F 01 1D [00000040]                 LIDT [__R_IDTR] ;Load interrupt vector table,the lidt use physical address.
-    55 0000005B 0F 20 C0                            MOV EAX,CR0
-    56 0000005E 24 FE                               AND AL,0XFE ;Clear PE bit
-    57 00000060 0F 22 C0                            MOV CR0,EAX
-    58 00000063 EB 43                               jmp __REAL_MODE_ENTRY  ;Jump to real mode.
-    59 00000065                                  
-    60 00000065 90 90 90                            ALIGN 4
-    61 00000068                                 __REINIT_8259:           ;Re-initialize the 8259 chip to comply real mode,
-    62 00000068                                                          ;since it has been configured into different mode
-    63 00000068                                                          ;for protected mode.
-    64 00000068 66 50                               PUSH AX
-    65 0000006A B0 13                               MOV AL,0X13
-    66 0000006C E6 20                               OUT 0X20,AL
-    67 0000006E B0 08                               MOV AL,0X08
-    68 00000070 E6 21                               OUT 0X21,AL
-    69 00000072 B0 09                               MOV AL,0X09
-    70 00000074 E6 21                               OUT 0X21,AL
-    71 00000076 66 58                               POP AX
-    72 00000078 C3                                  RET
-    73 00000079                                  
-    74 00000079                                 __REINIT_8259_EX:
-    75 00000079 66 50                               PUSH AX
-    76 0000007B B0 11                               MOV AL,0X11
-    77 0000007D E6 20                               OUT 0X20,AL
-    78 0000007F E6 A0                               OUT 0XA0,AL
-    79 00000081 B0 08                               MOV AL,0X08
-    80 00000083 E6 21                               OUT 0X21,AL
-    81 00000085 B0 70                               MOV AL,0X70
-    82 00000087 E6 A1                               OUT 0XA1,AL
-    83 00000089 B0 04                               MOV AL,0X04
-    84 0000008B E6 21                               OUT 0X21,AL
-    85 0000008D B0 02                               MOV AL,0X02
-    86 0000008F E6 A1                               OUT 0XA1,AL
-    87 00000091 B0 01                               MOV AL,0X01
-    88 00000093 E6 21                               OUT 0X21,AL
-    89 00000095 E6 A1                               OUT 0XA1,AL
-    90 00000097 B0 B8                               MOV AL,0XB8
-    91 00000099 E6 21                               OUT 0X21,AL
-    92 0000009B B0 8F                               MOV AL,0X8F
-    93 0000009D E6 A1                               OUT 0XA1,AL
-    94 0000009F                                  
-    95 0000009F B0 20                               MOV AL,0X20                  ;;Indicate the interrupt chip we have fin-
-    96 000000A1                                                                  ;;ished handle the interrupt.
-    97 000000A1                                                                  ;;:-)
-    98 000000A1                                                                  ;;It is mandatory when switch back real
-    99 000000A1                                                                  ;;mode from protect mode.In the switching
-   100 000000A1                                                                  ;;process,interrupt may occur but is disabled.
-   101 000000A1                                                                  ;;When re-initialize the 8259 chip and enable
-   102 000000A1                                                                  ;;the interrupt,pending interrupt may cause
-   103 000000A1                                                                  ;;system crash,since the interrupt vector is
-   104 000000A1                                                                  ;;different between protect mode and real
-   105 000000A1                                                                  ;;mode.
-   106 000000A1                                                                  ;;So this code segment cancels all pending
-   107 000000A1                                                                  ;;interrupt(s) in real mode.
-   108 000000A1 E6 20                               OUT 0X20,AL
-   109 000000A3 E6 A0                               OUT 0XA0,AL
-   110 000000A5                                  
-   111 000000A5 66 58                               POP AX
-   112 000000A7 C3                                  RET
-   113 000000A8                                  
-   114 000000A8                                 __REAL_MODE_ENTRY:
-   115 000000A8 EB 06                               JMP __REALCODE_BEGIN
-   116 000000AA                                 	
-   117 000000AA 90 90                               ALIGN 4
-   118 000000AC 00000000                        __ESP dd 0x00  ;Save ESP
-   119 000000B0                                 __REALCODE_BEGIN:
-   120 000000B0 66 8C C8                            MOV AX,CS
-   121 000000B3 8E D8                               MOV DS,AX
-   122 000000B5 8E C0                               MOV ES,AX
-   123 000000B7 8E E0                               MOV FS,AX
-   124 000000B9 8E E8                               MOV GS,AX
-   125 000000BB                                 	;Save ESP.
-   126 000000BB 89 25 [000000AC]                    MOV DWORD [__ESP],ESP
-   127 000000C1                                 	;ss and esp must be updated together.
-   128 000000C1 8E D3                           	MOV SS,BX
-   129 000000C3 66 BC 0FF0                          MOV SP,0XFF0
-   130 000000C7 E8 FFFFFFAD                         CALL __REINIT_8259_EX         ;Set 8259 to BIOS mode
-   131 000000CC FB                                  STI ;Enable interrupt.
-   132 000000CD                                     ;OK,can run BIOS code now.
-   133 000000CD                                 __BIOS_BEGIN:
-   134 000000CD 66 89 C3                            MOV BX,AX
-   135 000000D0 66 B8 5301                      	MOV AX,0X5301
-   136 000000D4 66 31 DB                            XOR BX,BX
-   137 000000D7 CD 15                               INT 0X15
-   138 000000D9 66 B8 530E                          MOV AX,0X530E
-   139 000000DD 66 B9 0102                          MOV CX,0X102
-   140 000000E1 CD 15                               INT 0X15
-   141 000000E3 66 B8 14BB                          MOV AX,5307
-   142 000000E7 B3 01                               MOV BL,0X01
-   143 000000E9 66 B9 0003                          MOV CX,0X03
-   144 000000ED CD 15                               INT 0X15
-   145 000000EF                                     ;mov eax,0x01   ;Indicate the calling is success.
-   146 000000EF C3                                  RET
+    18 0000001A                                  
+    19 0000001A                                     
+    20 0000001A                                 __R_IDTR:
+    21 0000001A 0400                                DW 1024
+    22 0000001C 00000000                            DD 0x00
+    23 00000020                                 
+    24 00000020                                 __32CODE_BEGIN:
+    25 00000020 53                                  PUSH EBX
+    26 00000021 51                                  PUSH ECX
+    27 00000022 52                                  PUSH EDX
+    28 00000023 56                                  PUSH ESI
+    29 00000024 57                                  PUSH EDI
+    30 00000025 55                                  PUSH EBP
+    31 00000026 FA                                  CLI  ;Disable interrupt
+    32 00000027 0F 01 0D [00000010]                 SIDT [__P_IDTR] ;SAVE IDTR
+    33 0000002E 50                                  PUSH EAX
+    34 0000002F                                     ;MOV EAX,CR3
+    35 0000002F                                     ;MOV DWORD [__CR3],EAX ;SAVE CR3.
+    36 0000002F                                     ;MOV EAX,CR0
+    37 0000002F                                     ;and eax,0x7FFFFFFF ;Clear PG bit
+    38 0000002F                                     ;mov cr0,eax  ;Disable paging.
+    39 0000002F                                     ;xor eax,eax
+    40 0000002F                                     ;mov cr3,eax  ;Flush TLB.
+    41 0000002F 58                                  POP EAX
+    42 00000030 EB 00                               JMP __16CODE_BEGIN ;Jump to 16 bits code.
+    43 00000032                                 
+    44 00000032                                 	
+    45 00000032                                 __16CODE_BEGIN:
+    46 00000032 66 B8 FFF0                          MOV AX,8190*8
+    47 00000036 8E D8                               MOV DS,AX
+    48 00000038 8E D0                               MOV SS,AX
+    49 0000003A 8E C0                               MOV ES,AX
+    50 0000003C 8E E0                               MOV FS,AX
+    51 0000003E 8E E8                               MOV GS,AX
+    52 00000040 0F 01 1D [0000001A]                 LIDT [__R_IDTR] ;Load interrupt vector table,the lidt use physical address.
+    53 00000047 0F 20 C0                            MOV EAX,CR0
+    54 0000004A 24 FE                               AND AL,0XFE ;Clear PE bit
+    55 0000004C 0F 22 C0                            MOV CR0,EAX
+    56 0000004F EB 43                               jmp __REAL_MODE_ENTRY  ;Jump to real mode.
+    57 00000051                                  
+    58 00000051 90 90 90                            ALIGN 4
+    59 00000054                                 __REINIT_8259:           ;Re-initialize the 8259 chip to comply real mode,
+    60 00000054                                                          ;since it has been configured into different mode
+    61 00000054                                                          ;for protected mode.
+    62 00000054 66 50                               PUSH AX
+    63 00000056 B0 13                               MOV AL,0X13
+    64 00000058 E6 20                               OUT 0X20,AL
+    65 0000005A B0 08                               MOV AL,0X08
+    66 0000005C E6 21                               OUT 0X21,AL
+    67 0000005E B0 09                               MOV AL,0X09
+    68 00000060 E6 21                               OUT 0X21,AL
+    69 00000062 66 58                               POP AX
+    70 00000064 C3                                  RET
+    71 00000065                                  
+    72 00000065                                 __REINIT_8259_EX:
+    73 00000065 66 50                               PUSH AX
+    74 00000067 B0 11                               MOV AL,0X11
+    75 00000069 E6 20                               OUT 0X20,AL
+    76 0000006B E6 A0                               OUT 0XA0,AL
+    77 0000006D B0 08                               MOV AL,0X08
+    78 0000006F E6 21                               OUT 0X21,AL
+    79 00000071 B0 70                               MOV AL,0X70
+    80 00000073 E6 A1                               OUT 0XA1,AL
+    81 00000075 B0 04                               MOV AL,0X04
+    82 00000077 E6 21                               OUT 0X21,AL
+    83 00000079 B0 02                               MOV AL,0X02
+    84 0000007B E6 A1                               OUT 0XA1,AL
+    85 0000007D B0 01                               MOV AL,0X01
+    86 0000007F E6 21                               OUT 0X21,AL
+    87 00000081 E6 A1                               OUT 0XA1,AL
+    88 00000083 B0 B8                               MOV AL,0XB8
+    89 00000085 E6 21                               OUT 0X21,AL
+    90 00000087 B0 8F                               MOV AL,0X8F
+    91 00000089 E6 A1                               OUT 0XA1,AL
+    92 0000008B                                  
+    93 0000008B B0 20                               MOV AL,0X20                  ;;Indicate the interrupt chip we have fin-
+    94 0000008D                                                                  ;;ished handle the interrupt.
+    95 0000008D                                                                  ;;:-)
+    96 0000008D                                                                  ;;It is mandatory when switch back real
+    97 0000008D                                                                  ;;mode from protect mode.In the switching
+    98 0000008D                                                                  ;;process,interrupt may occur but is disabled.
+    99 0000008D                                                                  ;;When re-initialize the 8259 chip and enable
+   100 0000008D                                                                  ;;the interrupt,pending interrupt may cause
+   101 0000008D                                                                  ;;system crash,since the interrupt vector is
+   102 0000008D                                                                  ;;different between protect mode and real
+   103 0000008D                                                                  ;;mode.
+   104 0000008D                                                                  ;;So this code segment cancels all pending
+   105 0000008D                                                                  ;;interrupt(s) in real mode.
+   106 0000008D E6 20                               OUT 0X20,AL
+   107 0000008F E6 A0                               OUT 0XA0,AL
+   108 00000091                                  
+   109 00000091 66 58                               POP AX
+   110 00000093 C3                                  RET
+   111 00000094                                  
+   112 00000094                                 __REAL_MODE_ENTRY:
+   113 00000094 EB 06                               JMP __REALCODE_BEGIN
+   114 00000096                                 	
+   115 00000096 90 90                               ALIGN 4
+   116 00000098 00000000                        __ESP dd 0x00  ;Save ESP
+   117 0000009C                                 __REALCODE_BEGIN:
+   118 0000009C 66 8C C8                            MOV AX,CS
+   119 0000009F 8E D8                               MOV DS,AX
+   120 000000A1 8E C0                               MOV ES,AX
+   121 000000A3 8E E0                               MOV FS,AX
+   122 000000A5 8E E8                               MOV GS,AX
+   123 000000A7                                 	;Save ESP.
+   124 000000A7 89 25 [00000098]                    MOV DWORD [__ESP],ESP
+   125 000000AD                                 	;ss and esp must be updated together.
+   126 000000AD 8E D3                           	MOV SS,BX
+   127 000000AF 66 BC 0FF0                          MOV SP,0XFF0
+   128 000000B3 E8 FFFFFFAD                         CALL __REINIT_8259_EX         ;Set 8259 to BIOS mode
+   129 000000B8 FB                                  STI ;Enable interrupt.
+   130 000000B9                                     ;OK,can run BIOS code now.
+   131 000000B9                                 __BIOS_BEGIN:
+   132 000000B9 66 B8 5301                      	MOV AX,0x5301
+   133 000000BD 66 31 DB                            XOR BX,BX
+   134 000000C0 CD 15                               INT 0x15
+   135 000000C2 66 B8 530E                          MOV AX,0x530E
+   136 000000C6 66 B9 0102                          MOV CX,0x102
+   137 000000CA CD 15                               INT 0x15
+   138 000000CC 66 B8 14BB                          MOV AX,5307
+   139 000000D0 66 BB 0001                          MOV BX,0x01
+   140 000000D4 66 B9 0002                          MOV CX,0x02
+   141 000000D8 CD 15                               INT 0x15
+   142 000000DA B8 00000001                         MOV EAX,0x01   ;INDICATE THE CALLING IS SUCCESS.
+   143 000000DF C3                                  RET
+   144 000000E0                                     ;mov eax,0x01   ;Indicate the calling is success.
+   145 000000E0                                   

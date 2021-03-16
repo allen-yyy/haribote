@@ -15,6 +15,11 @@ __P_IDTR:
     DW 00     ;LIMITATION OF IDTR
     DD 00     ;Base of IDTR
 __CR3 DD 0X00 ;Used to save CR3
+ 
+    
+__R_IDTR:
+    DW 1024
+    DD 0x00
 
 __32CODE_BEGIN:
     PUSH EBX
@@ -34,18 +39,11 @@ __32CODE_BEGIN:
     ;xor eax,eax
     ;mov cr3,eax  ;Flush TLB.
     POP EAX
-    JMP __16BIT_ENTRY ;Jump to 16 bits code.
- 
-    ALIGN 16
-__16BIT_ENTRY:
-    jmp __16CODE_BEGIN
-    ALIGN 16
-__R_IDTR:
-    DW 1024
-    DD 0x00
+    JMP __16CODE_BEGIN ;Jump to 16 bits code.
+
 	
 __16CODE_BEGIN:
-    MOV AX,0x0
+    MOV AX,8190*8
     MOV DS,AX
     MOV SS,AX
     MOV ES,AX
@@ -131,16 +129,17 @@ __REALCODE_BEGIN:
     STI ;Enable interrupt.
     ;OK,can run BIOS code now.
 __BIOS_BEGIN:
-    MOV BX,AX
-	MOV AX,0X5301
+	MOV AX,0x5301
     XOR BX,BX
-    INT 0X15
-    MOV AX,0X530E
-    MOV CX,0X102
-    INT 0X15
+    INT 0x15
+    MOV AX,0x530E
+    MOV CX,0x102
+    INT 0x15
     MOV AX,5307
-    MOV BL,0X01
-    MOV CX,0X03
-    INT 0X15
-    ;mov eax,0x01   ;Indicate the calling is success.
+    MOV BX,0x01
+    MOV CX,0x02
+    INT 0x15
+    MOV EAX,0x01   ;INDICATE THE CALLING IS SUCCESS.
     RET
+    ;mov eax,0x01   ;Indicate the calling is success.
+  
