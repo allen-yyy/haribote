@@ -427,6 +427,7 @@ BOOL HDEntry(struct Dobject *Dobj);
 
 /* driver.c */
 #define DR_NUM 2
+#define DR_ENUM 5
 struct Dobject{
 	char *name;
 	struct MEMMAN *memman;

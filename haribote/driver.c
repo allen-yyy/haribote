@@ -14,10 +14,19 @@ struct dDevEntry{
 	DEntry entry;
 	struct Dobject *Dobj;
 };
+struct exdrivertable{
+	char *name;
+	char *filename; 
+	//DEntry entry;
+	struct Dobject *Dobj;
+};
 
-struct dDevEntry dDevs[DR_NUM]={
-	{"FS",FSEntry},
-	{"Ide HD",HDEntry}
+struct exdrivertable etable[DR_ENUM]={
+	{"HAFS","hafs.sys"},
+	{"IO","io.sys"},
+	{"NET","net.sys"},
+	{"SETM","setm.sys"},
+	{"SETH","seth.sys"}
 };
 
 BOOL LDevs(struct MEMMAN *memman)
@@ -34,6 +43,23 @@ BOOL LDevs(struct MEMMAN *memman)
 			return FALSE;
 		}
 	}
+	/*for(i=0;i<DR_ENUM;i++) 
+	{
+		struct SEGMENT_DESCRIPTOR *gdt = (struct SEGMENT_DESCRIPTOR *) ADR_GDT;
+		struct Dobject Devobj;
+		Devobj.name = etable[i].name;
+		Devobj.memman = memman;
+		etable[i].Dobj = &Devobj;
+		
+		//struct TASK *task;
+		task = task_alloc();
+		set_segmdesc(gdt + task.sel,);
+		task->tss.esp = memman_alloc_4k(memman, 64 * 1024) + 64 * 1024;
+		task->tss.eip = (int) &FS_task;
+		
+		task_run(task, 4, 1);
+	}*/
+
 	return TRUE;	
 } 
 
