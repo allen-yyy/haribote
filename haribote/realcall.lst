@@ -137,8 +137,8 @@
    136 000000C6 66 B9 0102                          MOV CX,0x102
    137 000000CA CD 15                               INT 0x15
    138 000000CC 66 B8 14BB                          MOV AX,5307
-   139 000000D0 66 BB 0001                          MOV BX,0x01
-   140 000000D4 66 B9 0002                          MOV CX,0x02
+   139 000000D0 66 BB 0000                          MOV BX,0x00
+   140 000000D4 66 B9 0003                          MOV CX,0x03
    141 000000D8 CD 15                               INT 0x15
    142 000000DA B8 00000001                         MOV EAX,0x01   ;INDICATE THE CALLING IS SUCCESS.
    143 000000DF C3                                  RET
