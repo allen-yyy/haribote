@@ -86,7 +86,7 @@ void HariMain(void)
 	init_screen8(buf_back, binfo->scrnx, binfo->scrny);
 
 	/* sht_cons */
-	key_win = open_console(shtctl, memtotal);
+	//key_win = open_console(shtctl, memtotal);
 
 	/* sht_mouse */
 	sht_mouse = sheet_alloc(shtctl);
@@ -96,12 +96,12 @@ void HariMain(void)
 	my = (binfo->scrny - 28 - 16) / 2;
 
 	sheet_slide(sht_back,  0,  0);
-	sheet_slide(key_win,   32, 4);
+	//sheet_slide(key_win,   32, 4);
 	sheet_slide(sht_mouse, mx, my);
 	sheet_updown(sht_back,  0);
-	sheet_updown(key_win,   1);
-	sheet_updown(sht_mouse, 2);
-	keywin_on(key_win);
+	//sheet_updown(key_win,   1);
+	sheet_updown(sht_mouse, 1);
+	//keywin_on(key_win);
 
 	LDevs(memman);
 
@@ -315,11 +315,24 @@ void HariMain(void)
 												fifo32_put(&task->fifo, 4);
 												io_sti();
 											}
-										}
+										}/* else if(1<=x && x<8*12&&1<=y && y < 8)
+										{
+											key_win = open_console(shtctl, memtotal);
+											sheet_slide(key_win, 32, 4);
+											sheet_updown(key_win, shtctl->top);
+											keywin_on(key_win);
+										}*/ 
 										break;
 									}
 								}
 							}
+							if(1<=mx && mx<8*12&&1<=my && my < 8)
+							{
+								key_win = open_console(shtctl, memtotal);
+								sheet_slide(key_win, 32, 4);
+								sheet_updown(key_win, shtctl->top);
+								keywin_on(key_win);
+							} 
 						} else {
 							/* ウィンドウ移動モードの場合 */
 							x = mx - mmx;	/* マウスの移動量を計算 */

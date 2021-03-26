@@ -82,6 +82,7 @@ void init_screen8(char *vram, int x, int y)
 	boxfill8(vram, x, COL8_848484, x - 47, y - 23, x - 47, y -  4);
 	boxfill8(vram, x, COL8_FFFFFF, x - 47, y -  3, x -  4, y -  3);
 	boxfill8(vram, x, COL8_FFFFFF, x -  3, y - 24, x -  3, y -  3);
+	putfonts8_asc(vram, x, 1, 1, COL8_FFFFFF ,"console");
 	return;
 }
 
