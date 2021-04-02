@@ -83,7 +83,7 @@ void HariMain(void)
 	sht_back  = sheet_alloc(shtctl);
 	buf_back  = (unsigned char *) memman_alloc_4k(memman, binfo->scrnx * binfo->scrny);
 	sheet_setbuf(sht_back, buf_back, binfo->scrnx, binfo->scrny, -1); /* ìßñæêFÇ»Çµ */
-	init_screen8(buf_back, binfo->scrnx, binfo->scrny);
+	init_screen8(buf_back, binfo->scrnx, binfo->scrny,fat,memman);
 
 	/* sht_cons */
 	//key_win = open_console(shtctl, memtotal);
@@ -115,8 +115,9 @@ void HariMain(void)
 	fifo32_put(&keycmd, key_leds);
 
 	/* nihongo.fntÇÃì«Ç›çûÇ› */
-	fat = (int *) memman_alloc_4k(memman, 4 * 2880);
+	
 	file_readfat(fat, (unsigned char *) (ADR_DISKIMG + 0x000200));
+	
 
 	finfo = file_search("nihongo.fnt", (struct FILEINFO *) (ADR_DISKIMG + 0x002600), 224);
 	if (finfo != 0) {
@@ -326,7 +327,7 @@ void HariMain(void)
 									}
 								}
 							}
-							if(1<=mx && mx<8*12&&1<=my && my < 8)
+							if(76<=mx && mx<8*12+76&&86<=my && my < 86)
 							{
 								key_win = open_console(shtctl, memtotal);
 								sheet_slide(key_win, 32, 4);

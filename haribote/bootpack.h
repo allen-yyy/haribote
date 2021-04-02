@@ -119,7 +119,7 @@ int fifo32_status(struct FIFO32 *fifo);
 void init_palette(void);
 void set_palette(int start, int end, unsigned char *rgb);
 void boxfill8(unsigned char *vram, int xsize, unsigned char c, int x0, int y0, int x1, int y1);
-void init_screen8(char *vram, int x, int y);
+
 void putfont8(char *vram, int xsize, int x, int y, char c, char *font);
 void putfonts8_asc(char *vram, int xsize, int x, int y, char c, unsigned char *s);
 void init_mouse_cursor8(char *mouse, char bc);
@@ -216,6 +216,11 @@ unsigned int memman_alloc(struct MEMMAN *man, unsigned int size);
 int memman_free(struct MEMMAN *man, unsigned int addr, unsigned int size);
 unsigned int memman_alloc_4k(struct MEMMAN *man, unsigned int size);
 int memman_free_4k(struct MEMMAN *man, unsigned int addr, unsigned int size);
+
+void init_screen8(char *vram, int x, int y, int *fat,struct MEMMAN *memman);
+
+int info_BMP(struct DLL_STRPICENV *env, int *info, int size, char *fp);
+int decode0_BMP(struct DLL_STRPICENV *env, int size, char *fp, int b_type, char *buf, int skip);
 
 /* sheet.c */
 #define MAX_SHEETS		256

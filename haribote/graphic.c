@@ -2,6 +2,16 @@
 
 #include "bootpack.h"
 
+struct DLL_STRPICENV {	/* 64KB */
+	int work[64 * 1024 / 4];
+};
+
+struct RGB {
+	unsigned char b, g, r, t;
+};
+
+unsigned char rgb2pal(int r, int g, int b, int x, int y);
+
 void init_palette(void)
 {
 	static unsigned char table_rgb[16 * 3] = {
@@ -64,8 +74,10 @@ void boxfill8(unsigned char *vram, int xsize, unsigned char c, int x0, int y0, i
 	return;
 }
 
-void init_screen8(char *vram, int x, int y)
+void init_screen8(char *vram, int x, int y, int *fat,struct MEMMAN *memman)
 {
+	struct FILEINFO *finfo;
+	char *buf;
 	boxfill8(vram, x, COL8_008484,  0,     0,      x -  1, y - 29);
 	boxfill8(vram, x, COL8_C6C6C6,  0,     y - 28, x -  1, y - 28);
 	boxfill8(vram, x, COL8_FFFFFF,  0,     y - 27, x -  1, y - 27);
@@ -82,7 +94,17 @@ void init_screen8(char *vram, int x, int y)
 	boxfill8(vram, x, COL8_848484, x - 47, y - 23, x - 47, y -  4);
 	boxfill8(vram, x, COL8_FFFFFF, x - 47, y -  3, x -  4, y -  3);
 	boxfill8(vram, x, COL8_FFFFFF, x -  3, y - 24, x -  3, y -  3);
-	putfonts8_asc(vram, x, 1, 1, COL8_FFFFFF ,"console");
+	
+	//fat = (int *) memman_alloc_4k(memman, 4 * 2880);
+	//file_readfat(fat, (unsigned char *) (ADR_DISKIMG + 0x000200));
+	
+	//finfo = file_search("CONSOLE.bmp", (struct FILEINFO *) (ADR_DISKIMG + 0x002600), 224);
+	
+	///file_loadfile(finfo->clustno, finfo->size,buf, fat,(ADR_DISKIMG+0x3e00));
+	
+	//draw_icon(buf,finfo->size,vram);
+	
+	putfonts8_asc(vram, x, 1, 77, COL8_FFFFFF ,"console");
 	return;
 }
 
@@ -219,4 +241,87 @@ void putblock8_8(char *vram, int vxsize, int pxsize,
 		}
 	}
 	return;
+}
+
+void draw_icon(char *p2,int fsize,char *winbuf)
+{
+	struct DLL_STRPICENV env;
+	//char winbuf[1040 * 805];
+	char s[32], *p;
+	int win, i, j, xsize, info[8];
+	struct RGB picbuf[1024 * 768], *q;
+
+	/* コマンドライン解析 */
+	//api_cmdline(s, 30);
+	//for (p = s; *p > ' '; p++) { }	/* スペースが来るまで読み飛ばす */
+	//for (; *p == ' '; p++) { }	/* スペースを読み飛ばす */
+
+	/* ファイル読み込み */
+	//i = api_fopen(p); if (i == 0) { error("file not found.\n"); }
+	//fsize = api_fsize(i, 0);
+	//if (fsize > 512 * 1024) {
+	//	error("file too large.\n");
+	//}
+	//api_fread(filebuf, fsize, i);
+	//api_fclose(i);
+
+	/* ファイルタイプチェック */
+	if (info_BMP(&env, info, fsize, p2) == 0) {
+		/* BMPではなかった */
+		//if (info_JPEG(&env, info, fsize, filebuf) == 0) {
+			/* JPEGでもなかった */
+		//	api_putstr0("file type unknown.\n");
+		//	api_end();
+		//}
+	}
+	/* どちらかのinfo関数が成功すると、以下の情報がinfoに入っている */
+	/*	info[0] : ファイルタイプ (1:BMP, 2:JPEG) */
+	/*	info[1] : カラー情報 */
+	/*	info[2] : xsize */
+	/*	info[3] : ysize */
+
+	//if (info[2] > 1024 || info[3] > 768) {
+	//	error("picture too large.\n");
+	//}
+
+	/* ウィンドウの準備 */
+	////xsize = info[2] + 16;
+	//if (xsize < 136) {
+	//	xsize = 136;
+	//}
+	//win = api_openwin(winbuf, xsize, info[3] + 37, -1, "gview");
+
+	/* ファイル内容を画像データに変換 */
+	//if (info[0] == 1) {
+		////i = decode0_BMP (&env, fsize, p2, 4, (char *) picbuf, 0);
+	//} else {
+		//i = decode0_JPEG(&env, fsize, fp, 4, (char *) picbuf, 0);
+	//}
+	/* b_type = 4 は、 struct RGB 形式を意味する */
+	/* skipは0にしておけばよい */
+	///if (i != 0) {
+		//error("decode error.\n");
+	///}
+	/**for (i = 0; i < info[3]; i++) {
+		///p = p2 + (i + 29) * xsize + (xsize - info[2]) / 2;
+		q = picbuf + i * info[2];
+		for (j = 0; j < info[2]; j++) {
+			p[j] = rgb2pal(q[j].r, q[j].g, q[j].b, j, i);
+		}
+	}**/
+}
+unsigned char rgb2pal(int r, int g, int b, int x, int y)
+{
+	static int table[4] = { 3, 1, 0, 2 };
+	int i;
+	x &= 1; /* 偶数か奇数か */
+	y &= 1;
+	i = table[x + y * 2];	/* 中間色を作るための定数 */
+	r = (r * 21) / 256;	/* これで 0～20 になる */
+	g = (g * 21) / 256;
+	b = (b * 21) / 256;
+	r = (r + i) / 4;	/* これで 0～5 になる */
+	g = (g + i) / 4;
+	b = (b + i) / 4;
+	return 16 + r + g * 6 + b * 36;
 }

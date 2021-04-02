@@ -29,6 +29,7 @@ haribote.img : haribote/ipl09.bin haribote/haribote.sys Makefile \
 		copy from:haribote/haribote.sys to:@: \
 		copy from:ipl09.nas to:@: \
 		copy from:make.bat to:@: \
+		copy from:CONSOLE.bmp to:@: \
 		copy from:a/a.hrb to:@: \
 		copy from:hello3/hello3.hrb to:@: \
 		copy from:hello4/hello4.hrb to:@: \
