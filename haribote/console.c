@@ -303,7 +303,20 @@ void cons_runcmd(char *cmdline, struct CONSOLE *cons, int *fat, int memtotal)
 	} else if (strcmp(cmdline, "time") == 0){
 		printtime(cons);
 	} else if (strcmp(cmdline, "shutdown") == 0){
-		_START();
+		io_cli();
+		regs16_t *reg;
+		reg->ax = 0x5301;
+		reg->bx = 0;
+		int32(0x15,reg);
+		//regs16_t *reg;
+		reg->ax = 0x530e;
+		reg->cx = 102;
+		int32(0x15,reg);
+		reg->ax = 0x5307;
+		reg->bx = 1;
+		reg->cx = 3;
+		int32(0x15,reg);
+		
 	} else if (strcmp(cmdline, "version") == 0){
 		ver(cons);
 	} else if (strcmp(cmdline, "hdinfo") == 0){

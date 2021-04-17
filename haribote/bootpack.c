@@ -115,7 +115,7 @@ void HariMain(void)
 	fifo32_put(&keycmd, key_leds);
 
 	/* nihongo.fnt‚Ì“Ç‚İ‚İ */
-	
+	fat = (int *) memman_alloc_4k(memman, 4 * 2880);
 	file_readfat(fat, (unsigned char *) (ADR_DISKIMG + 0x000200));
 	
 

@@ -102,7 +102,13 @@ void inws(char *b,long len,short port);
 
 
 /* realcall.nas */
-void _START(void);
+typedef struct __attribute__ ((packed)) {
+	unsigned short di, si, bp, sp, bx, dx, cx, ax;
+	unsigned short gs, fs, es, ds, eflags;
+} regs16_t;
+void int32(unsigned char intnum, regs16_t *regs);
+
+
 
 /* fifo.c */
 struct FIFO32 {
