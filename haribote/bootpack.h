@@ -303,6 +303,7 @@ struct TASK {
 	int pid;
 	int r_flags;
 	struct MESSAGE *message_r;
+	//struct blocks_t *waits;
 };
 struct TASKLEVEL {
 	int running; /* 動作しているタスクの数 */

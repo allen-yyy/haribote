@@ -3,23 +3,23 @@
      3 00000000                                 [OPTIMIZE 1]
      4 00000000                                 [OPTION 1]
      5 00000000                                 [BITS 32]
-     6 00000000                                 	EXTERN	_FSEntry
-     7 00000000                                 	EXTERN	_HDEntry
+     6 00000000                                 	EXTERN	_HDEntry
+     7 00000000                                 	EXTERN	_FSEntry
      8 00000000                                 	EXTERN	_strcmp
      9 00000000                                 [FILE "driver.c"]
     10 00000000                                 	GLOBAL	_dDevs
     11                                          [SECTION .data]
     12 00000000                                 LC0:
-    13 00000000 46 53 00                        	DB	"FS",0x00
-    14 00000003                                 LC1:
-    15 00000003 49 64 65 20 48 44 00            	DB	"Ide HD",0x00
+    13 00000000 49 64 65 20 48 44 00            	DB	"Ide HD",0x00
+    14 00000007                                 LC1:
+    15 00000007 46 53 00                        	DB	"FS",0x00
     16 0000000A 00 00                           	ALIGNB	4
     17 0000000C                                 _dDevs:
     18 0000000C [00000000]                      	DD	LC0
-    19 00000010 [00000000]                      	DD	_FSEntry
+    19 00000010 [00000000]                      	DD	_HDEntry
     20 00000014 00 00 00 00                     	RESB	4
-    21 00000018 [00000003]                      	DD	LC1
-    22 0000001C [00000000]                      	DD	_HDEntry
+    21 00000018 [00000007]                      	DD	LC1
+    22 0000001C [00000000]                      	DD	_FSEntry
     23 00000020 00 00 00 00                     	RESB	4
     24 00000024                                 	GLOBAL	_etable
     25 00000024                                 LC2:
