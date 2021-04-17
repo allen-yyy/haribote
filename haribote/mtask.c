@@ -176,6 +176,7 @@ struct TASK *task_alloc(void)
             for (i = 3; i < 108 / 4; i++) {
                 task->fpu[i] = 0;
             }                                              /* ¥³¥³¤Þ¤Ç */
+			//task->waits->next = 0;
 			return task;
 		}
 	}
@@ -274,19 +275,19 @@ void task_block(struct TASK *task)
 	struct blocks_t *block = *((int *) 0x0f0f);
 	if (task->flags == 2) {
 		
-		//now_task = task_now();
-		//task_remove(task);
+		now_task = task_now();
+		task_remove(task);
 		task->flags=3;
 		pid->pido[task->pid].task->flags=task->flags;
-		//block->blocko[block->next].task = task;
-		//block->blocko[block->next].pid = task->pid;
-		//block->next++;
-		//if (task == now_task) {
-		//	
-			//task_switchsub();
-			//now_task = task_now();
-			//farjmp(0, now_task->sel);
-		//}
+		block->blocko[block->next].task = task;
+		block->blocko[block->next].pid = task->pid;
+		block->next++;
+		if (task == now_task) {
+			
+			task_switchsub();
+			now_task = task_now();
+			farjmp(0, now_task->sel);
+		}
 		 
 	}
 	return;
@@ -302,6 +303,9 @@ void task_unblock(struct TASK *task)
 	
 	//now_task = task_now();
 	task_run(task,task->level,task->priority);
+	struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
+	boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 - 1, 15);
+	putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, "mtask message ublock run1");
 	//task->flags=1;
 	pid->pido[task->pid].task->flags=task->flags;
 		//block->blocko[block->next].task = task; 
@@ -309,19 +313,21 @@ void task_unblock(struct TASK *task)
 		//	
 		//	
 		//}
-	/*for (i = 0; i < block->next; i++) {
+	for (i = 0; i < block->next; i++) {
 		if (block->blocko[i].task == task) {
-			/* ‚±‚±‚É‚¢‚½ 
+			/* ‚±‚±‚É‚¢‚½ */
 			block->blocko[i].task = 0;
 			block->blocko[i].pid = 0;
 			break;
 		}
 	}
-	for (i=0; i < block->next; i++) {
+	//struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
+	boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 - 1, 15);
+	putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, "mtask message ublock run2");
+	for (; i < block->next; i++) {
 		block->blocko[i] = block->blocko[i + 1];
 	}
 	block->next--;
-	//}*/
 	return;
 }
 
@@ -330,35 +336,38 @@ int message_receive(int to_receive,struct MESSAGE *message)
 	struct TASK *task = task_now();
 	//struct TASK *to_task;
 	task->r_flags = 1;
-	task_block(task);
-	for(;;)
-	{
+	int i=0;
+	
+	next:
 		if(task->message_r!=0)
 		{
 			if(to_receive==ANY)
 			{
-				task_unblock(task);
-				message=task->message_r;
+				//task_unblock(task);
+				task->r_flags = 0;
+				message = task->message_r;
 				return 0;
 			}else{
 				if(task->message_r->src==to_receive)
 				{
-					task_unblock(task);
+					//task_unblock(task);
+					task->r_flags = 0;
 					message = task->message_r;
 					return 0;
 				}else{
-					task->message_r = NULL;
-					task_switch(); 
-				}
+					task_block(task);
+					goto next;
+				} 
 			}
 		}else{
-			//task_switchsub();
-			//now_task = task_now();
-			//farjmp(0, now_task->sel);
-			task_switch(); 
-			continue; 
+			
+			//FIXMEOK:bug:Can not run
+			a:
+			task_block(task_now());
+			goto next;
+			//continue; 
 		} 
-	} 
+	
 	
 	return -1;
 }
@@ -370,7 +379,15 @@ int message_send(int to_send,struct MESSAGE *message)
 	{
 		return -1;
 	}
+	
 	message->src = task2pid(task_now());
 	task->message_r = message;
+	struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
+	//boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 - 1, 15);
+	//putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, "mtask message send run1");
+	if(task->r_flags==1) task_unblock(task);
+	//struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
+	//boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 8, 0, 32 * 8 - 1, 15);
+	//putfonts8_asc(binfo->vram, binfo->scrnx, 8, 0, COL8_FFFFFF, "mtask message send run2");
 	return 0;
 }

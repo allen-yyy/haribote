@@ -22,8 +22,8 @@ struct exdrivertable {
 };
 
 struct dDevEntry dDevs[DR_NUM] = {
-	{"FS",FSEntry},
-	{"Ide HD",HDEntry}
+	{"Ide HD",HDEntry},
+	{"FS",FSEntry}
 };
 
 struct exdrivertable etable[DR_ENUM]= {

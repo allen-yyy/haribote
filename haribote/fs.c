@@ -13,6 +13,7 @@ void FS_task(struct MEMMAN *memman)
 	struct Dobject *mydobj = GetMyObj("FS");
 	struct Dobject *hddobj = GetMyObj("Ide HD");
 	int i=0;
+	char s[20];
 	struct MESSAGE *message;
 	message->type = HD_OPEN;
 	message_send(task2pid(hddobj->task),message);
@@ -22,10 +23,10 @@ void FS_task(struct MEMMAN *memman)
 		i++;
 		*((int *) 0x0ef0) = i;
 		io_hlt();
-		//struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
-		//boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 - 1, 15);
-		//sprintf(s,"taskrun %d",i);
-		//putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, "113234546");
+		struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
+		boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 - 1, 15);
+		sprintf(s,"taskrun %d",i);
+		putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, s);
 	 } 
 	return;
 } 
