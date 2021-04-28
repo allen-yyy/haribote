@@ -383,9 +383,9 @@ int message_send(int to_send,struct MESSAGE *message)
 	message->src = task2pid(task_now());
 	task->message_r = message;
 	struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
-	//boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 - 1, 15);
-	//putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, "mtask message send run1");
-	if(task->r_flags==1) task_unblock(task);
+	boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 - 1, 15);
+	putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, "mtask message send run1");
+	if(task->flags==3) task_unblock(task);
 	//struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
 	//boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 8, 0, 32 * 8 - 1, 15);
 	//putfonts8_asc(binfo->vram, binfo->scrnx, 8, 0, COL8_FFFFFF, "mtask message send run2");

@@ -20,7 +20,7 @@ IMGTOL   = $(TOOLPATH)imgtol.com
 GOLIB    = $(TOOLPATH)golib00.exe 
 COPY     = copy
 DEL      = del
-NASM	 = E:\Program Files\NASM\nasm.exe
+#NASM	 = E:\Program Files\NASM\nasm.exe
 
 # デフォルト動作
 
@@ -53,8 +53,8 @@ bootpack.hrb : bootpack.bim Makefile
 haribote.sys : asmhead.bin bootpack.hrb Makefile
 	copy /B asmhead.bin+bootpack.hrb haribote.sys
 
-realcall.obj : realcall.nas Makefile
-	$(NASM) -o D:\BaiduNetdiskDownload\30ﾌ�ﾗﾔﾖﾆｲﾙﾗｵﾍｳ\ｹ簀ﾌ\tolset\haribote\haribote\realcall.obj -f coff D:\BaiduNetdiskDownload\30ﾌ�ﾗﾔﾖﾆｲﾙﾗｵﾍｳ\ｹ簀ﾌ\tolset\haribote\haribote\realcall.nas
+realcall.obj : #realcall.nas Makefile
+	#$(NASM) -o D:\BaiduNetdiskDownload\30ﾌ・ﾔﾖﾆｲﾙﾗｵﾍｳ\ｹ簀ﾌ\tolset\haribote\haribote\realcall.obj -f coff D:\BaiduNetdiskDownload\30ﾌ・ﾔﾖﾆｲﾙﾗｵﾍｳ\ｹ簀ﾌ\tolset\haribote\haribote\realcall.nas
 
 # 一般規則
 

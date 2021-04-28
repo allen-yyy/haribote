@@ -243,9 +243,9 @@ BOOL Identify(int nHdNum,BYTE* pBuffer)
 	//Issue the IDENTIFY DEVICE command.
 	WaitForBsy(IDE_CTRL0_PORT_STATUS,0);  //Wait for controller to free.
 	WaitForRdy(IDE_CTRL0_PORT_STATUS,0);
-	io_out8(DeviceReg,IDE_CTRL0_PORT_HEADER);
+	io_out8(IDE_CTRL0_PORT_HEADER,DeviceReg);
 	//WaitForRdy(IDE_CTRL0_PORT_STATUS,0);
-	io_out8(IDE_CMD_IDENTIFY,IDE_CTRL0_PORT_CMD);
+	io_out8(IDE_CTRL0_PORT_CMD,IDE_CMD_IDENTIFY);
 	//Wait for command completion.
 	//WaitForBsy(IDE_CTRL0_PORT_STATUS,0);
 	//WaitForRdy(IDE_CTRL0_PORT_STATUS,0);  //-- DEBUG --
