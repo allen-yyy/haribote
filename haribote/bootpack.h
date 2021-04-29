@@ -429,6 +429,7 @@ typedef BOOL (*DEntry)(Dobject);
 
 /* hd.c */
 #define HD_OPEN 0x1
+#define HD_IDENTIFY 0x2
 void inthandler2e(int *esp);
 BOOL Identify(int nHdNum,BYTE* pBuffer);
 static BOOL CmdSucc(WORD wPort);
@@ -446,11 +447,17 @@ struct Dobject{
 	struct TASK *task;
 	void (*unload)(struct Dobject *this); 
 };
+struct dDevEntry {
+	char *name;
+	DEntry entry;
+	struct Dobject *Dobj;
+};
 BOOL LDevs(struct MEMMAN *memman);
 struct Dobject *GetMyObj(char *name);
 //typedef BOOL (*DEntry) (Dobject);
 
 /* fs.c */
+#define FS_IDENTIFY 0x1
 BOOL FSEntry(struct Dobject *Dobj); 
 
 /* code.c */

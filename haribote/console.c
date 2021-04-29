@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <string.h>
 
+extern struct dDevEntry dDevs[DR_NUM];
+
 void readrtc(unsigned char *t)
 {
     char err;
@@ -36,7 +38,7 @@ void printtime(struct CONSOLE *cons)
     cons_putstr0(cons,s);
 }
 
-void print_identify_info(short* hdinfo)
+void print_identify_info(short* hdinfo,struct CONSOLE *cons)
 {
 	int i, k;
 	char s[64];
@@ -57,18 +59,20 @@ void print_identify_info(short* hdinfo)
 		}
 		s[i*2] = 0;
 		sprintf(b,"%s: %s\n", iinfo[k].desc, s);
+		cons_putstr0(cons,s);
 	}
 
 	int capabilities = hdinfo[49];
 	sprintf(b,"LBA supported: %s\n",
 	       (capabilities & 0x0200) ? "Yes" : "No");
-
+	cons_putstr0(cons,s);
 	int cmd_set_supported = hdinfo[83];
 	sprintf(b,"LBA48 supported: %s\n",
 	       (cmd_set_supported & 0x0400) ? "Yes" : "No");
-
+	cons_putstr0(cons,s);
 	int sectors = ((int)hdinfo[61] << 16) + hdinfo[60];
 	sprintf(b,"HD size: %dMB\n", sectors * 512 / 1000000);
+	cons_putstr0(cons,s);
 }
 
 struct TIME time2TIME()
@@ -82,7 +86,13 @@ struct TIME time2TIME()
 
 void hdinfo(struct CONSOLE *cons)
 {
-	
+	struct MESSAGE *message;
+	char *Buff[512];
+	message->params = Buff;
+	message->type = 1;
+	message_send(task2pid(dDevs[1].Dobj->task),message);
+	message_receive(task2pid(dDevs[1].Dobj->task),message);
+	print_identify_info((short*)Buff,cons);
 	return;
 } 
 
@@ -303,19 +313,7 @@ void cons_runcmd(char *cmdline, struct CONSOLE *cons, int *fat, int memtotal)
 	} else if (strcmp(cmdline, "time") == 0){
 		printtime(cons);
 	} else if (strcmp(cmdline, "shutdown") == 0){
-		io_cli();
-		regs16_t *reg;
-		reg->ax = 0x5301;
-		reg->bx = 0;
-		int32(0x15,reg);
-		//regs16_t *reg;
-		reg->ax = 0x530e;
-		reg->cx = 102;
-		int32(0x15,reg);
-		reg->ax = 0x5307;
-		reg->bx = 1;
-		reg->cx = 3;
-		int32(0x15,reg);
+		
 		
 	} else if (strcmp(cmdline, "version") == 0){
 		ver(cons);

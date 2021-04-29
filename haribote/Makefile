@@ -1,6 +1,6 @@
 OBJS_BOOTPACK = bootpack.obj naskfunc.obj hankaku.obj graphic.obj dsctbl.obj \
 		int.obj fifo.obj keyboard.obj mouse.obj memory.obj sheet.obj timer.obj \
-		mtask.obj window.obj console.obj file.obj tek.obj realcall.obj hd.obj fs.obj driver.obj \
+		mtask.obj window.obj console.obj file.obj tek.obj hd.obj fs.obj driver.obj \
 		code.obj bmp.obj alloca.obj
 
 TOOLPATH = ../../z_tools/

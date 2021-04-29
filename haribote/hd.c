@@ -316,8 +316,7 @@ BOOL HDEntry(struct Dobject *Dobj)
 	UCHAR Buff[512];
 	//IdeInitialize();
 	Identify(0,(BYTE*)&Buff[0]);
-	dwLba = ((DWORD)Buff[123] << 24) + ((DWORD)Buff[122] << 16) 
-			+ ((DWORD)Buff[121] << 8) + (DWORD)Buff[120];
+	UINT sectors = *(UINT*)&Buff[60*2];
 			
 	hdtask = task_alloc();
 	hdtask->tss.esp = memman_alloc_4k(Dobj->memman, 64 * 1024) + 64 * 1024;
@@ -333,11 +332,11 @@ BOOL HDEntry(struct Dobject *Dobj)
 	*((int *) 0x0f01) = hdtask;
 	Dobj->task = hdtask;
 	//---DEBUG--- 
-	/*io_cli();
+	//io_cli();
 	struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
-		boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 - 1, 15);
-		//sprintf(s,"taskrun %d",i);
-		putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, "looooo");
-	io_sti();*/
+	boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 8*8, 32 * 8 - 1, 15);
+	sprintf(s,"HD SIZE %dMiB",sectors*512/1024/1024);
+	putfonts8_asc(binfo->vram, binfo->scrnx, 0, 8*8, COL8_FFFFFF, s);
+	//io_sti();
 	return TRUE;
 } 

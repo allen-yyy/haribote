@@ -9,11 +9,7 @@
 #include "bootpack.h"
 
 
-struct dDevEntry {
-	char *name;
-	DEntry entry;
-	struct Dobject *Dobj;
-};
+
 struct exdrivertable {
 	char *name;
 	char *filename;

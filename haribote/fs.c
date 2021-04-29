@@ -14,20 +14,23 @@ void FS_task(struct MEMMAN *memman)
 	struct Dobject *hddobj = GetMyObj("Ide HD");
 	int i=0;
 	char s[20];
-	struct MESSAGE *message;
+	struct MESSAGE *message,*umess;
 	message->type = HD_OPEN;
 	message_send(task2pid(hddobj->task),message);
 	message_receive(ANY,message);
 	for(;;)
 	{
-		i++;
-		*((int *) 0x0ef0) = i;
-		io_hlt();
-		struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
-		boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 - 1, 15);
-		sprintf(s,"taskrun %d",i);
-		putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, s);
-	 } 
+		message_receive(ANY,umess);
+		switch(umess->type)
+		{
+			case FS_IDENTIFY:
+				message->type = HD_IDENTIFY;
+				message->params = umess->params;
+				message_send(task2pid(hddobj->task),message);
+				message_receive(task2pid(hddobj->task),message);
+				message_send(umess->src,umess);
+		} 
+	} 
 	return;
 } 
 
