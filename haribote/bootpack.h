@@ -457,7 +457,7 @@ struct Dobject *GetMyObj(char *name);
 //typedef BOOL (*DEntry) (Dobject);
 
 /* fs.c */
-#define FS_IDENTIFY 0x1
+#define FS_HDSIZE 0x1
 BOOL FSEntry(struct Dobject *Dobj); 
 
 /* code.c */

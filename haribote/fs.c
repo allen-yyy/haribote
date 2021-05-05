@@ -18,16 +18,15 @@ void FS_task(struct MEMMAN *memman)
 	message->type = HD_OPEN;
 	message_send(task2pid(hddobj->task),message);
 	message_receive(ANY,message);
+	int *p = message->Param;
+	UINT sectors = *(UINT*)&p[60*2];
 	for(;;)
 	{
 		message_receive(ANY,umess);
 		switch(umess->type)
 		{
-			case FS_IDENTIFY:
-				message->type = HD_IDENTIFY;
-				message->params = umess->params;
-				message_send(task2pid(hddobj->task),message);
-				message_receive(task2pid(hddobj->task),message);
+			case FS_HDSIZE:
+				umess->Param = sectors * 512/1024/1024/1024;
 				message_send(umess->src,umess);
 		} 
 	} 
@@ -46,7 +45,7 @@ BOOL FSEntry(struct Dobject *Dobj)
 	task->tss.ds = 1 * 8;
 	task->tss.fs = 1 * 8;
 	task->tss.gs = 1 * 8;
-	task_run(task, 4, 1);
+	task_run(task, 3, 2);
 	Dobj->task = task; 
 	/*struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
 		boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 - 1, 15);

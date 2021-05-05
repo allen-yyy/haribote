@@ -13,7 +13,7 @@ struct TASK *pid2task(int pid)
 	return task;
 }
 
-void init_pid()
+void init_pid(struct MEMMAN *memman)
 {
 	int i;
 	struct pid_t *pid;
@@ -107,7 +107,7 @@ struct TASK *task_init(struct MEMMAN *memman)
 	struct TASK *task, *idle;
 	struct SEGMENT_DESCRIPTOR *gdt = (struct SEGMENT_DESCRIPTOR *) ADR_GDT;
 
-	init_pid();
+	init_pid(memman);
 
 	taskctl = (struct TASKCTL *) memman_alloc_4k(memman, sizeof (struct TASKCTL));
 	for (i = 0; i < MAX_TASKS; i++) {
@@ -151,6 +151,7 @@ struct TASK *task_init(struct MEMMAN *memman)
 struct TASK *task_alloc(void)
 {
 	int i;
+	struct pid_t *pid = *((int *) 0x0f0a);
 	struct TASK *task;
 	for (i = 0; i < MAX_TASKS; i++) {
 		if (taskctl->tasks0[i].flags == 0) {
@@ -175,8 +176,10 @@ struct TASK *task_alloc(void)
             task->fpu[2] = 0xffff; /* TW(tag word)     */
             for (i = 3; i < 108 / 4; i++) {
                 task->fpu[i] = 0;
-            }                                              /* ･ｳ･ｳ､ﾞ､ﾇ */
-			//task->waits->next = 0;
+            }  
+			pid->pido[pid->next].task = task;
+			pid->next++;
+			task->pid=pid->next-1;                                            /* ･ｳ･ｳ､ﾞ､ﾇ */
 			return task;
 		}
 	}
@@ -185,27 +188,16 @@ struct TASK *task_alloc(void)
 
 void task_run(struct TASK *task, int level, int priority)
 {
-	//int i;
-	struct pid_t *pid = *((int *) 0x0f0a);
 	if (level < 0) {
 		level = task->level; /* レベルを変更しない */
 	}
 	if (priority > 0) {
 		task->priority = priority;
 	}
-	if(task->flags == 1){
-		pid->pido[pid->next].task = task;
-		pid->next++;
-		task->pid=pid->next-1;
-	}
 	if (task->flags == 2 && task->level != level) { /* 動作中のレベルの変更 */
-		
 		task_remove(task); /* これを実行するとflagsは1になるので下のifも実行される */
 	}
 	if (task->flags != 2||task->flags == 3) {
-		pid->pido[pid->next].task = task;
-		pid->next++;
-		task->pid=pid->next-1;
 		/* スリープから起こされる場合 */
 		task->level = level;
 		task_add(task);
@@ -299,20 +291,8 @@ void task_unblock(struct TASK *task)
 	struct TASK *now_task;
 	struct blocks_t *block = *((int *) 0x0f0f);
 	int i; 
-	//if (task->flags == 2) {
-	
-	//now_task = task_now();
 	task_run(task,task->level,task->priority);
-	struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
-	boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 - 1, 15);
-	putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, "mtask message ublock run1");
-	//task->flags=1;
 	pid->pido[task->pid].task->flags=task->flags;
-		//block->blocko[block->next].task = task; 
-		//if (task == now_task) {
-		//	
-		//	
-		//}
 	for (i = 0; i < block->next; i++) {
 		if (block->blocko[i].task == task) {
 			/* ここにいた */
@@ -321,9 +301,6 @@ void task_unblock(struct TASK *task)
 			break;
 		}
 	}
-	//struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
-	boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 - 1, 15);
-	putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, "mtask message ublock run2");
 	for (; i < block->next; i++) {
 		block->blocko[i] = block->blocko[i + 1];
 	}
@@ -334,23 +311,24 @@ void task_unblock(struct TASK *task)
 int message_receive(int to_receive,struct MESSAGE *message)
 {
 	struct TASK *task = task_now();
-	//struct TASK *to_task;
+	char s[30];
 	task->r_flags = 1;
 	int i=0;
-	
 	next:
 		if(task->message_r!=0)
 		{
 			if(to_receive==ANY)
 			{
-				//task_unblock(task);
+				struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
+				boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 - 1, 15);
+				putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, "mtask message recv run2");
 				task->r_flags = 0;
 				message = task->message_r;
+				task->message_r = 0;
 				return 0;
 			}else{
 				if(task->message_r->src==to_receive)
 				{
-					//task_unblock(task);
 					task->r_flags = 0;
 					message = task->message_r;
 					return 0;
@@ -363,9 +341,8 @@ int message_receive(int to_receive,struct MESSAGE *message)
 			
 			//FIXMEOK:bug:Can not run
 			a:
-			task_block(task_now());
+			task_block(task);
 			goto next;
-			//continue; 
 		} 
 	
 	
@@ -381,13 +358,7 @@ int message_send(int to_send,struct MESSAGE *message)
 	}
 	
 	message->src = task2pid(task_now());
-	task->message_r = message;
-	struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
-	boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 - 1, 15);
-	putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, "mtask message send run1");
-	if(task->flags==3) task_unblock(task);
-	//struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
-	//boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 8, 0, 32 * 8 - 1, 15);
-	//putfonts8_asc(binfo->vram, binfo->scrnx, 8, 0, COL8_FFFFFF, "mtask message send run2");
+	memcpy(task->message_r,message,sizeof(struct MESSAGE));
+	if(task->r_flags) task_unblock(task);
 	return 0;
 }

@@ -86,13 +86,12 @@ struct TIME time2TIME()
 
 void hdinfo(struct CONSOLE *cons)
 {
-	struct MESSAGE *message;
-	char *Buff[512];
-	message->params = Buff;
-	message->type = 1;
-	message_send(task2pid(dDevs[1].Dobj->task),message);
-	message_receive(task2pid(dDevs[1].Dobj->task),message);
-	print_identify_info((short*)Buff,cons);
+	struct MESSAGE message;
+	char s[30];
+	message.type = 1;
+	message_send(task2pid(dDevs[1].Dobj->task),&message);
+	sprintf(s,"%dMB\n\n",*message.Param);
+	cons_putstr0(cons,s);
 	return;
 } 
 
