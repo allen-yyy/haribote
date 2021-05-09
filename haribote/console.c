@@ -90,7 +90,8 @@ void hdinfo(struct CONSOLE *cons)
 	char s[30];
 	message.type = 1;
 	message_send(task2pid(dDevs[1].Dobj->task),&message);
-	sprintf(s,"%dMB\n\n",*message.Param);
+	message_receive(ANY,&message);
+	sprintf(s,"%dMB\n\n",*message.params);
 	cons_putstr0(cons,s);
 	return;
 } 

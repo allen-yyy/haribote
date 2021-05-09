@@ -275,16 +275,13 @@ void task_hd()
 		//putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, s);
 		 
 		message_receive(ANY,message);
-		//boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 - 1, 15);
-		//sprintf(s,"taskrun %d",2);
-		//putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, s);
+		boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 - 1, 15);
+		sprintf(s,"taskrun %d",2);
+		putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, s);
 		switch(message->type)
 		{
 			case HD_OPEN:
 				Identify(0,message->params);
-				boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 - 1, 15);
-				sprintf(s,"pid is %d",message->src);
-				putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, s);
 				message_send(message->src,message);
 				break;
 			case HD_IDENTIFY:

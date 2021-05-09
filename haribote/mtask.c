@@ -319,9 +319,6 @@ int message_receive(int to_receive,struct MESSAGE *message)
 		{
 			if(to_receive==ANY)
 			{
-				struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
-				boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 - 1, 15);
-				putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, "mtask message recv run2");
 				task->r_flags = 0;
 				message = task->message_r;
 				task->message_r = 0;
