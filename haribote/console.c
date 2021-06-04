@@ -86,13 +86,14 @@ struct TIME time2TIME()
 
 void hdinfo(struct CONSOLE *cons)
 {
-	struct MESSAGE *message;
-	char *Buff[512];
-	message->params = Buff;
-	message->type = 1;
-	message_send(task2pid(dDevs[1].Dobj->task),message);
-	message_receive(task2pid(dDevs[1].Dobj->task),message);
-	print_identify_info((short*)Buff,cons);
+	struct MESSAGE message;
+	char s[50];
+	message.type = 1;
+	message_send(task2pid(dDevs[1].Dobj->task),&message);
+	message_receive(task2pid(dDevs[1].Dobj->task),&message);
+	//print_identify_info((short*)Buff,cons);
+	sprintf(s,"%dMB\n\n",*(message.params)); 
+	cons_putstr0(cons,s);
 	return;
 } 
 
@@ -313,12 +314,13 @@ void cons_runcmd(char *cmdline, struct CONSOLE *cons, int *fat, int memtotal)
 	} else if (strcmp(cmdline, "time") == 0){
 		printtime(cons);
 	} else if (strcmp(cmdline, "shutdown") == 0){
-		
-		
+		acpiPowerOff(); 
 	} else if (strcmp(cmdline, "version") == 0){
 		ver(cons);
 	} else if (strcmp(cmdline, "hdinfo") == 0){
 		hdinfo(cons);
+	} else if (strcmp(cmdline, "ps") == 0){
+		cmd_ps(cons);
 	} else if (cmdline[0] != 0) {
 			if (cmd_app(cons, fat, cmdline) == 0) {
 				/* コマンドではなく、アプリでもなく、さらに空行でもない */
@@ -327,6 +329,20 @@ void cons_runcmd(char *cmdline, struct CONSOLE *cons, int *fat, int memtotal)
 		}
 		
 	
+	return;
+}
+
+void cmd_ps(struct CONSOLE *cons)
+{
+	struct pid_t *pids = *((int *) 0x0f0a);
+	int i;
+	char s[30];
+	cons_putstr0(cons, "PID			NAME\n\n");
+	for(i=0;i<pids->next;i++)
+	{
+		sprintf(s,"%d			%s\n\n",pids->pido[i].pid,pids->pido[i].task->taskname);
+		cons_putstr0(cons, s);
+	}
 	return;
 }
 

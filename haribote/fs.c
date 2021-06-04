@@ -14,20 +14,21 @@ void FS_task(struct MEMMAN *memman)
 	struct Dobject *hddobj = GetMyObj("Ide HD");
 	int i=0;
 	char s[20];
+	char *Buff; 
 	struct MESSAGE *message,*umess;
 	message->type = HD_OPEN;
 	message_send(task2pid(hddobj->task),message);
 	message_receive(ANY,message);
+	Buff = message->params;
+	UINT sectors = *(UINT*)&Buff[60*2];
+	UINT size = sectors *512/1024/1024;
 	for(;;)
 	{
 		message_receive(ANY,umess);
 		switch(umess->type)
 		{
-			case FS_IDENTIFY:
-				message->type = HD_IDENTIFY;
-				message->params = umess->params;
-				message_send(task2pid(hddobj->task),message);
-				message_receive(task2pid(hddobj->task),message);
+			case FS_HDSIZE:
+				umess->Param = &size;
 				message_send(umess->src,umess);
 		} 
 	} 

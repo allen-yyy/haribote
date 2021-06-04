@@ -104,6 +104,7 @@ void HariMain(void)
 	//keywin_on(key_win);
 
 	LDevs(memman);
+	initAcpi();
 
 	time = timer_alloc();
 	timer_init(time,&fifo,2280);

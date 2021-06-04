@@ -126,12 +126,13 @@ struct TASK *task_init(struct MEMMAN *memman)
 	task->flags = 2;	/* 動作中マーク */
 	task->priority = 2; /* 0.02秒 */
 	task->level = 0;	/* 最高レベル */
+	task->taskname = (char *)memman_alloc_4k(memman, 40);
+	task->taskname[0] = 't';task->taskname[1] = 'a';task->taskname[2] = 's';task->taskname[3] = 'k';task->taskname[4] = '_';task->taskname[5] = 'a';
 	task_add(task);
 	task_switchsub();	/* レベル設定 */
 	load_tr(task->sel);
 	task_timer = timer_alloc();
 	timer_settime(task_timer, task->priority);
-
 	idle = task_alloc();
 	idle->tss.esp = memman_alloc_4k(memman, 64 * 1024) + 64 * 1024;
 	idle->tss.eip = (int) &task_idle;
@@ -141,6 +142,8 @@ struct TASK *task_init(struct MEMMAN *memman)
 	idle->tss.ds = 1 * 8;
 	idle->tss.fs = 1 * 8;
 	idle->tss.gs = 1 * 8;
+	idle->taskname = (char *)memman_alloc_4k(memman, 40);
+	idle->taskname[0] = 'i';idle->taskname[1] = 'd';idle->taskname[2] = 'l';idle->taskname[3] = 'e';
 	task_run(idle, MAX_TASKLEVELS - 1, 1);
 	
 	taskctl->task_fpu = 0; 
@@ -303,9 +306,6 @@ void task_unblock(struct TASK *task)
 	
 	//now_task = task_now();
 	task_run(task,task->level,task->priority);
-	struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
-	boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 - 1, 15);
-	putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, "mtask message ublock run1");
 	//task->flags=1;
 	pid->pido[task->pid].task->flags=task->flags;
 		//block->blocko[block->next].task = task; 
@@ -322,8 +322,6 @@ void task_unblock(struct TASK *task)
 		}
 	}
 	//struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
-	boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 - 1, 15);
-	putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, "mtask message ublock run2");
 	for (; i < block->next; i++) {
 		block->blocko[i] = block->blocko[i + 1];
 	}
@@ -343,9 +341,13 @@ int message_receive(int to_receive,struct MESSAGE *message)
 		{
 			if(to_receive==ANY)
 			{
+				struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
+				boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 8, 0, 32 * 8 - 1, 15);
+				putfonts8_asc(binfo->vram, binfo->scrnx, 8, 0, COL8_FFFFFF, "mtask message recv mess");
 				//task_unblock(task);
 				task->r_flags = 0;
 				message = task->message_r;
+				task->message_r = 0; 
 				return 0;
 			}else{
 				if(task->message_r->src==to_receive)
@@ -353,6 +355,7 @@ int message_receive(int to_receive,struct MESSAGE *message)
 					//task_unblock(task);
 					task->r_flags = 0;
 					message = task->message_r;
+					task->message_r = 0;
 					return 0;
 				}else{
 					task_block(task);
@@ -382,9 +385,6 @@ int message_send(int to_send,struct MESSAGE *message)
 	
 	message->src = task2pid(task_now());
 	task->message_r = message;
-	struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
-	boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 - 1, 15);
-	putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, "mtask message send run1");
 	if(task->flags==3) task_unblock(task);
 	//struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
 	//boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 8, 0, 32 * 8 - 1, 15);

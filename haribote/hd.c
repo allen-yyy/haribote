@@ -333,10 +333,6 @@ BOOL HDEntry(struct Dobject *Dobj)
 	Dobj->task = hdtask;
 	//---DEBUG--- 
 	//io_cli();
-	struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
-	boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 8*8, 32 * 8 - 1, 15);
-	sprintf(s,"HD SIZE %dMiB",sectors*512/1024/1024);
-	putfonts8_asc(binfo->vram, binfo->scrnx, 0, 8*8, COL8_FFFFFF, s);
 	//io_sti();
 	return TRUE;
 } 
