@@ -44,7 +44,7 @@ void HariMain(void)
 		0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
 		0,   0,   0,   '_', 0,   0,   0,   0,   0,   0,   0,   0,   0,   '|', 0,   0
 	};
-	int key_shift = 0, key_leds = (binfo->leds >> 4) & 7, keycmd_wait = -1;
+	int key_shift = 0, key_leds = (binfo->leds >> 4) & 7, keycmd_wait = -1,key_ctrl = 0;
 	int j, x, y, mmx = -1, mmy = -1, mmx2 = 0;
 	struct SHEET *sht = 0, *key_win, *sht2;
 	int *fat;
@@ -203,6 +203,12 @@ void HariMain(void)
 				if (i == 256 + 0x36) {	/* 右シフト ON */
 					key_shift |= 2;
 				}
+				if (i == 256 + 0x1d) {	/* 右シフト ON */
+					key_ctrl = 1;
+				}
+				if (i == 256 + 0x9d) {	/* 右シフト ON */
+					key_ctrl = 0;
+				}
 				if (i == 256 + 0xaa) {	/* 左シフト OFF */
 					key_shift &= ~1;
 				}
@@ -225,6 +231,17 @@ void HariMain(void)
 					fifo32_put(&keycmd, key_leds);
 				}
 				if (i == 256 + 0x3b && key_shift != 0 && key_win != 0) {	/* Shift+F1 */
+					task = key_win->task;
+					if (task != 0 && task->tss.ss0 != 0) {
+						cons_putstr0(task->cons, "\nBreak(key) :\n");
+						io_cli();	/* 強制終了処理中にタスクが変わると困るから */
+						task->tss.eax = (int) &(task->tss.esp0);
+						task->tss.eip = (int) asm_end_app;
+						io_sti();
+						task_run(task, -1, 0);	/* 終了処理を確実にやらせるために、寝ていたら起こす */
+					}
+				}
+				if (i == 256 + 0x2e && key_ctrl != 0 && key_win != 0) {	/* Shift+F1 */
 					task = key_win->task;
 					if (task != 0 && task->tss.ss0 != 0) {
 						cons_putstr0(task->cons, "\nBreak(key) :\n");

@@ -271,15 +271,23 @@ void task_hd()
 		//---DEBUG--- 
 		//io_cli(); 
 		//boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 - 1, 15);
-		//sprintf(s,"taskrun %d",i);
+		//sprintf(s,"taskrun %d",1);
 		//putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, s);
 		 
 		message_receive(ANY,message);
+		boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 - 1, 15);
+		sprintf(s,"taskrun %d",2);
+		putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, s);
 		switch(message->type)
 		{
 			case HD_OPEN:
 				Identify(0,message->params);
 				message_send(message->src,message);
+				break;
+			case HD_IDENTIFY:
+				Identify(0,message->params);
+				message_send(message->src,message);
+				break;
 			default:
 				message->params = (char *)0;
 				message_send(message->src,message);	
@@ -316,7 +324,7 @@ BOOL HDEntry(struct Dobject *Dobj)
 	UCHAR Buff[512];
 	//IdeInitialize();
 	Identify(0,(BYTE*)&Buff[0]);
-	UINT sectors = *(UINT*)&Buff[60*2];
+	//UINT sectors = *(UINT*)&Buff[60*2];
 			
 	hdtask = task_alloc();
 	hdtask->tss.esp = memman_alloc_4k(Dobj->memman, 64 * 1024) + 64 * 1024;
@@ -327,7 +335,7 @@ BOOL HDEntry(struct Dobject *Dobj)
 	hdtask->tss.ds = 1 * 8;
 	hdtask->tss.fs = 1 * 8;
 	hdtask->tss.gs = 1 * 8;
-	task_run(hdtask, 4, 1);
+	task_run(hdtask, 3, 2);
 	
 	*((int *) 0x0f01) = hdtask;
 	Dobj->task = hdtask;
