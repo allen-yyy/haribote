@@ -43,7 +43,7 @@ hankaku.obj : hankaku.bin Makefile
 	$(BIN2OBJ) hankaku.bin hankaku.obj _hankaku
 
 bootpack.bim : $(OBJS_BOOTPACK) Makefile
-	$(OBJ2BIM) @$(RULEFILE) out:bootpack.bim stack:6136k map:bootpack.map \
+	$(OBJ2BIM) @$(RULEFILE) out:bootpack.bim stack:3190k map:bootpack.map \
 		$(OBJS_BOOTPACK)
 # 3MB+64KB=3136KB
 

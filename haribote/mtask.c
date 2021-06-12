@@ -16,20 +16,20 @@ struct TASK *pid2task(int pid)
 void init_pid(struct MEMMAN *memman)
 {
 	int i;
-	struct pid_t *pid;
-	struct blocks_t *block;
-	pid->next = 0;
-	block->next = 0;
+	struct pid_t pid;
+	struct blocks_t block;
+	pid.next = 0;
+	block.next = 0;
 	for(i=0;i<=MAX_PID;++i)
 	{
-		pid->pido[i].pid = i;
+		pid.pido[i].pid = i;
 	}
 	for(i=0;i<=MAX_TASKS;++i)
 	{
-		block->blocko[i].pid = i;
+		block.blocko[i].pid = i;
 	}
-	*((int *) 0x0f0a) = pid;
-	*((int *) 0x0f0f) = block;
+	*((int *) 0x0f0a) = &pid;
+	*((int *) 0x0f0f) = &block;
 }
 
 struct TASK *task_now(void)
@@ -179,7 +179,7 @@ struct TASK *task_alloc(void)
             }  
 			pid->pido[pid->next].task = task;
 			pid->next++;
-			task->pid=pid->next-1;                                            /* ココまで */
+			task->pid = pid->next-1;                                            /* ココまで */
 			return task;
 		}
 	}
@@ -313,15 +313,15 @@ int message_receive(int to_receive,struct MESSAGE *message)
 	struct TASK *task = task_now();
 	char s[30];
 	task->r_flags = 1;
-	int i=0;
 	next:
 		if(task->message_r!=0)
 		{
 			if(to_receive==ANY)
 			{
 				task->r_flags = 0;
-				message = task->message_r;
+				memcpy(message,task->message_r,sizeof(struct MESSAGE));
 				task->message_r = 0;
+				//memset(task->message_r,0,sizeof(struct MESSAGE)); 
 				return 0;
 			}else{
 				if(task->message_r->src==to_receive)
@@ -348,7 +348,9 @@ int message_receive(int to_receive,struct MESSAGE *message)
 
 int message_send(int to_send,struct MESSAGE *message)
 {
+	char s[30];
 	struct TASK *task = pid2task(to_send);
+	struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
 	if(task==NULL)
 	{
 		return -1;

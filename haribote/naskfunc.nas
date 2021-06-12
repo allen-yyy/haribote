@@ -492,6 +492,15 @@ _inws:
 	rep	insw
 	ret
 	
+_outws:
+	mov	edi, [esp + 4]	; buf
+	mov	ecx, [esp + 4 + 4]	; port
+	mov	edx, [esp + 4 + 4 + 4]   ; n
+	shr	ecx, 1
+	cld
+	rep	outsw
+	ret
+	
 ; ------------------------------------------------------------------------
 ; void* memcpy(void* es:p_dst, void* ds:p_src, int size);
 ; ------------------------------------------------------------------------

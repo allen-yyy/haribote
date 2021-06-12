@@ -81,7 +81,7 @@
     81 0000002C 5A                              	POP	EDX
     82 0000002D 31 D2                           	XOR	EDX,EDX
     83 0000002F 85 C0                           	TEST	EAX,EAX
-    84 00000031 75 0E                           	JNE	L1
+    84 00000031 74 0E                           	JE	L1
     85 00000033 46                              	INC	ESI
     86 00000034 83 C3 0C                        	ADD	EBX,12
     87 00000037 83 FE 01                        	CMP	ESI,1

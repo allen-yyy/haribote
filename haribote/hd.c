@@ -75,6 +75,21 @@ BOOL ReadHDSector(LPVOID lpBuffer,
 	return bResult;
 }
 
+void readhddisk(int driver,int sector,int lba,char *buf)
+{
+   io_out8(0x1f2, sector);	 
+
+
+   io_out8(0x1f3, lba);		 
+   io_out8(0x1f4, lba >> 8);		 
+   io_out8(0x1f5, lba >> 16);		 
+
+   io_out8(0x1f6, 0xa0 | 0x40 | (driver == 1 ? 0x10 : 0) | lba >> 24);
+   io_out8(0x1f7, 0x20);
+   inws(buf,sector*256,0x1f0);
+   return;
+}
+
 BOOL WriteHDSector(LPVOID lpBuffer,
 				  UCHAR byStartSector,
 				  UCHAR byCylinderLo,
@@ -145,6 +160,21 @@ BOOL WriteHDSector(LPVOID lpBuffer,
 
 	bResult = TRUE;
 	return bResult;
+}
+
+void writehddisk(int driver,int sector,int lba,char *buf)
+{
+   io_out8(0x1f2, sector);	 
+
+
+   io_out8(0x1f3, lba);		 
+   io_out8(0x1f4, lba >> 8);		 
+   io_out8(0x1f5, lba >> 16);		 
+
+   io_out8(0x1f6, 0xa0 | 0x40 | (driver == 1 ? 0x10 : 0) | lba >> 24);
+   io_out8(0x1f7, 0x40);
+   outws(buf,secort*256,0x1f0);
+   return;
 }
 
 //Several low level routines to test specified flags in hard disk driver registers.
@@ -260,41 +290,27 @@ BOOL Identify(int nHdNum,BYTE* pBuffer)
 
 void task_hd()
 {
-	struct MESSAGE *message;
-	int i=0;
-	io_cli();
+	struct MESSAGE message;
 	for(;;)
 	{
-		char s[31];
-		i++;
 		struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
 		//---DEBUG--- 
-		//io_cli(); 
-		//boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 - 1, 15);
-		//sprintf(s,"taskrun %d",1);
-		//putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, s);
-		 
 		message_receive(ANY,message);
-		boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 - 1, 15);
-		sprintf(s,"taskrun %d",2);
-		putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, s);
-		switch(message->type)
+		switch(message.type)
 		{
 			case HD_OPEN:
-				Identify(0,message->params);
-				message_send(message->src,message);
+				Identify(0,message.params);
+				message_send(message.src,&message);
 				break;
 			case HD_IDENTIFY:
-				Identify(0,message->params);
-				message_send(message->src,message);
+				Identify(0,message.params);
+				message_send(message.src,&message);
 				break;
 			default:
-				message->params = (char *)0;
-				message_send(message->src,message);	
+				message.params = (char )0;
+				message_send(message.src,&message);	
 		}
-		//io_hlt(); 
 	}
-	io_sti();
 	return;
 }
 
@@ -323,7 +339,7 @@ BOOL HDEntry(struct Dobject *Dobj)
 	DWORD dwLba;
 	UCHAR Buff[512];
 	//IdeInitialize();
-	Identify(0,(BYTE*)&Buff[0]);
+	//Identify(0,(BYTE*)&Buff[0]);
 	//UINT sectors = *(UINT*)&Buff[60*2];
 			
 	hdtask = task_alloc();
@@ -335,9 +351,9 @@ BOOL HDEntry(struct Dobject *Dobj)
 	hdtask->tss.ds = 1 * 8;
 	hdtask->tss.fs = 1 * 8;
 	hdtask->tss.gs = 1 * 8;
-	task_run(hdtask, 3, 2);
+	task_run(hdtask, 2, 1);
 	
-	*((int *) 0x0f01) = hdtask;
+	//*((int *) 0x0f01) = hdtask;
 	Dobj->task = hdtask;
 	//---DEBUG--- 
 	//io_cli();

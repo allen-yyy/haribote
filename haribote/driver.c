@@ -37,7 +37,7 @@ BOOL LDevs(struct MEMMAN *memman) {
 		Devobj.name = dDevs[i].name;
 		Devobj.memman = memman;
 		dDevs[i].Dobj = &Devobj;
-		if((dDevs[i].entry)(&Devobj)) {
+		if(!(dDevs[i].entry)(&Devobj)) {
 			return FALSE;
 		}
 	}

@@ -345,12 +345,13 @@ void HariMain(void)
 									}
 								}
 							}
-							if(76<=mx && mx<8*12+76&&86<=my && my < 86)
+							if(0<=mx && mx<16&&0<=my && my < 16)
 							{
-								key_win = open_console(shtctl, memtotal);
+								/*key_win = open_console(shtctl, memtotal);
 								sheet_slide(key_win, 32, 4);
 								sheet_updown(key_win, shtctl->top);
-								keywin_on(key_win);
+								keywin_on(key_win);*/
+								acpiPowerOff();
 							} 
 						} else {
 							/* ウィンドウ移動モードの場合 */

@@ -8,27 +8,17 @@
 
 #include "bootpack.h"
 
+extern struct dDevEntry dDevs[DR_NUM]; 
+
 void FS_task(struct MEMMAN *memman)
 {
-	struct Dobject *mydobj = GetMyObj("FS");
-	struct Dobject *hddobj = GetMyObj("Ide HD");
-	int i=0;
-	char s[20];
-	struct MESSAGE *message,*umess;
-	message->type = HD_OPEN;
-	message_send(task2pid(hddobj->task),message);
-	message_receive(ANY,message);
-	int *p = message->Param;
-	UINT sectors = *(UINT*)&p[60*2];
+	struct Dobject *hddobj = dDevs[0].Dobj;
+	//struct MESSAGE message;
+	//message.type = HD_OPEN;
+	//message_send(task2pid(hddobj->task),&message);
 	for(;;)
 	{
-		message_receive(ANY,umess);
-		switch(umess->type)
-		{
-			case FS_HDSIZE:
-				umess->Param = sectors * 512/1024/1024/1024;
-				message_send(umess->src,umess);
-		} 
+		io_hlt();
 	} 
 	return;
 } 
@@ -45,7 +35,7 @@ BOOL FSEntry(struct Dobject *Dobj)
 	task->tss.ds = 1 * 8;
 	task->tss.fs = 1 * 8;
 	task->tss.gs = 1 * 8;
-	task_run(task, 3, 2);
+	task_run(task, 2, 1);
 	Dobj->task = task; 
 	/*struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
 		boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 - 1, 15);

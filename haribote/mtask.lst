@@ -3,711 +3,672 @@
      3 00000000                                 [OPTIMIZE 1]
      4 00000000                                 [OPTION 1]
      5 00000000                                 [BITS 32]
-     6 00000000                                 	EXTERN	_io_hlt
-     7 00000000                                 	EXTERN	_memman_alloc_4k
-     8 00000000                                 	EXTERN	_set_segmdesc
-     9 00000000                                 	EXTERN	_load_tr
-    10 00000000                                 	EXTERN	_timer_alloc
-    11 00000000                                 	EXTERN	_timer_settime
-    12 00000000                                 	EXTERN	_farjmp
-    13 00000000                                 	EXTERN	_io_cli
-    14 00000000                                 	EXTERN	_clts
-    15 00000000                                 	EXTERN	_frstor
-    16 00000000                                 	EXTERN	_io_sti
-    17 00000000                                 	EXTERN	_fnsave
-    18 00000000                                 	EXTERN	_boxfill8
-    19 00000000                                 	EXTERN	_putfonts8_asc
-    20 00000000                                 [FILE "mtask.c"]
-    21                                          [SECTION .text]
-    22 00000000                                 	GLOBAL	_pid2task
-    23 00000000                                 _pid2task:
-    24 00000000 55                              	PUSH	EBP
-    25 00000001 89 E5                           	MOV	EBP,ESP
-    26 00000003 8B 15 00000F0A                  	MOV	EDX,DWORD [3850]
-    27 00000009 8B 45 08                        	MOV	EAX,DWORD [8+EBP]
-    28 0000000C 5D                              	POP	EBP
-    29 0000000D 8B 44 C2 04                     	MOV	EAX,DWORD [4+EDX+EAX*8]
-    30 00000011 C3                              	RET
-    31 00000012                                 	GLOBAL	_init_pid
-    32 00000012                                 _init_pid:
-    33 00000012 55                              	PUSH	EBP
-    34 00000013 31 C0                           	XOR	EAX,EAX
-    35 00000015 89 E5                           	MOV	EBP,ESP
-    36 00000017 C7 82 00013878 00000000         	MOV	DWORD [79992+EDX],0
-    37 00000021 C7 82 00001F40 00000000         	MOV	DWORD [8000+EDX],0
-    38 0000002B                                 L7:
-    39 0000002B 89 04 C2                        	MOV	DWORD [EDX+EAX*8],EAX
-    40 0000002E 40                              	INC	EAX
-    41 0000002F 3D 0000270F                     	CMP	EAX,9999
-    42 00000034 7E F5                           	JLE	L7
-    43 00000036 31 C0                           	XOR	EAX,EAX
-    44 00000038                                 L12:
-    45 00000038 89 04 C2                        	MOV	DWORD [EDX+EAX*8],EAX
-    46 0000003B 40                              	INC	EAX
-    47 0000003C 3D 000003E8                     	CMP	EAX,1000
-    48 00000041 7E F5                           	JLE	L12
-    49 00000043 89 15 00000F0A                  	MOV	DWORD [3850],EDX
-    50 00000049 89 15 00000F0F                  	MOV	DWORD [3855],EDX
-    51 0000004F 5D                              	POP	EBP
-    52 00000050 C3                              	RET
-    53 00000051                                 	GLOBAL	_task_now
-    54 00000051                                 _task_now:
-    55 00000051 A1 [00000018]                   	MOV	EAX,DWORD [_taskctl]
-    56 00000056 55                              	PUSH	EBP
-    57 00000057 89 E5                           	MOV	EBP,ESP
-    58 00000059 5D                              	POP	EBP
-    59 0000005A 8B 10                           	MOV	EDX,DWORD [EAX]
-    60 0000005C 69 D2 00000198                  	IMUL	EDX,EDX,408
-    61 00000062 8D 44 02 0C                     	LEA	EAX,DWORD [12+EDX+EAX*1]
-    62 00000066 8B 50 04                        	MOV	EDX,DWORD [4+EAX]
-    63 00000069 8B 44 90 08                     	MOV	EAX,DWORD [8+EAX+EDX*4]
-    64 0000006D C3                              	RET
-    65 0000006E                                 	GLOBAL	_task_add
-    66 0000006E                                 _task_add:
-    67 0000006E 55                              	PUSH	EBP
-    68 0000006F 89 E5                           	MOV	EBP,ESP
-    69 00000071 8B 4D 08                        	MOV	ECX,DWORD [8+EBP]
-    70 00000074 8B 51 08                        	MOV	EDX,DWORD [8+ECX]
-    71 00000077 69 D2 00000198                  	IMUL	EDX,EDX,408
-    72 0000007D 03 15 [00000018]                	ADD	EDX,DWORD [_taskctl]
-    73 00000083 8B 42 0C                        	MOV	EAX,DWORD [12+EDX]
-    74 00000086 89 4C 82 14                     	MOV	DWORD [20+EDX+EAX*4],ECX
-    75 0000008A 40                              	INC	EAX
-    76 0000008B 89 42 0C                        	MOV	DWORD [12+EDX],EAX
-    77 0000008E C7 41 04 00000002               	MOV	DWORD [4+ECX],2
-    78 00000095 5D                              	POP	EBP
-    79 00000096 C3                              	RET
-    80 00000097                                 	GLOBAL	_task_remove
-    81 00000097                                 _task_remove:
-    82 00000097 55                              	PUSH	EBP
-    83 00000098 31 C9                           	XOR	ECX,ECX
-    84 0000009A 89 E5                           	MOV	EBP,ESP
-    85 0000009C 57                              	PUSH	EDI
-    86 0000009D 56                              	PUSH	ESI
-    87 0000009E 8B 75 08                        	MOV	ESI,DWORD [8+EBP]
-    88 000000A1 53                              	PUSH	EBX
-    89 000000A2 8B 3D 00000F0A                  	MOV	EDI,DWORD [3850]
-    90 000000A8 8B 46 08                        	MOV	EAX,DWORD [8+ESI]
-    91 000000AB 69 C0 00000198                  	IMUL	EAX,EAX,408
-    92 000000B1 03 05 [00000018]                	ADD	EAX,DWORD [_taskctl]
-    93 000000B7 8D 50 0C                        	LEA	EDX,DWORD [12+EAX]
-    94 000000BA 3B 48 0C                        	CMP	ECX,DWORD [12+EAX]
-    95 000000BD 7D 0B                           	JGE	L21
-    96 000000BF                                 L25:
-    97 000000BF 39 74 8A 08                     	CMP	DWORD [8+EDX+ECX*4],ESI
-    98 000000C3 74 05                           	JE	L21
-    99 000000C5 41                              	INC	ECX
-   100 000000C6 3B 0A                           	CMP	ECX,DWORD [EDX]
-   101 000000C8 7C F5                           	JL	L25
-   102 000000CA                                 L21:
-   103 000000CA 8B 42 04                        	MOV	EAX,DWORD [4+EDX]
-   104 000000CD FF 0A                           	DEC	DWORD [EDX]
-   105 000000CF 39 C1                           	CMP	ECX,EAX
-   106 000000D1 7D 04                           	JGE	L26
-   107 000000D3 48                              	DEC	EAX
-   108 000000D4 89 42 04                        	MOV	DWORD [4+EDX],EAX
-   109 000000D7                                 L26:
-   110 000000D7 8B 02                           	MOV	EAX,DWORD [EDX]
-   111 000000D9 39 42 04                        	CMP	DWORD [4+EDX],EAX
-   112 000000DC 7C 07                           	JL	L27
-   113 000000DE C7 42 04 00000000               	MOV	DWORD [4+EDX],0
-   114 000000E5                                 L27:
-   115 000000E5 C7 46 04 00000001               	MOV	DWORD [4+ESI],1
-   116 000000EC 8B 1A                           	MOV	EBX,DWORD [EDX]
-   117 000000EE 39 D9                           	CMP	ECX,EBX
-   118 000000F0 7D 0D                           	JGE	L35
-   119 000000F2                                 L32:
-   120 000000F2 8B 44 8A 0C                     	MOV	EAX,DWORD [12+EDX+ECX*4]
-   121 000000F6 89 44 8A 08                     	MOV	DWORD [8+EDX+ECX*4],EAX
-   122 000000FA 41                              	INC	ECX
-   123 000000FB 39 D9                           	CMP	ECX,EBX
-   124 000000FD 7C F3                           	JL	L32
-   125 000000FF                                 L35:
-   126 000000FF 8B 86 0000012C                  	MOV	EAX,DWORD [300+ESI]
-   127 00000105 8B 54 C7 04                     	MOV	EDX,DWORD [4+EDI+EAX*8]
-   128 00000109 8B 46 04                        	MOV	EAX,DWORD [4+ESI]
-   129 0000010C 89 42 04                        	MOV	DWORD [4+EDX],EAX
-   130 0000010F 5B                              	POP	EBX
-   131 00000110 5E                              	POP	ESI
-   132 00000111 5F                              	POP	EDI
-   133 00000112 5D                              	POP	EBP
-   134 00000113 C3                              	RET
-   135 00000114                                 	GLOBAL	_task_switchsub
-   136 00000114                                 _task_switchsub:
-   137 00000114 55                              	PUSH	EBP
-   138 00000115 31 C9                           	XOR	ECX,ECX
-   139 00000117 89 E5                           	MOV	EBP,ESP
-   140 00000119 A1 [00000018]                   	MOV	EAX,DWORD [_taskctl]
-   141 0000011E 31 D2                           	XOR	EDX,EDX
-   142 00000120                                 L42:
-   143 00000120 83 7C 10 0C 00                  	CMP	DWORD [12+EAX+EDX*1],0
-   144 00000125 7F 0C                           	JG	L38
-   145 00000127 41                              	INC	ECX
-   146 00000128 81 C2 00000198                  	ADD	EDX,408
-   147 0000012E 83 F9 09                        	CMP	ECX,9
-   148 00000131 7E ED                           	JLE	L42
-   149 00000133                                 L38:
-   150 00000133 89 08                           	MOV	DWORD [EAX],ECX
-   151 00000135 C6 40 08 00                     	MOV	BYTE [8+EAX],0
-   152 00000139 5D                              	POP	EBP
-   153 0000013A C3                              	RET
-   154 0000013B                                 	GLOBAL	_task_idle
-   155 0000013B                                 _task_idle:
-   156 0000013B 55                              	PUSH	EBP
-   157 0000013C 89 E5                           	MOV	EBP,ESP
-   158 0000013E                                 L45:
-   159 0000013E E8 [00000000]                   	CALL	_io_hlt
-   160 00000143 EB F9                           	JMP	L45
-   161 00000145                                 	GLOBAL	_task_init
-   162 00000145                                 _task_init:
-   163 00000145 55                              	PUSH	EBP
-   164 00000146 89 E5                           	MOV	EBP,ESP
-   165 00000148 57                              	PUSH	EDI
-   166 00000149 56                              	PUSH	ESI
-   167 0000014A 31 FF                           	XOR	EDI,EDI
-   168 0000014C 53                              	PUSH	EBX
-   169 0000014D 31 F6                           	XOR	ESI,ESI
-   170 0000014F BB 000003E7                     	MOV	EBX,999
-   171 00000154 E8 FFFFFEB9                     	CALL	_init_pid
-   172 00000159 68 0004E25C                     	PUSH	320092
-   173 0000015E FF 75 08                        	PUSH	DWORD [8+EBP]
-   174 00000161 E8 [00000000]                   	CALL	_memman_alloc_4k
-   175 00000166 A3 [00000018]                   	MOV	DWORD [_taskctl],EAX
-   176 0000016B 58                              	POP	EAX
-   177 0000016C 5A                              	POP	EDX
-   178 0000016D                                 L53:
-   179 0000016D 89 FA                           	MOV	EDX,EDI
-   180 0000016F 8D 46 18                        	LEA	EAX,DWORD [24+ESI]
-   181 00000172 03 15 [00000018]                	ADD	EDX,DWORD [_taskctl]
-   182 00000178 89 82 00000FFC                  	MOV	DWORD [4092+EDX],EAX
-   183 0000017E 8D 86 00001F58                  	LEA	EAX,DWORD [8024+ESI]
-   184 00000184 89 82 00001088                  	MOV	DWORD [4232+EDX],EAX
-   185 0000018A 8D 86 00270018                  	LEA	EAX,DWORD [2555928+ESI]
-   186 00000190 C7 82 00001000 00000000         	MOV	DWORD [4096+EDX],0
-   187 0000019A 68 00000089                     	PUSH	137
-   188 0000019F 81 C2 00001028                  	ADD	EDX,4136
-   189 000001A5 52                              	PUSH	EDX
-   190 000001A6 6A 67                           	PUSH	103
-   191 000001A8 50                              	PUSH	EAX
-   192 000001A9 E8 [00000000]                   	CALL	_set_segmdesc
-   193 000001AE A1 [00000018]                   	MOV	EAX,DWORD [_taskctl]
-   194 000001B3 01 F8                           	ADD	EAX,EDI
-   195 000001B5 68 00000082                     	PUSH	130
-   196 000001BA 05 000010FC                     	ADD	EAX,4348
-   197 000001BF 81 C7 0000013C                  	ADD	EDI,316
-   198 000001C5 50                              	PUSH	EAX
-   199 000001C6 8D 86 00271F58                  	LEA	EAX,DWORD [2563928+ESI]
-   200 000001CC 6A 0F                           	PUSH	15
-   201 000001CE 83 C6 08                        	ADD	ESI,8
-   202 000001D1 50                              	PUSH	EAX
-   203 000001D2 E8 [00000000]                   	CALL	_set_segmdesc
-   204 000001D7 83 C4 20                        	ADD	ESP,32
-   205 000001DA 4B                              	DEC	EBX
-   206 000001DB 79 90                           	JNS	L53
-   207 000001DD 8B 0D [00000018]                	MOV	ECX,DWORD [_taskctl]
-   208 000001E3 31 D2                           	XOR	EDX,EDX
-   209 000001E5 BB 00000009                     	MOV	EBX,9
-   210 000001EA                                 L58:
-   211 000001EA 8D 04 11                        	LEA	EAX,DWORD [ECX+EDX*1]
-   212 000001ED 81 C2 00000198                  	ADD	EDX,408
-   213 000001F3 4B                              	DEC	EBX
-   214 000001F4 C7 40 0C 00000000               	MOV	DWORD [12+EAX],0
-   215 000001FB C7 40 10 00000000               	MOV	DWORD [16+EAX],0
-   216 00000202 79 E6                           	JNS	L58
-   217 00000204 E8 0000012B                     	CALL	_task_alloc
-   218 00000209 89 C6                           	MOV	ESI,EAX
-   219 0000020B C7 40 04 00000002               	MOV	DWORD [4+EAX],2
-   220 00000212 C7 40 0C 00000002               	MOV	DWORD [12+EAX],2
-   221 00000219 C7 40 08 00000000               	MOV	DWORD [8+EAX],0
-   222 00000220 6A 28                           	PUSH	40
-   223 00000222 FF 75 08                        	PUSH	DWORD [8+EBP]
-   224 00000225 E8 [00000000]                   	CALL	_memman_alloc_4k
-   225 0000022A 89 86 00000138                  	MOV	DWORD [312+ESI],EAX
-   226 00000230 C6 00 74                        	MOV	BYTE [EAX],116
-   227 00000233 8B 86 00000138                  	MOV	EAX,DWORD [312+ESI]
-   228 00000239 C6 40 01 61                     	MOV	BYTE [1+EAX],97
-   229 0000023D 8B 86 00000138                  	MOV	EAX,DWORD [312+ESI]
-   230 00000243 C6 40 02 73                     	MOV	BYTE [2+EAX],115
-   231 00000247 8B 86 00000138                  	MOV	EAX,DWORD [312+ESI]
-   232 0000024D C6 40 03 6B                     	MOV	BYTE [3+EAX],107
-   233 00000251 8B 86 00000138                  	MOV	EAX,DWORD [312+ESI]
-   234 00000257 C6 40 04 5F                     	MOV	BYTE [4+EAX],95
-   235 0000025B 8B 86 00000138                  	MOV	EAX,DWORD [312+ESI]
-   236 00000261 C6 40 05 61                     	MOV	BYTE [5+EAX],97
-   237 00000265 56                              	PUSH	ESI
-   238 00000266 E8 FFFFFE03                     	CALL	_task_add
-   239 0000026B E8 FFFFFEA4                     	CALL	_task_switchsub
-   240 00000270 FF 36                           	PUSH	DWORD [ESI]
-   241 00000272 E8 [00000000]                   	CALL	_load_tr
-   242 00000277 E8 [00000000]                   	CALL	_timer_alloc
-   243 0000027C FF 76 0C                        	PUSH	DWORD [12+ESI]
-   244 0000027F 50                              	PUSH	EAX
-   245 00000280 A3 [0000001C]                   	MOV	DWORD [_task_timer],EAX
-   246 00000285 E8 [00000000]                   	CALL	_timer_settime
-   247 0000028A E8 000000A5                     	CALL	_task_alloc
-   248 0000028F 68 00010000                     	PUSH	65536
-   249 00000294 FF 75 08                        	PUSH	DWORD [8+EBP]
-   250 00000297 89 C3                           	MOV	EBX,EAX
-   251 00000299 E8 [00000000]                   	CALL	_memman_alloc_4k
-   252 0000029E 83 C4 20                        	ADD	ESP,32
-   253 000002A1 05 00010000                     	ADD	EAX,65536
-   254 000002A6 89 43 64                        	MOV	DWORD [100+EBX],EAX
-   255 000002A9 C7 43 4C [0000013B]             	MOV	DWORD [76+EBX],_task_idle
-   256 000002B0 C7 43 74 00000008               	MOV	DWORD [116+EBX],8
-   257 000002B7 C7 43 78 00000010               	MOV	DWORD [120+EBX],16
-   258 000002BE C7 43 7C 00000008               	MOV	DWORD [124+EBX],8
-   259 000002C5 C7 83 00000080 00000008         	MOV	DWORD [128+EBX],8
-   260 000002CF C7 83 00000084 00000008         	MOV	DWORD [132+EBX],8
-   261 000002D9 C7 83 00000088 00000008         	MOV	DWORD [136+EBX],8
-   262 000002E3 6A 28                           	PUSH	40
-   263 000002E5 FF 75 08                        	PUSH	DWORD [8+EBP]
-   264 000002E8 E8 [00000000]                   	CALL	_memman_alloc_4k
-   265 000002ED 89 83 00000138                  	MOV	DWORD [312+EBX],EAX
-   266 000002F3 C6 00 69                        	MOV	BYTE [EAX],105
-   267 000002F6 8B 83 00000138                  	MOV	EAX,DWORD [312+EBX]
-   268 000002FC C6 40 01 64                     	MOV	BYTE [1+EAX],100
-   269 00000300 8B 83 00000138                  	MOV	EAX,DWORD [312+EBX]
-   270 00000306 C6 40 02 6C                     	MOV	BYTE [2+EAX],108
-   271 0000030A 8B 83 00000138                  	MOV	EAX,DWORD [312+EBX]
-   272 00000310 C6 40 03 65                     	MOV	BYTE [3+EAX],101
-   273 00000314 6A 01                           	PUSH	1
-   274 00000316 6A 09                           	PUSH	9
-   275 00000318 53                              	PUSH	EBX
-   276 00000319 E8 000000F6                     	CALL	_task_run
-   277 0000031E A1 [00000018]                   	MOV	EAX,DWORD [_taskctl]
-   278 00000323 C7 40 04 00000000               	MOV	DWORD [4+EAX],0
-   279 0000032A 8D 65 F4                        	LEA	ESP,DWORD [-12+EBP]
-   280 0000032D 89 F0                           	MOV	EAX,ESI
-   281 0000032F 5B                              	POP	EBX
-   282 00000330 5E                              	POP	ESI
-   283 00000331 5F                              	POP	EDI
-   284 00000332 5D                              	POP	EBP
-   285 00000333 C3                              	RET
-   286 00000334                                 	GLOBAL	_task_alloc
-   287 00000334                                 _task_alloc:
-   288 00000334 55                              	PUSH	EBP
-   289 00000335 31 C9                           	XOR	ECX,ECX
-   290 00000337 89 E5                           	MOV	EBP,ESP
-   291 00000339                                 L74:
-   292 00000339 89 C8                           	MOV	EAX,ECX
-   293 0000033B 69 C0 0000013C                  	IMUL	EAX,EAX,316
-   294 00000341 03 05 [00000018]                	ADD	EAX,DWORD [_taskctl]
-   295 00000347 83 B8 00001000 00               	CMP	DWORD [4096+EAX],0
-   296 0000034E 74 0D                           	JE	L79
-   297 00000350 41                              	INC	ECX
-   298 00000351 81 F9 000003E7                  	CMP	ECX,999
-   299 00000357 7E E0                           	JLE	L74
-   300 00000359 31 C0                           	XOR	EAX,EAX
-   301 0000035B                                 L63:
-   302 0000035B 5D                              	POP	EBP
-   303 0000035C C3                              	RET
-   304 0000035D                                 L79:
-   305 0000035D 8D 90 00000FFC                  	LEA	EDX,DWORD [4092+EAX]
-   306 00000363 B9 00000003                     	MOV	ECX,3
-   307 00000368 C7 42 04 00000001               	MOV	DWORD [4+EDX],1
-   308 0000036F C7 42 50 00000202               	MOV	DWORD [80+EDX],514
-   309 00000376 C7 42 54 00000000               	MOV	DWORD [84+EDX],0
-   310 0000037D C7 42 58 00000000               	MOV	DWORD [88+EDX],0
-   311 00000384 C7 42 5C 00000000               	MOV	DWORD [92+EDX],0
-   312 0000038B C7 42 60 00000000               	MOV	DWORD [96+EDX],0
-   313 00000392 C7 42 68 00000000               	MOV	DWORD [104+EDX],0
-   314 00000399 C7 42 6C 00000000               	MOV	DWORD [108+EDX],0
-   315 000003A0 C7 42 70 00000000               	MOV	DWORD [112+EDX],0
-   316 000003A7 C7 42 74 00000000               	MOV	DWORD [116+EDX],0
-   317 000003AE C7 82 00000080 00000000         	MOV	DWORD [128+EDX],0
-   318 000003B8 C7 82 00000084 00000000         	MOV	DWORD [132+EDX],0
-   319 000003C2 C7 82 00000088 00000000         	MOV	DWORD [136+EDX],0
-   320 000003CC C7 82 00000090 40000000         	MOV	DWORD [144+EDX],1073741824
-   321 000003D6 C7 42 34 00000000               	MOV	DWORD [52+EDX],0
-   322 000003DD C7 82 00000094 0000037F         	MOV	DWORD [148+EDX],895
-   323 000003E7 C7 82 00000098 00000000         	MOV	DWORD [152+EDX],0
-   324 000003F1 C7 82 0000009C 0000FFFF         	MOV	DWORD [156+EDX],65535
-   325 000003FB                                 L73:
-   326 000003FB C7 84 8A 00000094 00000000      	MOV	DWORD [148+EDX+ECX*4],0
-   327 00000406 41                              	INC	ECX
-   328 00000407 89 D0                           	MOV	EAX,EDX
-   329 00000409 83 F9 1A                        	CMP	ECX,26
-   330 0000040C 0F 8F FFFFFF49                  	JG	L63
-   331 00000412 EB E7                           	JMP	L73
-   332 00000414                                 	GLOBAL	_task_run
-   333 00000414                                 _task_run:
-   334 00000414 55                              	PUSH	EBP
-   335 00000415 89 E5                           	MOV	EBP,ESP
-   336 00000417 57                              	PUSH	EDI
-   337 00000418 56                              	PUSH	ESI
-   338 00000419 53                              	PUSH	EBX
-   339 0000041A 8B 7D 0C                        	MOV	EDI,DWORD [12+EBP]
-   340 0000041D 8B 5D 08                        	MOV	EBX,DWORD [8+EBP]
-   341 00000420 8B 45 10                        	MOV	EAX,DWORD [16+EBP]
-   342 00000423 8B 35 00000F0A                  	MOV	ESI,DWORD [3850]
-   343 00000429 85 FF                           	TEST	EDI,EDI
-   344 0000042B 78 76                           	JS	L86
-   345 0000042D                                 L81:
-   346 0000042D 85 C0                           	TEST	EAX,EAX
-   347 0000042F 7E 03                           	JLE	L82
-   348 00000431 89 43 0C                        	MOV	DWORD [12+EBX],EAX
-   349 00000434                                 L82:
-   350 00000434 83 7B 04 01                     	CMP	DWORD [4+EBX],1
-   351 00000438 74 4E                           	JE	L87
-   352 0000043A                                 L83:
-   353 0000043A 83 7B 04 02                     	CMP	DWORD [4+EBX],2
-   354 0000043E 74 3A                           	JE	L88
-   355 00000440                                 L84:
-   356 00000440 83 7B 04 02                     	CMP	DWORD [4+EBX],2
-   357 00000444 74 23                           	JE	L85
-   358 00000446 8B 86 00013878                  	MOV	EAX,DWORD [79992+ESI]
-   359 0000044C 8D 50 01                        	LEA	EDX,DWORD [1+EAX]
-   360 0000044F 89 5C C6 04                     	MOV	DWORD [4+ESI+EAX*8],EBX
-   361 00000453 89 96 00013878                  	MOV	DWORD [79992+ESI],EDX
-   362 00000459 89 7B 08                        	MOV	DWORD [8+EBX],EDI
-   363 0000045C 89 83 0000012C                  	MOV	DWORD [300+EBX],EAX
-   364 00000462 53                              	PUSH	EBX
-   365 00000463 E8 FFFFFC06                     	CALL	_task_add
-   366 00000468 59                              	POP	ECX
-   367 00000469                                 L85:
-   368 00000469 A1 [00000018]                   	MOV	EAX,DWORD [_taskctl]
-   369 0000046E C6 40 08 01                     	MOV	BYTE [8+EAX],1
-   370 00000472 8D 65 F4                        	LEA	ESP,DWORD [-12+EBP]
-   371 00000475 5B                              	POP	EBX
-   372 00000476 5E                              	POP	ESI
-   373 00000477 5F                              	POP	EDI
-   374 00000478 5D                              	POP	EBP
-   375 00000479 C3                              	RET
-   376 0000047A                                 L88:
-   377 0000047A 39 7B 08                        	CMP	DWORD [8+EBX],EDI
-   378 0000047D 74 C1                           	JE	L84
-   379 0000047F 53                              	PUSH	EBX
-   380 00000480 E8 FFFFFC12                     	CALL	_task_remove
-   381 00000485 58                              	POP	EAX
-   382 00000486 EB B8                           	JMP	L84
-   383 00000488                                 L87:
-   384 00000488 8B 86 00013878                  	MOV	EAX,DWORD [79992+ESI]
-   385 0000048E 8D 50 01                        	LEA	EDX,DWORD [1+EAX]
-   386 00000491 89 5C C6 04                     	MOV	DWORD [4+ESI+EAX*8],EBX
-   387 00000495 89 96 00013878                  	MOV	DWORD [79992+ESI],EDX
-   388 0000049B 89 83 0000012C                  	MOV	DWORD [300+EBX],EAX
-   389 000004A1 EB 97                           	JMP	L83
-   390 000004A3                                 L86:
-   391 000004A3 8B 7B 08                        	MOV	EDI,DWORD [8+EBX]
-   392 000004A6 EB 85                           	JMP	L81
-   393 000004A8                                 	GLOBAL	_task_sleep
-   394 000004A8                                 _task_sleep:
-   395 000004A8 55                              	PUSH	EBP
-   396 000004A9 89 E5                           	MOV	EBP,ESP
-   397 000004AB 56                              	PUSH	ESI
-   398 000004AC 53                              	PUSH	EBX
-   399 000004AD 8B 75 08                        	MOV	ESI,DWORD [8+EBP]
-   400 000004B0 83 7E 04 02                     	CMP	DWORD [4+ESI],2
-   401 000004B4 74 07                           	JE	L92
-   402 000004B6                                 L89:
-   403 000004B6 8D 65 F8                        	LEA	ESP,DWORD [-8+EBP]
-   404 000004B9 5B                              	POP	EBX
-   405 000004BA 5E                              	POP	ESI
-   406 000004BB 5D                              	POP	EBP
-   407 000004BC C3                              	RET
-   408 000004BD                                 L92:
-   409 000004BD E8 FFFFFB8F                     	CALL	_task_now
-   410 000004C2 56                              	PUSH	ESI
-   411 000004C3 89 C3                           	MOV	EBX,EAX
-   412 000004C5 E8 FFFFFBCD                     	CALL	_task_remove
-   413 000004CA 59                              	POP	ECX
-   414 000004CB 39 DE                           	CMP	ESI,EBX
-   415 000004CD 75 E7                           	JNE	L89
-   416 000004CF E8 FFFFFC40                     	CALL	_task_switchsub
-   417 000004D4 E8 FFFFFB78                     	CALL	_task_now
-   418 000004D9 FF 30                           	PUSH	DWORD [EAX]
-   419 000004DB 6A 00                           	PUSH	0
-   420 000004DD E8 [00000000]                   	CALL	_farjmp
-   421 000004E2 58                              	POP	EAX
-   422 000004E3 5A                              	POP	EDX
-   423 000004E4 EB D0                           	JMP	L89
-   424 000004E6                                 	GLOBAL	_task_switch
-   425 000004E6                                 _task_switch:
-   426 000004E6 55                              	PUSH	EBP
-   427 000004E7 89 E5                           	MOV	EBP,ESP
-   428 000004E9 56                              	PUSH	ESI
-   429 000004EA 53                              	PUSH	EBX
-   430 000004EB 8B 1D [00000018]                	MOV	EBX,DWORD [_taskctl]
-   431 000004F1 8B 13                           	MOV	EDX,DWORD [EBX]
-   432 000004F3 69 D2 00000198                  	IMUL	EDX,EDX,408
-   433 000004F9 8D 14 1A                        	LEA	EDX,DWORD [EDX+EBX*1]
-   434 000004FC 8D 4A 0C                        	LEA	ECX,DWORD [12+EDX]
-   435 000004FF 8B 41 04                        	MOV	EAX,DWORD [4+ECX]
-   436 00000502 8B 74 81 08                     	MOV	ESI,DWORD [8+ECX+EAX*4]
-   437 00000506 40                              	INC	EAX
-   438 00000507 89 41 04                        	MOV	DWORD [4+ECX],EAX
-   439 0000050A 3B 42 0C                        	CMP	EAX,DWORD [12+EDX]
-   440 0000050D 74 4C                           	JE	L97
-   441 0000050F                                 L94:
-   442 0000050F 80 7B 08 00                     	CMP	BYTE [8+EBX],0
-   443 00000513 75 2D                           	JNE	L98
-   444 00000515                                 L95:
-   445 00000515 8B 41 04                        	MOV	EAX,DWORD [4+ECX]
-   446 00000518 8B 5C 81 08                     	MOV	EBX,DWORD [8+ECX+EAX*4]
-   447 0000051C FF 73 0C                        	PUSH	DWORD [12+EBX]
-   448 0000051F FF 35 [0000001C]                	PUSH	DWORD [_task_timer]
-   449 00000525 E8 [00000000]                   	CALL	_timer_settime
-   450 0000052A 39 F3                           	CMP	EBX,ESI
-   451 0000052C 58                              	POP	EAX
-   452 0000052D 5A                              	POP	EDX
-   453 0000052E 74 0B                           	JE	L93
-   454 00000530 FF 33                           	PUSH	DWORD [EBX]
-   455 00000532 6A 00                           	PUSH	0
-   456 00000534 E8 [00000000]                   	CALL	_farjmp
-   457 00000539 5B                              	POP	EBX
-   458 0000053A 5E                              	POP	ESI
-   459 0000053B                                 L93:
-   460 0000053B 8D 65 F8                        	LEA	ESP,DWORD [-8+EBP]
-   461 0000053E 5B                              	POP	EBX
-   462 0000053F 5E                              	POP	ESI
-   463 00000540 5D                              	POP	EBP
-   464 00000541 C3                              	RET
-   465 00000542                                 L98:
-   466 00000542 E8 FFFFFBCD                     	CALL	_task_switchsub
-   467 00000547 8B 15 [00000018]                	MOV	EDX,DWORD [_taskctl]
-   468 0000054D 8B 02                           	MOV	EAX,DWORD [EDX]
-   469 0000054F 69 C0 00000198                  	IMUL	EAX,EAX,408
-   470 00000555 8D 4C 10 0C                     	LEA	ECX,DWORD [12+EAX+EDX*1]
-   471 00000559 EB BA                           	JMP	L95
-   472 0000055B                                 L97:
-   473 0000055B C7 41 04 00000000               	MOV	DWORD [4+ECX],0
-   474 00000562 EB AB                           	JMP	L94
-   475 00000564                                 	GLOBAL	_inthandler07
-   476 00000564                                 _inthandler07:
-   477 00000564 55                              	PUSH	EBP
-   478 00000565 89 E5                           	MOV	EBP,ESP
-   479 00000567 53                              	PUSH	EBX
-   480 00000568 E8 FFFFFAE4                     	CALL	_task_now
-   481 0000056D 89 C3                           	MOV	EBX,EAX
-   482 0000056F E8 [00000000]                   	CALL	_io_cli
-   483 00000574 E8 [00000000]                   	CALL	_clts
-   484 00000579 A1 [00000018]                   	MOV	EAX,DWORD [_taskctl]
-   485 0000057E 8B 40 04                        	MOV	EAX,DWORD [4+EAX]
-   486 00000581 39 D8                           	CMP	EAX,EBX
-   487 00000583 74 19                           	JE	L100
-   488 00000585 85 C0                           	TEST	EAX,EAX
-   489 00000587 75 21                           	JNE	L102
-   490 00000589                                 L101:
-   491 00000589 8D 83 00000094                  	LEA	EAX,DWORD [148+EBX]
-   492 0000058F 50                              	PUSH	EAX
-   493 00000590 E8 [00000000]                   	CALL	_frstor
-   494 00000595 A1 [00000018]                   	MOV	EAX,DWORD [_taskctl]
-   495 0000059A 89 58 04                        	MOV	DWORD [4+EAX],EBX
-   496 0000059D 59                              	POP	ECX
-   497 0000059E                                 L100:
-   498 0000059E E8 [00000000]                   	CALL	_io_sti
-   499 000005A3 8B 5D FC                        	MOV	EBX,DWORD [-4+EBP]
-   500 000005A6 31 C0                           	XOR	EAX,EAX
-   501 000005A8 C9                              	LEAVE
-   502 000005A9 C3                              	RET
-   503 000005AA                                 L102:
-   504 000005AA 05 00000094                     	ADD	EAX,148
-   505 000005AF 50                              	PUSH	EAX
-   506 000005B0 E8 [00000000]                   	CALL	_fnsave
-   507 000005B5 58                              	POP	EAX
-   508 000005B6 EB D1                           	JMP	L101
-   509 000005B8                                 	GLOBAL	_task_block
-   510 000005B8                                 _task_block:
-   511 000005B8 55                              	PUSH	EBP
-   512 000005B9 89 E5                           	MOV	EBP,ESP
-   513 000005BB 57                              	PUSH	EDI
-   514 000005BC 56                              	PUSH	ESI
-   515 000005BD 53                              	PUSH	EBX
-   516 000005BE 53                              	PUSH	EBX
-   517 000005BF 8B 7D 08                        	MOV	EDI,DWORD [8+EBP]
-   518 000005C2 A1 00000F0A                     	MOV	EAX,DWORD [3850]
-   519 000005C7 89 45 F0                        	MOV	DWORD [-16+EBP],EAX
-   520 000005CA 8B 1D 00000F0F                  	MOV	EBX,DWORD [3855]
-   521 000005D0 83 7F 04 02                     	CMP	DWORD [4+EDI],2
-   522 000005D4 74 08                           	JE	L106
-   523 000005D6                                 L103:
-   524 000005D6 8D 65 F4                        	LEA	ESP,DWORD [-12+EBP]
-   525 000005D9 5B                              	POP	EBX
-   526 000005DA 5E                              	POP	ESI
-   527 000005DB 5F                              	POP	EDI
-   528 000005DC 5D                              	POP	EBP
-   529 000005DD C3                              	RET
-   530 000005DE                                 L106:
-   531 000005DE E8 FFFFFA6E                     	CALL	_task_now
-   532 000005E3 57                              	PUSH	EDI
-   533 000005E4 89 C6                           	MOV	ESI,EAX
-   534 000005E6 E8 FFFFFAAC                     	CALL	_task_remove
-   535 000005EB 8B 87 0000012C                  	MOV	EAX,DWORD [300+EDI]
-   536 000005F1 8B 4D F0                        	MOV	ECX,DWORD [-16+EBP]
-   537 000005F4 C7 47 04 00000003               	MOV	DWORD [4+EDI],3
-   538 000005FB 8B 54 C1 04                     	MOV	EDX,DWORD [4+ECX+EAX*8]
-   539 000005FF C7 42 04 00000003               	MOV	DWORD [4+EDX],3
-   540 00000606 8B 93 00001F40                  	MOV	EDX,DWORD [8000+EBX]
-   541 0000060C 89 04 D3                        	MOV	DWORD [EBX+EDX*8],EAX
-   542 0000060F 89 7C D3 04                     	MOV	DWORD [4+EBX+EDX*8],EDI
-   543 00000613 FF 83 00001F40                  	INC	DWORD [8000+EBX]
-   544 00000619 39 F7                           	CMP	EDI,ESI
-   545 0000061B 59                              	POP	ECX
-   546 0000061C 75 B8                           	JNE	L103
-   547 0000061E E8 FFFFFAF1                     	CALL	_task_switchsub
-   548 00000623 E8 FFFFFA29                     	CALL	_task_now
-   549 00000628 FF 30                           	PUSH	DWORD [EAX]
-   550 0000062A 6A 00                           	PUSH	0
-   551 0000062C E8 [00000000]                   	CALL	_farjmp
-   552 00000631 58                              	POP	EAX
-   553 00000632 5A                              	POP	EDX
-   554 00000633 EB A1                           	JMP	L103
-   555 00000635                                 	GLOBAL	_task_unblock
-   556 00000635                                 _task_unblock:
-   557 00000635 55                              	PUSH	EBP
-   558 00000636 89 E5                           	MOV	EBP,ESP
-   559 00000638 57                              	PUSH	EDI
-   560 00000639 56                              	PUSH	ESI
-   561 0000063A 8B 7D 08                        	MOV	EDI,DWORD [8+EBP]
-   562 0000063D 53                              	PUSH	EBX
-   563 0000063E 8B 1D 00000F0A                  	MOV	EBX,DWORD [3850]
-   564 00000644 8B 35 00000F0F                  	MOV	ESI,DWORD [3855]
-   565 0000064A FF 77 0C                        	PUSH	DWORD [12+EDI]
-   566 0000064D FF 77 08                        	PUSH	DWORD [8+EDI]
-   567 00000650 57                              	PUSH	EDI
-   568 00000651 E8 FFFFFDBE                     	CALL	_task_run
-   569 00000656 83 C4 0C                        	ADD	ESP,12
-   570 00000659 8B 87 0000012C                  	MOV	EAX,DWORD [300+EDI]
-   571 0000065F 31 C9                           	XOR	ECX,ECX
-   572 00000661 8B 54 C3 04                     	MOV	EDX,DWORD [4+EBX+EAX*8]
-   573 00000665 8B 47 04                        	MOV	EAX,DWORD [4+EDI]
-   574 00000668 89 42 04                        	MOV	DWORD [4+EDX],EAX
-   575 0000066B 8B 86 00001F40                  	MOV	EAX,DWORD [8000+ESI]
-   576 00000671 39 C1                           	CMP	ECX,EAX
-   577 00000673 7D 0B                           	JGE	L109
-   578 00000675                                 L113:
-   579 00000675 39 7C CE 04                     	CMP	DWORD [4+ESI+ECX*8],EDI
-   580 00000679 74 34                           	JE	L122
-   581 0000067B 41                              	INC	ECX
-   582 0000067C 39 C1                           	CMP	ECX,EAX
-   583 0000067E 7C F5                           	JL	L113
-   584 00000680                                 L109:
-   585 00000680 8B 9E 00001F40                  	MOV	EBX,DWORD [8000+ESI]
-   586 00000686 39 D9                           	CMP	ECX,EBX
-   587 00000688 7D 14                           	JGE	L121
-   588 0000068A                                 L118:
-   589 0000068A 8B 44 CE 08                     	MOV	EAX,DWORD [8+ESI+ECX*8]
-   590 0000068E 8B 54 CE 0C                     	MOV	EDX,DWORD [12+ESI+ECX*8]
-   591 00000692 89 04 CE                        	MOV	DWORD [ESI+ECX*8],EAX
-   592 00000695 89 54 CE 04                     	MOV	DWORD [4+ESI+ECX*8],EDX
-   593 00000699 41                              	INC	ECX
-   594 0000069A 39 D9                           	CMP	ECX,EBX
-   595 0000069C 7C EC                           	JL	L118
-   596 0000069E                                 L121:
-   597 0000069E 8D 43 FF                        	LEA	EAX,DWORD [-1+EBX]
-   598 000006A1 89 86 00001F40                  	MOV	DWORD [8000+ESI],EAX
-   599 000006A7 8D 65 F4                        	LEA	ESP,DWORD [-12+EBP]
-   600 000006AA 5B                              	POP	EBX
-   601 000006AB 5E                              	POP	ESI
-   602 000006AC 5F                              	POP	EDI
-   603 000006AD 5D                              	POP	EBP
-   604 000006AE C3                              	RET
-   605 000006AF                                 L122:
-   606 000006AF C7 44 CE 04 00000000            	MOV	DWORD [4+ESI+ECX*8],0
-   607 000006B7 C7 04 CE 00000000               	MOV	DWORD [ESI+ECX*8],0
-   608 000006BE EB C0                           	JMP	L109
-   609                                          [SECTION .data]
-   610 00000000                                 LC0:
-   611 00000000 6D 74 61 73 6B 20 6D 65 73 73   	DB	"mtask message recv mess",0x00
-       0000000A 61 67 65 20 72 65 63 76 20 6D 
-       00000014 65 73 73 00 
-   612                                          [SECTION .text]
-   613 000006C0                                 	GLOBAL	_message_receive
-   614 000006C0                                 _message_receive:
-   615 000006C0 55                              	PUSH	EBP
-   616 000006C1 89 E5                           	MOV	EBP,ESP
-   617 000006C3 56                              	PUSH	ESI
-   618 000006C4 53                              	PUSH	EBX
-   619 000006C5 8B 75 08                        	MOV	ESI,DWORD [8+EBP]
-   620 000006C8 E8 FFFFF984                     	CALL	_task_now
-   621 000006CD 89 C3                           	MOV	EBX,EAX
-   622 000006CF C7 80 00000130 00000001         	MOV	DWORD [304+EAX],1
-   623 000006D9                                 L124:
-   624 000006D9 8B 83 00000134                  	MOV	EAX,DWORD [308+EBX]
-   625 000006DF 85 C0                           	TEST	EAX,EAX
-   626 000006E1 75 0E                           	JNE	L134
-   627 000006E3                                 L131:
-   628 000006E3 E8 FFFFF969                     	CALL	_task_now
-   629 000006E8 50                              	PUSH	EAX
-   630 000006E9                                 L132:
-   631 000006E9 E8 FFFFFECA                     	CALL	_task_block
-   632 000006EE 58                              	POP	EAX
-   633 000006EF EB E8                           	JMP	L124
-   634 000006F1                                 L134:
-   635 000006F1 81 FE 00002710                  	CMP	ESI,10000
-   636 000006F7 74 25                           	JE	L135
-   637 000006F9 39 70 0C                        	CMP	DWORD [12+EAX],ESI
-   638 000006FC 74 03                           	JE	L133
-   639 000006FE 53                              	PUSH	EBX
-   640 000006FF EB E8                           	JMP	L132
-   641 00000701                                 L133:
-   642 00000701 C7 83 00000130 00000000         	MOV	DWORD [304+EBX],0
-   643 0000070B C7 83 00000134 00000000         	MOV	DWORD [308+EBX],0
-   644 00000715 8D 65 F8                        	LEA	ESP,DWORD [-8+EBP]
-   645 00000718 31 C0                           	XOR	EAX,EAX
-   646 0000071A 5B                              	POP	EBX
-   647 0000071B 5E                              	POP	ESI
-   648 0000071C 5D                              	POP	EBP
-   649 0000071D C3                              	RET
-   650 0000071E                                 L135:
-   651 0000071E 6A 0F                           	PUSH	15
-   652 00000720 68 000000FF                     	PUSH	255
-   653 00000725 6A 00                           	PUSH	0
-   654 00000727 6A 08                           	PUSH	8
-   655 00000729 6A 00                           	PUSH	0
-   656 0000072B 0F BF 05 00000FF4               	MOVSX	EAX,WORD [4084]
-   657 00000732 50                              	PUSH	EAX
-   658 00000733 FF 35 00000FF8                  	PUSH	DWORD [4088]
-   659 00000739 E8 [00000000]                   	CALL	_boxfill8
-   660 0000073E 68 [00000000]                   	PUSH	LC0
-   661 00000743 6A 07                           	PUSH	7
-   662 00000745 6A 00                           	PUSH	0
-   663 00000747 6A 08                           	PUSH	8
-   664 00000749 0F BF 05 00000FF4               	MOVSX	EAX,WORD [4084]
-   665 00000750 50                              	PUSH	EAX
-   666 00000751 FF 35 00000FF8                  	PUSH	DWORD [4088]
-   667 00000757 E8 [00000000]                   	CALL	_putfonts8_asc
-   668 0000075C EB A3                           	JMP	L133
-   669 0000075E                                 	GLOBAL	_message_send
-   670 0000075E                                 _message_send:
-   671 0000075E 55                              	PUSH	EBP
-   672 0000075F 89 E5                           	MOV	EBP,ESP
-   673 00000761 56                              	PUSH	ESI
-   674 00000762 53                              	PUSH	EBX
-   675 00000763 FF 75 08                        	PUSH	DWORD [8+EBP]
-   676 00000766 8B 75 0C                        	MOV	ESI,DWORD [12+EBP]
-   677 00000769 E8 FFFFF892                     	CALL	_pid2task
-   678 0000076E 89 C3                           	MOV	EBX,EAX
-   679 00000770 58                              	POP	EAX
-   680 00000771 83 C8 FF                        	OR	EAX,-1
-   681 00000774 85 DB                           	TEST	EBX,EBX
-   682 00000776 74 1C                           	JE	L136
-   683 00000778 E8 FFFFF8D4                     	CALL	_task_now
-   684 0000077D 89 B3 00000134                  	MOV	DWORD [308+EBX],ESI
-   685 00000783 8B 80 0000012C                  	MOV	EAX,DWORD [300+EAX]
-   686 00000789 89 46 0C                        	MOV	DWORD [12+ESI],EAX
-   687 0000078C 83 7B 04 03                     	CMP	DWORD [4+EBX],3
-   688 00000790 74 09                           	JE	L139
-   689 00000792                                 L138:
-   690 00000792 31 C0                           	XOR	EAX,EAX
-   691 00000794                                 L136:
-   692 00000794 8D 65 F8                        	LEA	ESP,DWORD [-8+EBP]
-   693 00000797 5B                              	POP	EBX
-   694 00000798 5E                              	POP	ESI
-   695 00000799 5D                              	POP	EBP
-   696 0000079A C3                              	RET
-   697 0000079B                                 L139:
-   698 0000079B 53                              	PUSH	EBX
-   699 0000079C E8 FFFFFE94                     	CALL	_task_unblock
-   700 000007A1 58                              	POP	EAX
-   701 000007A2 EB EE                           	JMP	L138
-   702 000007A4                                 	GLOBAL	_taskctl
-   703                                          [SECTION .data]
-   704 00000018                                 	ALIGNB	4
-   705 00000018                                 _taskctl:
-   706 00000018 00 00 00 00                     	RESB	4
-   707 0000001C                                 	GLOBAL	_task_timer
-   708                                          [SECTION .data]
-   709 0000001C                                 	ALIGNB	4
-   710 0000001C                                 _task_timer:
-   711 0000001C 00 00 00 00                     	RESB	4
+     6 00000000                                 	EXTERN	__alloca
+     7 00000000                                 	EXTERN	_io_hlt
+     8 00000000                                 	EXTERN	_memman_alloc_4k
+     9 00000000                                 	EXTERN	_set_segmdesc
+    10 00000000                                 	EXTERN	_load_tr
+    11 00000000                                 	EXTERN	_timer_alloc
+    12 00000000                                 	EXTERN	_timer_settime
+    13 00000000                                 	EXTERN	_farjmp
+    14 00000000                                 	EXTERN	_io_cli
+    15 00000000                                 	EXTERN	_clts
+    16 00000000                                 	EXTERN	_frstor
+    17 00000000                                 	EXTERN	_io_sti
+    18 00000000                                 	EXTERN	_fnsave
+    19 00000000                                 [FILE "mtask.c"]
+    20                                          [SECTION .text]
+    21 00000000                                 	GLOBAL	_pid2task
+    22 00000000                                 _pid2task:
+    23 00000000 55                              	PUSH	EBP
+    24 00000001 89 E5                           	MOV	EBP,ESP
+    25 00000003 8B 15 00000F0A                  	MOV	EDX,DWORD [3850]
+    26 00000009 8B 45 08                        	MOV	EAX,DWORD [8+EBP]
+    27 0000000C 5D                              	POP	EBP
+    28 0000000D 8B 44 C2 04                     	MOV	EAX,DWORD [4+EDX+EAX*8]
+    29 00000011 C3                              	RET
+    30 00000012                                 	GLOBAL	_init_pid
+    31 00000012                                 _init_pid:
+    32 00000012 55                              	PUSH	EBP
+    33 00000013 B8 000157D0                     	MOV	EAX,88016
+    34 00000018 89 E5                           	MOV	EBP,ESP
+    35 0000001A E8 [00000000]                   	CALL	__alloca
+    36 0000001F 31 C0                           	XOR	EAX,EAX
+    37 00000021 C7 45 F8 00000000               	MOV	DWORD [-8+EBP],0
+    38 00000028 C7 85 FFFEC770 00000000         	MOV	DWORD [-80016+EBP],0
+    39 00000032                                 L7:
+    40 00000032 89 84 C5 FFFEC780               	MOV	DWORD [-80000+EBP+EAX*8],EAX
+    41 00000039 40                              	INC	EAX
+    42 0000003A 3D 0000270F                     	CMP	EAX,9999
+    43 0000003F 7E F1                           	JLE	L7
+    44 00000041 31 C0                           	XOR	EAX,EAX
+    45 00000043                                 L12:
+    46 00000043 89 84 C5 FFFEA830               	MOV	DWORD [-88016+EBP+EAX*8],EAX
+    47 0000004A 40                              	INC	EAX
+    48 0000004B 3D 000003E8                     	CMP	EAX,1000
+    49 00000050 7E F1                           	JLE	L12
+    50 00000052 8D 85 FFFEC780                  	LEA	EAX,DWORD [-80000+EBP]
+    51 00000058 A3 00000F0A                     	MOV	DWORD [3850],EAX
+    52 0000005D 8D 85 FFFEA830                  	LEA	EAX,DWORD [-88016+EBP]
+    53 00000063 A3 00000F0F                     	MOV	DWORD [3855],EAX
+    54 00000068 C9                              	LEAVE
+    55 00000069 C3                              	RET
+    56 0000006A                                 	GLOBAL	_task_now
+    57 0000006A                                 _task_now:
+    58 0000006A A1 [00000000]                   	MOV	EAX,DWORD [_taskctl]
+    59 0000006F 55                              	PUSH	EBP
+    60 00000070 89 E5                           	MOV	EBP,ESP
+    61 00000072 5D                              	POP	EBP
+    62 00000073 8B 10                           	MOV	EDX,DWORD [EAX]
+    63 00000075 69 D2 00000198                  	IMUL	EDX,EDX,408
+    64 0000007B 8D 44 02 0C                     	LEA	EAX,DWORD [12+EDX+EAX*1]
+    65 0000007F 8B 50 04                        	MOV	EDX,DWORD [4+EAX]
+    66 00000082 8B 44 90 08                     	MOV	EAX,DWORD [8+EAX+EDX*4]
+    67 00000086 C3                              	RET
+    68 00000087                                 	GLOBAL	_task_add
+    69 00000087                                 _task_add:
+    70 00000087 55                              	PUSH	EBP
+    71 00000088 89 E5                           	MOV	EBP,ESP
+    72 0000008A 8B 4D 08                        	MOV	ECX,DWORD [8+EBP]
+    73 0000008D 8B 51 08                        	MOV	EDX,DWORD [8+ECX]
+    74 00000090 69 D2 00000198                  	IMUL	EDX,EDX,408
+    75 00000096 03 15 [00000000]                	ADD	EDX,DWORD [_taskctl]
+    76 0000009C 8B 42 0C                        	MOV	EAX,DWORD [12+EDX]
+    77 0000009F 89 4C 82 14                     	MOV	DWORD [20+EDX+EAX*4],ECX
+    78 000000A3 40                              	INC	EAX
+    79 000000A4 89 42 0C                        	MOV	DWORD [12+EDX],EAX
+    80 000000A7 C7 41 04 00000002               	MOV	DWORD [4+ECX],2
+    81 000000AE 5D                              	POP	EBP
+    82 000000AF C3                              	RET
+    83 000000B0                                 	GLOBAL	_task_remove
+    84 000000B0                                 _task_remove:
+    85 000000B0 55                              	PUSH	EBP
+    86 000000B1 31 C9                           	XOR	ECX,ECX
+    87 000000B3 89 E5                           	MOV	EBP,ESP
+    88 000000B5 57                              	PUSH	EDI
+    89 000000B6 56                              	PUSH	ESI
+    90 000000B7 8B 75 08                        	MOV	ESI,DWORD [8+EBP]
+    91 000000BA 53                              	PUSH	EBX
+    92 000000BB 8B 3D 00000F0A                  	MOV	EDI,DWORD [3850]
+    93 000000C1 8B 46 08                        	MOV	EAX,DWORD [8+ESI]
+    94 000000C4 69 C0 00000198                  	IMUL	EAX,EAX,408
+    95 000000CA 03 05 [00000000]                	ADD	EAX,DWORD [_taskctl]
+    96 000000D0 8D 50 0C                        	LEA	EDX,DWORD [12+EAX]
+    97 000000D3 3B 48 0C                        	CMP	ECX,DWORD [12+EAX]
+    98 000000D6 7D 0B                           	JGE	L21
+    99 000000D8                                 L25:
+   100 000000D8 39 74 8A 08                     	CMP	DWORD [8+EDX+ECX*4],ESI
+   101 000000DC 74 05                           	JE	L21
+   102 000000DE 41                              	INC	ECX
+   103 000000DF 3B 0A                           	CMP	ECX,DWORD [EDX]
+   104 000000E1 7C F5                           	JL	L25
+   105 000000E3                                 L21:
+   106 000000E3 8B 42 04                        	MOV	EAX,DWORD [4+EDX]
+   107 000000E6 FF 0A                           	DEC	DWORD [EDX]
+   108 000000E8 39 C1                           	CMP	ECX,EAX
+   109 000000EA 7D 04                           	JGE	L26
+   110 000000EC 48                              	DEC	EAX
+   111 000000ED 89 42 04                        	MOV	DWORD [4+EDX],EAX
+   112 000000F0                                 L26:
+   113 000000F0 8B 02                           	MOV	EAX,DWORD [EDX]
+   114 000000F2 39 42 04                        	CMP	DWORD [4+EDX],EAX
+   115 000000F5 7C 07                           	JL	L27
+   116 000000F7 C7 42 04 00000000               	MOV	DWORD [4+EDX],0
+   117 000000FE                                 L27:
+   118 000000FE C7 46 04 00000001               	MOV	DWORD [4+ESI],1
+   119 00000105 8B 1A                           	MOV	EBX,DWORD [EDX]
+   120 00000107 39 D9                           	CMP	ECX,EBX
+   121 00000109 7D 0D                           	JGE	L35
+   122 0000010B                                 L32:
+   123 0000010B 8B 44 8A 0C                     	MOV	EAX,DWORD [12+EDX+ECX*4]
+   124 0000010F 89 44 8A 08                     	MOV	DWORD [8+EDX+ECX*4],EAX
+   125 00000113 41                              	INC	ECX
+   126 00000114 39 D9                           	CMP	ECX,EBX
+   127 00000116 7C F3                           	JL	L32
+   128 00000118                                 L35:
+   129 00000118 8B 86 0000012C                  	MOV	EAX,DWORD [300+ESI]
+   130 0000011E 8B 54 C7 04                     	MOV	EDX,DWORD [4+EDI+EAX*8]
+   131 00000122 8B 46 04                        	MOV	EAX,DWORD [4+ESI]
+   132 00000125 89 42 04                        	MOV	DWORD [4+EDX],EAX
+   133 00000128 5B                              	POP	EBX
+   134 00000129 5E                              	POP	ESI
+   135 0000012A 5F                              	POP	EDI
+   136 0000012B 5D                              	POP	EBP
+   137 0000012C C3                              	RET
+   138 0000012D                                 	GLOBAL	_task_switchsub
+   139 0000012D                                 _task_switchsub:
+   140 0000012D 55                              	PUSH	EBP
+   141 0000012E 31 C9                           	XOR	ECX,ECX
+   142 00000130 89 E5                           	MOV	EBP,ESP
+   143 00000132 A1 [00000000]                   	MOV	EAX,DWORD [_taskctl]
+   144 00000137 31 D2                           	XOR	EDX,EDX
+   145 00000139                                 L42:
+   146 00000139 83 7C 10 0C 00                  	CMP	DWORD [12+EAX+EDX*1],0
+   147 0000013E 7F 0C                           	JG	L38
+   148 00000140 41                              	INC	ECX
+   149 00000141 81 C2 00000198                  	ADD	EDX,408
+   150 00000147 83 F9 09                        	CMP	ECX,9
+   151 0000014A 7E ED                           	JLE	L42
+   152 0000014C                                 L38:
+   153 0000014C 89 08                           	MOV	DWORD [EAX],ECX
+   154 0000014E C6 40 08 00                     	MOV	BYTE [8+EAX],0
+   155 00000152 5D                              	POP	EBP
+   156 00000153 C3                              	RET
+   157 00000154                                 	GLOBAL	_task_idle
+   158 00000154                                 _task_idle:
+   159 00000154 55                              	PUSH	EBP
+   160 00000155 89 E5                           	MOV	EBP,ESP
+   161 00000157                                 L45:
+   162 00000157 E8 [00000000]                   	CALL	_io_hlt
+   163 0000015C EB F9                           	JMP	L45
+   164 0000015E                                 	GLOBAL	_task_init
+   165 0000015E                                 _task_init:
+   166 0000015E 55                              	PUSH	EBP
+   167 0000015F 89 E5                           	MOV	EBP,ESP
+   168 00000161 57                              	PUSH	EDI
+   169 00000162 56                              	PUSH	ESI
+   170 00000163 31 FF                           	XOR	EDI,EDI
+   171 00000165 53                              	PUSH	EBX
+   172 00000166 31 F6                           	XOR	ESI,ESI
+   173 00000168 FF 75 08                        	PUSH	DWORD [8+EBP]
+   174 0000016B BB 000003E7                     	MOV	EBX,999
+   175 00000170 E8 FFFFFE9D                     	CALL	_init_pid
+   176 00000175 68 0004E25C                     	PUSH	320092
+   177 0000017A FF 75 08                        	PUSH	DWORD [8+EBP]
+   178 0000017D E8 [00000000]                   	CALL	_memman_alloc_4k
+   179 00000182 83 C4 0C                        	ADD	ESP,12
+   180 00000185 A3 [00000000]                   	MOV	DWORD [_taskctl],EAX
+   181 0000018A                                 L53:
+   182 0000018A 89 FA                           	MOV	EDX,EDI
+   183 0000018C 8D 46 18                        	LEA	EAX,DWORD [24+ESI]
+   184 0000018F 03 15 [00000000]                	ADD	EDX,DWORD [_taskctl]
+   185 00000195 89 82 00000FFC                  	MOV	DWORD [4092+EDX],EAX
+   186 0000019B 8D 86 00001F58                  	LEA	EAX,DWORD [8024+ESI]
+   187 000001A1 89 82 00001088                  	MOV	DWORD [4232+EDX],EAX
+   188 000001A7 8D 86 00270018                  	LEA	EAX,DWORD [2555928+ESI]
+   189 000001AD C7 82 00001000 00000000         	MOV	DWORD [4096+EDX],0
+   190 000001B7 68 00000089                     	PUSH	137
+   191 000001BC 81 C2 00001028                  	ADD	EDX,4136
+   192 000001C2 52                              	PUSH	EDX
+   193 000001C3 6A 67                           	PUSH	103
+   194 000001C5 50                              	PUSH	EAX
+   195 000001C6 E8 [00000000]                   	CALL	_set_segmdesc
+   196 000001CB A1 [00000000]                   	MOV	EAX,DWORD [_taskctl]
+   197 000001D0 01 F8                           	ADD	EAX,EDI
+   198 000001D2 68 00000082                     	PUSH	130
+   199 000001D7 05 000010FC                     	ADD	EAX,4348
+   200 000001DC 81 C7 0000013C                  	ADD	EDI,316
+   201 000001E2 50                              	PUSH	EAX
+   202 000001E3 8D 86 00271F58                  	LEA	EAX,DWORD [2563928+ESI]
+   203 000001E9 6A 0F                           	PUSH	15
+   204 000001EB 83 C6 08                        	ADD	ESI,8
+   205 000001EE 50                              	PUSH	EAX
+   206 000001EF E8 [00000000]                   	CALL	_set_segmdesc
+   207 000001F4 83 C4 20                        	ADD	ESP,32
+   208 000001F7 4B                              	DEC	EBX
+   209 000001F8 79 90                           	JNS	L53
+   210 000001FA 8B 0D [00000000]                	MOV	ECX,DWORD [_taskctl]
+   211 00000200 31 D2                           	XOR	EDX,EDX
+   212 00000202 BB 00000009                     	MOV	EBX,9
+   213 00000207                                 L58:
+   214 00000207 8D 04 11                        	LEA	EAX,DWORD [ECX+EDX*1]
+   215 0000020A 81 C2 00000198                  	ADD	EDX,408
+   216 00000210 4B                              	DEC	EBX
+   217 00000211 C7 40 0C 00000000               	MOV	DWORD [12+EAX],0
+   218 00000218 C7 40 10 00000000               	MOV	DWORD [16+EAX],0
+   219 0000021F 79 E6                           	JNS	L58
+   220 00000221 E8 000000B2                     	CALL	_task_alloc
+   221 00000226 89 C6                           	MOV	ESI,EAX
+   222 00000228 C7 40 04 00000002               	MOV	DWORD [4+EAX],2
+   223 0000022F C7 40 0C 00000002               	MOV	DWORD [12+EAX],2
+   224 00000236 C7 40 08 00000000               	MOV	DWORD [8+EAX],0
+   225 0000023D 50                              	PUSH	EAX
+   226 0000023E E8 FFFFFE44                     	CALL	_task_add
+   227 00000243 E8 FFFFFEE5                     	CALL	_task_switchsub
+   228 00000248 FF 36                           	PUSH	DWORD [ESI]
+   229 0000024A E8 [00000000]                   	CALL	_load_tr
+   230 0000024F E8 [00000000]                   	CALL	_timer_alloc
+   231 00000254 FF 76 0C                        	PUSH	DWORD [12+ESI]
+   232 00000257 50                              	PUSH	EAX
+   233 00000258 A3 [00000004]                   	MOV	DWORD [_task_timer],EAX
+   234 0000025D E8 [00000000]                   	CALL	_timer_settime
+   235 00000262 E8 00000071                     	CALL	_task_alloc
+   236 00000267 68 00010000                     	PUSH	65536
+   237 0000026C FF 75 08                        	PUSH	DWORD [8+EBP]
+   238 0000026F 89 C3                           	MOV	EBX,EAX
+   239 00000271 E8 [00000000]                   	CALL	_memman_alloc_4k
+   240 00000276 05 00010000                     	ADD	EAX,65536
+   241 0000027B 89 43 64                        	MOV	DWORD [100+EBX],EAX
+   242 0000027E C7 43 4C [00000154]             	MOV	DWORD [76+EBX],_task_idle
+   243 00000285 C7 43 74 00000008               	MOV	DWORD [116+EBX],8
+   244 0000028C C7 43 78 00000010               	MOV	DWORD [120+EBX],16
+   245 00000293 C7 43 7C 00000008               	MOV	DWORD [124+EBX],8
+   246 0000029A C7 83 00000080 00000008         	MOV	DWORD [128+EBX],8
+   247 000002A4 C7 83 00000084 00000008         	MOV	DWORD [132+EBX],8
+   248 000002AE C7 83 00000088 00000008         	MOV	DWORD [136+EBX],8
+   249 000002B8 6A 01                           	PUSH	1
+   250 000002BA 6A 09                           	PUSH	9
+   251 000002BC 53                              	PUSH	EBX
+   252 000002BD E8 00000116                     	CALL	_task_run
+   253 000002C2 A1 [00000000]                   	MOV	EAX,DWORD [_taskctl]
+   254 000002C7 C7 40 04 00000000               	MOV	DWORD [4+EAX],0
+   255 000002CE 8D 65 F4                        	LEA	ESP,DWORD [-12+EBP]
+   256 000002D1 89 F0                           	MOV	EAX,ESI
+   257 000002D3 5B                              	POP	EBX
+   258 000002D4 5E                              	POP	ESI
+   259 000002D5 5F                              	POP	EDI
+   260 000002D6 5D                              	POP	EBP
+   261 000002D7 C3                              	RET
+   262 000002D8                                 	GLOBAL	_task_alloc
+   263 000002D8                                 _task_alloc:
+   264 000002D8 55                              	PUSH	EBP
+   265 000002D9 31 D2                           	XOR	EDX,EDX
+   266 000002DB 89 E5                           	MOV	EBP,ESP
+   267 000002DD 53                              	PUSH	EBX
+   268 000002DE 8B 1D 00000F0A                  	MOV	EBX,DWORD [3850]
+   269 000002E4                                 L74:
+   270 000002E4 89 D0                           	MOV	EAX,EDX
+   271 000002E6 69 C0 0000013C                  	IMUL	EAX,EAX,316
+   272 000002EC 03 05 [00000000]                	ADD	EAX,DWORD [_taskctl]
+   273 000002F2 83 B8 00001000 00               	CMP	DWORD [4096+EAX],0
+   274 000002F9 74 0E                           	JE	L79
+   275 000002FB 42                              	INC	EDX
+   276 000002FC 81 FA 000003E7                  	CMP	EDX,999
+   277 00000302 7E E0                           	JLE	L74
+   278 00000304 31 C0                           	XOR	EAX,EAX
+   279 00000306                                 L63:
+   280 00000306 5B                              	POP	EBX
+   281 00000307 5D                              	POP	EBP
+   282 00000308 C3                              	RET
+   283 00000309                                 L79:
+   284 00000309 8D 88 00000FFC                  	LEA	ECX,DWORD [4092+EAX]
+   285 0000030F BA 00000003                     	MOV	EDX,3
+   286 00000314 C7 41 04 00000001               	MOV	DWORD [4+ECX],1
+   287 0000031B C7 41 50 00000202               	MOV	DWORD [80+ECX],514
+   288 00000322 C7 41 54 00000000               	MOV	DWORD [84+ECX],0
+   289 00000329 C7 41 58 00000000               	MOV	DWORD [88+ECX],0
+   290 00000330 C7 41 5C 00000000               	MOV	DWORD [92+ECX],0
+   291 00000337 C7 41 60 00000000               	MOV	DWORD [96+ECX],0
+   292 0000033E C7 41 68 00000000               	MOV	DWORD [104+ECX],0
+   293 00000345 C7 41 6C 00000000               	MOV	DWORD [108+ECX],0
+   294 0000034C C7 41 70 00000000               	MOV	DWORD [112+ECX],0
+   295 00000353 C7 41 74 00000000               	MOV	DWORD [116+ECX],0
+   296 0000035A C7 81 00000080 00000000         	MOV	DWORD [128+ECX],0
+   297 00000364 C7 81 00000084 00000000         	MOV	DWORD [132+ECX],0
+   298 0000036E C7 81 00000088 00000000         	MOV	DWORD [136+ECX],0
+   299 00000378 C7 81 00000090 40000000         	MOV	DWORD [144+ECX],1073741824
+   300 00000382 C7 41 34 00000000               	MOV	DWORD [52+ECX],0
+   301 00000389 C7 81 00000094 0000037F         	MOV	DWORD [148+ECX],895
+   302 00000393 C7 81 00000098 00000000         	MOV	DWORD [152+ECX],0
+   303 0000039D C7 81 0000009C 0000FFFF         	MOV	DWORD [156+ECX],65535
+   304 000003A7                                 L73:
+   305 000003A7 C7 84 91 00000094 00000000      	MOV	DWORD [148+ECX+EDX*4],0
+   306 000003B2 42                              	INC	EDX
+   307 000003B3 83 FA 1A                        	CMP	EDX,26
+   308 000003B6 7E EF                           	JLE	L73
+   309 000003B8 8B 83 00013878                  	MOV	EAX,DWORD [79992+EBX]
+   310 000003BE 8D 50 01                        	LEA	EDX,DWORD [1+EAX]
+   311 000003C1 89 4C C3 04                     	MOV	DWORD [4+EBX+EAX*8],ECX
+   312 000003C5 89 93 00013878                  	MOV	DWORD [79992+EBX],EDX
+   313 000003CB 89 81 0000012C                  	MOV	DWORD [300+ECX],EAX
+   314 000003D1 89 C8                           	MOV	EAX,ECX
+   315 000003D3 E9 FFFFFF2E                     	JMP	L63
+   316 000003D8                                 	GLOBAL	_task_run
+   317 000003D8                                 _task_run:
+   318 000003D8 55                              	PUSH	EBP
+   319 000003D9 89 E5                           	MOV	EBP,ESP
+   320 000003DB 56                              	PUSH	ESI
+   321 000003DC 53                              	PUSH	EBX
+   322 000003DD 8B 75 0C                        	MOV	ESI,DWORD [12+EBP]
+   323 000003E0 8B 45 10                        	MOV	EAX,DWORD [16+EBP]
+   324 000003E3 8B 5D 08                        	MOV	EBX,DWORD [8+EBP]
+   325 000003E6 85 F6                           	TEST	ESI,ESI
+   326 000003E8 78 3B                           	JS	L85
+   327 000003EA                                 L81:
+   328 000003EA 85 C0                           	TEST	EAX,EAX
+   329 000003EC 7E 03                           	JLE	L82
+   330 000003EE 89 43 0C                        	MOV	DWORD [12+EBX],EAX
+   331 000003F1                                 L82:
+   332 000003F1 83 7B 04 02                     	CMP	DWORD [4+EBX],2
+   333 000003F5 74 20                           	JE	L86
+   334 000003F7                                 L83:
+   335 000003F7 83 7B 04 02                     	CMP	DWORD [4+EBX],2
+   336 000003FB 74 0A                           	JE	L84
+   337 000003FD 89 73 08                        	MOV	DWORD [8+EBX],ESI
+   338 00000400 53                              	PUSH	EBX
+   339 00000401 E8 FFFFFC81                     	CALL	_task_add
+   340 00000406 58                              	POP	EAX
+   341 00000407                                 L84:
+   342 00000407 A1 [00000000]                   	MOV	EAX,DWORD [_taskctl]
+   343 0000040C C6 40 08 01                     	MOV	BYTE [8+EAX],1
+   344 00000410 8D 65 F8                        	LEA	ESP,DWORD [-8+EBP]
+   345 00000413 5B                              	POP	EBX
+   346 00000414 5E                              	POP	ESI
+   347 00000415 5D                              	POP	EBP
+   348 00000416 C3                              	RET
+   349 00000417                                 L86:
+   350 00000417 39 73 08                        	CMP	DWORD [8+EBX],ESI
+   351 0000041A 74 DB                           	JE	L83
+   352 0000041C 53                              	PUSH	EBX
+   353 0000041D E8 FFFFFC8E                     	CALL	_task_remove
+   354 00000422 5A                              	POP	EDX
+   355 00000423 EB D2                           	JMP	L83
+   356 00000425                                 L85:
+   357 00000425 8B 73 08                        	MOV	ESI,DWORD [8+EBX]
+   358 00000428 EB C0                           	JMP	L81
+   359 0000042A                                 	GLOBAL	_task_sleep
+   360 0000042A                                 _task_sleep:
+   361 0000042A 55                              	PUSH	EBP
+   362 0000042B 89 E5                           	MOV	EBP,ESP
+   363 0000042D 56                              	PUSH	ESI
+   364 0000042E 53                              	PUSH	EBX
+   365 0000042F 8B 75 08                        	MOV	ESI,DWORD [8+EBP]
+   366 00000432 83 7E 04 02                     	CMP	DWORD [4+ESI],2
+   367 00000436 74 07                           	JE	L90
+   368 00000438                                 L87:
+   369 00000438 8D 65 F8                        	LEA	ESP,DWORD [-8+EBP]
+   370 0000043B 5B                              	POP	EBX
+   371 0000043C 5E                              	POP	ESI
+   372 0000043D 5D                              	POP	EBP
+   373 0000043E C3                              	RET
+   374 0000043F                                 L90:
+   375 0000043F E8 FFFFFC26                     	CALL	_task_now
+   376 00000444 56                              	PUSH	ESI
+   377 00000445 89 C3                           	MOV	EBX,EAX
+   378 00000447 E8 FFFFFC64                     	CALL	_task_remove
+   379 0000044C 58                              	POP	EAX
+   380 0000044D 39 DE                           	CMP	ESI,EBX
+   381 0000044F 75 E7                           	JNE	L87
+   382 00000451 E8 FFFFFCD7                     	CALL	_task_switchsub
+   383 00000456 E8 FFFFFC0F                     	CALL	_task_now
+   384 0000045B FF 30                           	PUSH	DWORD [EAX]
+   385 0000045D 6A 00                           	PUSH	0
+   386 0000045F E8 [00000000]                   	CALL	_farjmp
+   387 00000464 59                              	POP	ECX
+   388 00000465 5B                              	POP	EBX
+   389 00000466 EB D0                           	JMP	L87
+   390 00000468                                 	GLOBAL	_task_switch
+   391 00000468                                 _task_switch:
+   392 00000468 55                              	PUSH	EBP
+   393 00000469 89 E5                           	MOV	EBP,ESP
+   394 0000046B 56                              	PUSH	ESI
+   395 0000046C 53                              	PUSH	EBX
+   396 0000046D 8B 1D [00000000]                	MOV	EBX,DWORD [_taskctl]
+   397 00000473 8B 13                           	MOV	EDX,DWORD [EBX]
+   398 00000475 69 D2 00000198                  	IMUL	EDX,EDX,408
+   399 0000047B 8D 14 1A                        	LEA	EDX,DWORD [EDX+EBX*1]
+   400 0000047E 8D 4A 0C                        	LEA	ECX,DWORD [12+EDX]
+   401 00000481 8B 41 04                        	MOV	EAX,DWORD [4+ECX]
+   402 00000484 8B 74 81 08                     	MOV	ESI,DWORD [8+ECX+EAX*4]
+   403 00000488 40                              	INC	EAX
+   404 00000489 89 41 04                        	MOV	DWORD [4+ECX],EAX
+   405 0000048C 3B 42 0C                        	CMP	EAX,DWORD [12+EDX]
+   406 0000048F 74 4C                           	JE	L95
+   407 00000491                                 L92:
+   408 00000491 80 7B 08 00                     	CMP	BYTE [8+EBX],0
+   409 00000495 75 2D                           	JNE	L96
+   410 00000497                                 L93:
+   411 00000497 8B 41 04                        	MOV	EAX,DWORD [4+ECX]
+   412 0000049A 8B 5C 81 08                     	MOV	EBX,DWORD [8+ECX+EAX*4]
+   413 0000049E FF 73 0C                        	PUSH	DWORD [12+EBX]
+   414 000004A1 FF 35 [00000004]                	PUSH	DWORD [_task_timer]
+   415 000004A7 E8 [00000000]                   	CALL	_timer_settime
+   416 000004AC 39 F3                           	CMP	EBX,ESI
+   417 000004AE 59                              	POP	ECX
+   418 000004AF 58                              	POP	EAX
+   419 000004B0 74 0B                           	JE	L91
+   420 000004B2 FF 33                           	PUSH	DWORD [EBX]
+   421 000004B4 6A 00                           	PUSH	0
+   422 000004B6 E8 [00000000]                   	CALL	_farjmp
+   423 000004BB 58                              	POP	EAX
+   424 000004BC 5A                              	POP	EDX
+   425 000004BD                                 L91:
+   426 000004BD 8D 65 F8                        	LEA	ESP,DWORD [-8+EBP]
+   427 000004C0 5B                              	POP	EBX
+   428 000004C1 5E                              	POP	ESI
+   429 000004C2 5D                              	POP	EBP
+   430 000004C3 C3                              	RET
+   431 000004C4                                 L96:
+   432 000004C4 E8 FFFFFC64                     	CALL	_task_switchsub
+   433 000004C9 8B 15 [00000000]                	MOV	EDX,DWORD [_taskctl]
+   434 000004CF 8B 02                           	MOV	EAX,DWORD [EDX]
+   435 000004D1 69 C0 00000198                  	IMUL	EAX,EAX,408
+   436 000004D7 8D 4C 10 0C                     	LEA	ECX,DWORD [12+EAX+EDX*1]
+   437 000004DB EB BA                           	JMP	L93
+   438 000004DD                                 L95:
+   439 000004DD C7 41 04 00000000               	MOV	DWORD [4+ECX],0
+   440 000004E4 EB AB                           	JMP	L92
+   441 000004E6                                 	GLOBAL	_inthandler07
+   442 000004E6                                 _inthandler07:
+   443 000004E6 55                              	PUSH	EBP
+   444 000004E7 89 E5                           	MOV	EBP,ESP
+   445 000004E9 53                              	PUSH	EBX
+   446 000004EA E8 FFFFFB7B                     	CALL	_task_now
+   447 000004EF 89 C3                           	MOV	EBX,EAX
+   448 000004F1 E8 [00000000]                   	CALL	_io_cli
+   449 000004F6 E8 [00000000]                   	CALL	_clts
+   450 000004FB A1 [00000000]                   	MOV	EAX,DWORD [_taskctl]
+   451 00000500 8B 40 04                        	MOV	EAX,DWORD [4+EAX]
+   452 00000503 39 D8                           	CMP	EAX,EBX
+   453 00000505 74 19                           	JE	L98
+   454 00000507 85 C0                           	TEST	EAX,EAX
+   455 00000509 75 21                           	JNE	L100
+   456 0000050B                                 L99:
+   457 0000050B 8D 83 00000094                  	LEA	EAX,DWORD [148+EBX]
+   458 00000511 50                              	PUSH	EAX
+   459 00000512 E8 [00000000]                   	CALL	_frstor
+   460 00000517 A1 [00000000]                   	MOV	EAX,DWORD [_taskctl]
+   461 0000051C 89 58 04                        	MOV	DWORD [4+EAX],EBX
+   462 0000051F 58                              	POP	EAX
+   463 00000520                                 L98:
+   464 00000520 E8 [00000000]                   	CALL	_io_sti
+   465 00000525 8B 5D FC                        	MOV	EBX,DWORD [-4+EBP]
+   466 00000528 31 C0                           	XOR	EAX,EAX
+   467 0000052A C9                              	LEAVE
+   468 0000052B C3                              	RET
+   469 0000052C                                 L100:
+   470 0000052C 05 00000094                     	ADD	EAX,148
+   471 00000531 50                              	PUSH	EAX
+   472 00000532 E8 [00000000]                   	CALL	_fnsave
+   473 00000537 58                              	POP	EAX
+   474 00000538 EB D1                           	JMP	L99
+   475 0000053A                                 	GLOBAL	_task_block
+   476 0000053A                                 _task_block:
+   477 0000053A 55                              	PUSH	EBP
+   478 0000053B 89 E5                           	MOV	EBP,ESP
+   479 0000053D 57                              	PUSH	EDI
+   480 0000053E 56                              	PUSH	ESI
+   481 0000053F 53                              	PUSH	EBX
+   482 00000540 53                              	PUSH	EBX
+   483 00000541 8B 7D 08                        	MOV	EDI,DWORD [8+EBP]
+   484 00000544 A1 00000F0A                     	MOV	EAX,DWORD [3850]
+   485 00000549 89 45 F0                        	MOV	DWORD [-16+EBP],EAX
+   486 0000054C 8B 1D 00000F0F                  	MOV	EBX,DWORD [3855]
+   487 00000552 83 7F 04 02                     	CMP	DWORD [4+EDI],2
+   488 00000556 74 08                           	JE	L104
+   489 00000558                                 L101:
+   490 00000558 8D 65 F4                        	LEA	ESP,DWORD [-12+EBP]
+   491 0000055B 5B                              	POP	EBX
+   492 0000055C 5E                              	POP	ESI
+   493 0000055D 5F                              	POP	EDI
+   494 0000055E 5D                              	POP	EBP
+   495 0000055F C3                              	RET
+   496 00000560                                 L104:
+   497 00000560 E8 FFFFFB05                     	CALL	_task_now
+   498 00000565 57                              	PUSH	EDI
+   499 00000566 89 C6                           	MOV	ESI,EAX
+   500 00000568 E8 FFFFFB43                     	CALL	_task_remove
+   501 0000056D 8B 87 0000012C                  	MOV	EAX,DWORD [300+EDI]
+   502 00000573 8B 4D F0                        	MOV	ECX,DWORD [-16+EBP]
+   503 00000576 C7 47 04 00000003               	MOV	DWORD [4+EDI],3
+   504 0000057D 8B 54 C1 04                     	MOV	EDX,DWORD [4+ECX+EAX*8]
+   505 00000581 C7 42 04 00000003               	MOV	DWORD [4+EDX],3
+   506 00000588 8B 93 00001F40                  	MOV	EDX,DWORD [8000+EBX]
+   507 0000058E 89 04 D3                        	MOV	DWORD [EBX+EDX*8],EAX
+   508 00000591 89 7C D3 04                     	MOV	DWORD [4+EBX+EDX*8],EDI
+   509 00000595 FF 83 00001F40                  	INC	DWORD [8000+EBX]
+   510 0000059B 39 F7                           	CMP	EDI,ESI
+   511 0000059D 59                              	POP	ECX
+   512 0000059E 75 B8                           	JNE	L101
+   513 000005A0 E8 FFFFFB88                     	CALL	_task_switchsub
+   514 000005A5 E8 FFFFFAC0                     	CALL	_task_now
+   515 000005AA FF 30                           	PUSH	DWORD [EAX]
+   516 000005AC 6A 00                           	PUSH	0
+   517 000005AE E8 [00000000]                   	CALL	_farjmp
+   518 000005B3 58                              	POP	EAX
+   519 000005B4 5A                              	POP	EDX
+   520 000005B5 EB A1                           	JMP	L101
+   521 000005B7                                 	GLOBAL	_task_unblock
+   522 000005B7                                 _task_unblock:
+   523 000005B7 55                              	PUSH	EBP
+   524 000005B8 89 E5                           	MOV	EBP,ESP
+   525 000005BA 57                              	PUSH	EDI
+   526 000005BB 56                              	PUSH	ESI
+   527 000005BC 8B 7D 08                        	MOV	EDI,DWORD [8+EBP]
+   528 000005BF 53                              	PUSH	EBX
+   529 000005C0 8B 1D 00000F0A                  	MOV	EBX,DWORD [3850]
+   530 000005C6 8B 35 00000F0F                  	MOV	ESI,DWORD [3855]
+   531 000005CC FF 77 0C                        	PUSH	DWORD [12+EDI]
+   532 000005CF FF 77 08                        	PUSH	DWORD [8+EDI]
+   533 000005D2 57                              	PUSH	EDI
+   534 000005D3 E8 FFFFFE00                     	CALL	_task_run
+   535 000005D8 83 C4 0C                        	ADD	ESP,12
+   536 000005DB 8B 87 0000012C                  	MOV	EAX,DWORD [300+EDI]
+   537 000005E1 31 C9                           	XOR	ECX,ECX
+   538 000005E3 8B 54 C3 04                     	MOV	EDX,DWORD [4+EBX+EAX*8]
+   539 000005E7 8B 47 04                        	MOV	EAX,DWORD [4+EDI]
+   540 000005EA 89 42 04                        	MOV	DWORD [4+EDX],EAX
+   541 000005ED 8B 86 00001F40                  	MOV	EAX,DWORD [8000+ESI]
+   542 000005F3 39 C1                           	CMP	ECX,EAX
+   543 000005F5 7D 0B                           	JGE	L107
+   544 000005F7                                 L111:
+   545 000005F7 39 7C CE 04                     	CMP	DWORD [4+ESI+ECX*8],EDI
+   546 000005FB 74 34                           	JE	L120
+   547 000005FD 41                              	INC	ECX
+   548 000005FE 39 C1                           	CMP	ECX,EAX
+   549 00000600 7C F5                           	JL	L111
+   550 00000602                                 L107:
+   551 00000602 8B 9E 00001F40                  	MOV	EBX,DWORD [8000+ESI]
+   552 00000608 39 D9                           	CMP	ECX,EBX
+   553 0000060A 7D 14                           	JGE	L119
+   554 0000060C                                 L116:
+   555 0000060C 8B 44 CE 08                     	MOV	EAX,DWORD [8+ESI+ECX*8]
+   556 00000610 8B 54 CE 0C                     	MOV	EDX,DWORD [12+ESI+ECX*8]
+   557 00000614 89 04 CE                        	MOV	DWORD [ESI+ECX*8],EAX
+   558 00000617 89 54 CE 04                     	MOV	DWORD [4+ESI+ECX*8],EDX
+   559 0000061B 41                              	INC	ECX
+   560 0000061C 39 D9                           	CMP	ECX,EBX
+   561 0000061E 7C EC                           	JL	L116
+   562 00000620                                 L119:
+   563 00000620 8D 43 FF                        	LEA	EAX,DWORD [-1+EBX]
+   564 00000623 89 86 00001F40                  	MOV	DWORD [8000+ESI],EAX
+   565 00000629 8D 65 F4                        	LEA	ESP,DWORD [-12+EBP]
+   566 0000062C 5B                              	POP	EBX
+   567 0000062D 5E                              	POP	ESI
+   568 0000062E 5F                              	POP	EDI
+   569 0000062F 5D                              	POP	EBP
+   570 00000630 C3                              	RET
+   571 00000631                                 L120:
+   572 00000631 C7 44 CE 04 00000000            	MOV	DWORD [4+ESI+ECX*8],0
+   573 00000639 C7 04 CE 00000000               	MOV	DWORD [ESI+ECX*8],0
+   574 00000640 EB C0                           	JMP	L107
+   575 00000642                                 	GLOBAL	_message_receive
+   576 00000642                                 _message_receive:
+   577 00000642 55                              	PUSH	EBP
+   578 00000643 89 E5                           	MOV	EBP,ESP
+   579 00000645 57                              	PUSH	EDI
+   580 00000646 56                              	PUSH	ESI
+   581 00000647 53                              	PUSH	EBX
+   582 00000648 83 EC 20                        	SUB	ESP,32
+   583 0000064B 8B 7D 08                        	MOV	EDI,DWORD [8+EBP]
+   584 0000064E 8B 75 0C                        	MOV	ESI,DWORD [12+EBP]
+   585 00000651 E8 FFFFFA14                     	CALL	_task_now
+   586 00000656 89 C3                           	MOV	EBX,EAX
+   587 00000658 C7 80 00000130 00000001         	MOV	DWORD [304+EAX],1
+   588 00000662                                 L122:
+   589 00000662 8B 93 00000134                  	MOV	EDX,DWORD [308+EBX]
+   590 00000668 85 D2                           	TEST	EDX,EDX
+   591 0000066A 75 09                           	JNE	L130
+   592 0000066C                                 L129:
+   593 0000066C 53                              	PUSH	EBX
+   594 0000066D E8 FFFFFEC8                     	CALL	_task_block
+   595 00000672 58                              	POP	EAX
+   596 00000673 EB ED                           	JMP	L122
+   597 00000675                                 L130:
+   598 00000675 81 FF 00002710                  	CMP	EDI,10000
+   599 0000067B 74 19                           	JE	L131
+   600 0000067D 39 7A 0C                        	CMP	DWORD [12+EDX],EDI
+   601 00000680 75 EA                           	JNE	L129
+   602 00000682 C7 83 00000130 00000000         	MOV	DWORD [304+EBX],0
+   603 0000068C                                 L121:
+   604 0000068C 8D 65 F4                        	LEA	ESP,DWORD [-12+EBP]
+   605 0000068F 31 C0                           	XOR	EAX,EAX
+   606 00000691 5B                              	POP	EBX
+   607 00000692 5E                              	POP	ESI
+   608 00000693 5F                              	POP	EDI
+   609 00000694 5D                              	POP	EBP
+   610 00000695 C3                              	RET
+   611 00000696                                 L131:
+   612 00000696 C7 83 00000130 00000000         	MOV	DWORD [304+EBX],0
+   613 000006A0 8B 02                           	MOV	EAX,DWORD [EDX]
+   614 000006A2 89 06                           	MOV	DWORD [ESI],EAX
+   615 000006A4 8B 42 04                        	MOV	EAX,DWORD [4+EDX]
+   616 000006A7 89 46 04                        	MOV	DWORD [4+ESI],EAX
+   617 000006AA 8B 42 08                        	MOV	EAX,DWORD [8+EDX]
+   618 000006AD 89 46 08                        	MOV	DWORD [8+ESI],EAX
+   619 000006B0 8B 42 0C                        	MOV	EAX,DWORD [12+EDX]
+   620 000006B3 89 46 0C                        	MOV	DWORD [12+ESI],EAX
+   621 000006B6 C7 83 00000134 00000000         	MOV	DWORD [308+EBX],0
+   622 000006C0 EB CA                           	JMP	L121
+   623 000006C2                                 	GLOBAL	_message_send
+   624 000006C2                                 _message_send:
+   625 000006C2 55                              	PUSH	EBP
+   626 000006C3 89 E5                           	MOV	EBP,ESP
+   627 000006C5 56                              	PUSH	ESI
+   628 000006C6 53                              	PUSH	EBX
+   629 000006C7 83 EC 20                        	SUB	ESP,32
+   630 000006CA FF 75 08                        	PUSH	DWORD [8+EBP]
+   631 000006CD 8B 75 0C                        	MOV	ESI,DWORD [12+EBP]
+   632 000006D0 E8 FFFFF92B                     	CALL	_pid2task
+   633 000006D5 89 C3                           	MOV	EBX,EAX
+   634 000006D7 58                              	POP	EAX
+   635 000006D8 83 C8 FF                        	OR	EAX,-1
+   636 000006DB 85 DB                           	TEST	EBX,EBX
+   637 000006DD 74 35                           	JE	L132
+   638 000006DF E8 FFFFF986                     	CALL	_task_now
+   639 000006E4 8B 93 00000134                  	MOV	EDX,DWORD [308+EBX]
+   640 000006EA 8B 80 0000012C                  	MOV	EAX,DWORD [300+EAX]
+   641 000006F0 89 46 0C                        	MOV	DWORD [12+ESI],EAX
+   642 000006F3 8B 06                           	MOV	EAX,DWORD [ESI]
+   643 000006F5 89 02                           	MOV	DWORD [EDX],EAX
+   644 000006F7 8B 46 04                        	MOV	EAX,DWORD [4+ESI]
+   645 000006FA 89 42 04                        	MOV	DWORD [4+EDX],EAX
+   646 000006FD 8B 46 08                        	MOV	EAX,DWORD [8+ESI]
+   647 00000700 89 42 08                        	MOV	DWORD [8+EDX],EAX
+   648 00000703 8B 46 0C                        	MOV	EAX,DWORD [12+ESI]
+   649 00000706 89 42 0C                        	MOV	DWORD [12+EDX],EAX
+   650 00000709 83 BB 00000130 00               	CMP	DWORD [304+EBX],0
+   651 00000710 75 09                           	JNE	L135
+   652 00000712                                 L134:
+   653 00000712 31 C0                           	XOR	EAX,EAX
+   654 00000714                                 L132:
+   655 00000714 8D 65 F8                        	LEA	ESP,DWORD [-8+EBP]
+   656 00000717 5B                              	POP	EBX
+   657 00000718 5E                              	POP	ESI
+   658 00000719 5D                              	POP	EBP
+   659 0000071A C3                              	RET
+   660 0000071B                                 L135:
+   661 0000071B 53                              	PUSH	EBX
+   662 0000071C E8 FFFFFE96                     	CALL	_task_unblock
+   663 00000721 58                              	POP	EAX
+   664 00000722 EB EE                           	JMP	L134
+   665 00000724                                 	GLOBAL	_taskctl
+   666                                          [SECTION .data]
+   667 00000000                                 	ALIGNB	4
+   668 00000000                                 _taskctl:
+   669 00000000 00 00 00 00                     	RESB	4
+   670 00000004                                 	GLOBAL	_task_timer
+   671                                          [SECTION .data]
+   672 00000004                                 	ALIGNB	4
+   673 00000004                                 _task_timer:
+   674 00000004 00 00 00 00                     	RESB	4

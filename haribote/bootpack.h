@@ -80,6 +80,7 @@ void fnsave(int *addr);
 void frstor(int *addr);
 void asm_inthandler07(void);
 void inws(char *b,long len,short port);
+void outws(char *b,long len,short port);
  	VOID WriteByteToPort(UCHAR, WORD);
 
 	//
