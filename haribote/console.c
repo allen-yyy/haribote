@@ -319,6 +319,8 @@ void cons_runcmd(char *cmdline, struct CONSOLE *cons, int *fat, int memtotal)
 		ver(cons);
 	} else if (strcmp(cmdline, "hdinfo") == 0){
 		hdinfo(cons);
+	} else if (strcmp(cmdline, "ps") == 0){
+		ps(cons);
 	} else if (cmdline[0] != 0) {
 			if (cmd_app(cons, fat, cmdline) == 0) {
 				/* コマンドではなく、アプリでもなく、さらに空行でもない */
@@ -328,6 +330,15 @@ void cons_runcmd(char *cmdline, struct CONSOLE *cons, int *fat, int memtotal)
 		
 	
 	return;
+}
+
+
+void ps(struct CONSOLE *cons)
+{
+	char s[31];
+	struct pid_t *pid = *((int *) 0x0f0a);
+	sprintf(s,"%d\n\n\n",pid->next);
+	cons_putstr0(cons,s);
 }
 
 void ver(struct CONSOLE *cons)

@@ -173,7 +173,7 @@ void writehddisk(int driver,int sector,int lba,char *buf)
 
    io_out8(0x1f6, 0xa0 | 0x40 | (driver == 1 ? 0x10 : 0) | lba >> 24);
    io_out8(0x1f7, 0x40);
-   outws(buf,secort*256,0x1f0);
+   outws(buf,sector*256,0x1f0);
    return;
 }
 
@@ -295,7 +295,10 @@ void task_hd()
 	{
 		struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
 		//---DEBUG--- 
-		message_receive(ANY,message);
+		message_receive(ANY,&message);
+		//boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 - 1, 15);
+		//sprintf(s,"taskrun %d",2500);
+		//putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, s);
 		switch(message.type)
 		{
 			case HD_OPEN:
@@ -326,6 +329,9 @@ BOOL IdeInitialize()
 
 void inthandler2e(int *esp)
 {
+	struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
+	putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, "hdint");
+	io_in8(IDE_CTRL0_PORT_STATUS); 
 	io_out8(PIC1_OCW2, 0x66);
 	io_out8(PIC0_OCW2, 0x62);
 	return;
@@ -358,5 +364,9 @@ BOOL HDEntry(struct Dobject *Dobj)
 	//---DEBUG--- 
 	//io_cli();
 	//io_sti();
+	struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
+	boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 - 1, 15);
+	sprintf(s,"taskrun %d",hdtask->pid);
+	putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, s);
 	return TRUE;
 } 

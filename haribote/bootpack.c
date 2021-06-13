@@ -102,7 +102,8 @@ void HariMain(void)
 	//sheet_updown(key_win,   1);
 	sheet_updown(sht_mouse, 1);
 	//keywin_on(key_win);
-
+	
+	io_cli();
 	LDevs(memman);
 	initAcpi();
 

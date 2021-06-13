@@ -32,6 +32,14 @@ void init_pid(struct MEMMAN *memman)
 	*((int *) 0x0f0f) = &block;
 }
 
+int pid_alloc(struct TASK *task)
+{
+	struct pid_t *pids = *((int *) 0x0f0a);
+	pids->pido[pids->next].task = task;
+	pids->next++;
+	return pids->next-1;
+}
+
 struct TASK *task_now(void)
 {
 	struct TASKLEVEL *tl = &taskctl->level[taskctl->now_lv];
@@ -150,8 +158,7 @@ struct TASK *task_init(struct MEMMAN *memman)
 
 struct TASK *task_alloc(void)
 {
-	int i;
-	struct pid_t *pid = *((int *) 0x0f0a);
+	int i,j;
 	struct TASK *task;
 	for (i = 0; i < MAX_TASKS; i++) {
 		if (taskctl->tasks0[i].flags == 0) {
@@ -177,9 +184,9 @@ struct TASK *task_alloc(void)
             for (i = 3; i < 108 / 4; i++) {
                 task->fpu[i] = 0;
             }  
-			pid->pido[pid->next].task = task;
-			pid->next++;
-			task->pid = pid->next-1;                                            /* ココまで */
+			j = pid_alloc(task);
+			task->pid = j; 
+			task->message_r = 0;                                          /* ココまで */
 			return task;
 		}
 	}
@@ -348,16 +355,20 @@ int message_receive(int to_receive,struct MESSAGE *message)
 
 int message_send(int to_send,struct MESSAGE *message)
 {
-	char s[30];
+	char s[30]; 
 	struct TASK *task = pid2task(to_send);
 	struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
 	if(task==NULL)
 	{
 		return -1;
 	}
-	
+	io_cli();
+	boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 - 1, 15);
+	sprintf(s,"taskrun %d",message->type);
+	putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, s);
 	message->src = task2pid(task_now());
 	memcpy(task->message_r,message,sizeof(struct MESSAGE));
 	if(task->r_flags) task_unblock(task);
+	io_sti();
 	return 0;
 }

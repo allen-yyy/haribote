@@ -28,7 +28,7 @@
     28 00000000                                 		GLOBAL	_WriteByteToPort, _ReadByteStringFromPor
     29 00000000                                 		GLOBAL	_WriteByteStringToPort, _ReadWordFromPort
     30 00000000                                 		GLOBAL	_WriteWordToPort, _ReadWordStringFromPort
-    31 00000000                                 		GLOBAL	_WriteWordStringToPort, _inws
+    31 00000000                                 		GLOBAL	_WriteWordStringToPort, _inws, _outws
     32 00000000                                 		GLOBAL	memcpy
     33 00000000                                 		GLOBAL	memset
     34 00000000                                         EXTERN  _inthandler07
@@ -297,7 +297,7 @@
    297 00000198 C3                              		RET
    298 00000199                                 
    299 00000199                                 _farjmp:		; void farjmp(int eip, int cs);
-   300 00000199 FF 6C 24 04                     		JMP		FAR	[ESP+4]				; eip, cs
+   300 00000199 FF 6C 24 04                     		JMP		FAR	[ESP+4]		; eip, cs
    301 0000019D C3                              		RET
    302 0000019E                                 
    303 0000019E                                 _farcall:		; void farcall(int eip, int cs);
@@ -492,74 +492,83 @@
    492 000002BB F3 66 6D                        	rep	insw
    493 000002BE C3                              	ret
    494 000002BF                                 	
-   495 000002BF                                 ; ------------------------------------------------------------------------
-   496 000002BF                                 ; void* memcpy(void* es:p_dst, void* ds:p_src, int size);
-   497 000002BF                                 ; ------------------------------------------------------------------------
-   498 000002BF                                 _memcpy:
-   499 000002BF 55                              	push	ebp
-   500 000002C0 89 E5                           	mov	ebp, esp
-   501 000002C2                                 
-   502 000002C2 56                              	push	esi
-   503 000002C3 57                              	push	edi
-   504 000002C4 51                              	push	ecx
-   505 000002C5                                 
-   506 000002C5 8B 7D 08                        	mov	edi, [ebp + 8]	; Destination
-   507 000002C8 8B 75 0C                        	mov	esi, [ebp + 12]	; Source
-   508 000002CB 8B 4D 10                        	mov	ecx, [ebp + 16]	; Counter
-   509 000002CE                                 .1:
-   510 000002CE 83 F9 00                        	cmp	ecx, 0		; 判断计数器
-   511 000002D1 74 0B                           	jz	.2		; 计数器为零时跳出
-   512 000002D3                                 
-   513 000002D3 3E 8A 06                        	mov	al, [ds:esi]		; ┓
-   514 000002D6 46                              	inc	esi			; ┃
-   515 000002D7                                 					; ┣ 逐字节移动
-   516 000002D7 26 88 07                        	mov	byte [es:edi], al	; ┃
-   517 000002DA 47                              	inc	edi			; ┛
-   518 000002DB                                 
-   519 000002DB 49                              	dec	ecx		; 计数器减一
-   520 000002DC EB F0                           	jmp	.1		; 循环
-   521 000002DE                                 .2:
-   522 000002DE 8B 45 08                        	mov	eax, [ebp + 8]	; 返回值
-   523 000002E1                                 
-   524 000002E1 59                              	pop	ecx
-   525 000002E2 5F                              	pop	edi
-   526 000002E3 5E                              	pop	esi
-   527 000002E4 89 EC                           	mov	esp, ebp
-   528 000002E6 5D                              	pop	ebp
-   529 000002E7                                 
-   530 000002E7 C3                              	ret			; 函数结束，返回
-   531 000002E8                                 ; memcpy 结束-------------------------------------------------------------
-   532 000002E8                                 
-   533 000002E8                                 
-   534 000002E8                                 ; ------------------------------------------------------------------------
-   535 000002E8                                 ; void memset(void* p_dst, char ch, int size);
-   536 000002E8                                 ; ------------------------------------------------------------------------
-   537 000002E8                                 _memset:
-   538 000002E8 55                              	push	ebp
-   539 000002E9 89 E5                           	mov	ebp, esp
-   540 000002EB                                 
-   541 000002EB 56                              	push	esi
-   542 000002EC 57                              	push	edi
-   543 000002ED 51                              	push	ecx
-   544 000002EE                                 
-   545 000002EE 8B 7D 08                        	mov	edi, [ebp + 8]	; Destination
-   546 000002F1 8B 55 0C                        	mov	edx, [ebp + 12]	; Char to be putted
-   547 000002F4 8B 4D 10                        	mov	ecx, [ebp + 16]	; Counter
-   548 000002F7                                 .1:
-   549 000002F7 83 F9 00                        	cmp	ecx, 0		; 判断计数器
-   550 000002FA 74 06                           	jz	.2		; 计数器为零时跳出
-   551 000002FC                                 
-   552 000002FC 88 17                           	mov	byte [edi], dl		; ┓
-   553 000002FE 47                              	inc	edi			; ┛
-   554 000002FF                                 
-   555 000002FF 49                              	dec	ecx		; 计数器减一
-   556 00000300 EB F5                           	jmp	.1		; 循环
-   557 00000302                                 .2:
-   558 00000302                                 
-   559 00000302 59                              	pop	ecx
-   560 00000303 5F                              	pop	edi
-   561 00000304 5E                              	pop	esi
-   562 00000305 89 EC                           	mov	esp, ebp
-   563 00000307 5D                              	pop	ebp
-   564 00000308                                 
-   565 00000308 C3                              	ret			; 函数结束，返回
+   495 000002BF                                 _outws:
+   496 000002BF 8B 7C 24 04                     	mov	edi, [esp + 4]	; buf
+   497 000002C3 8B 4C 24 08                     	mov	ecx, [esp + 4 + 4]	; port
+   498 000002C7 8B 54 24 0C                     	mov	edx, [esp + 4 + 4 + 4]   ; n
+   499 000002CB D1 E9                           	shr	ecx, 1
+   500 000002CD FC                              	cld
+   501 000002CE F3 66 6F                        	rep	outsw
+   502 000002D1 C3                              	ret
+   503 000002D2                                 	
+   504 000002D2                                 ; ------------------------------------------------------------------------
+   505 000002D2                                 ; void* memcpy(void* es:p_dst, void* ds:p_src, int size);
+   506 000002D2                                 ; ------------------------------------------------------------------------
+   507 000002D2                                 _memcpy:
+   508 000002D2 55                              	push	ebp
+   509 000002D3 89 E5                           	mov	ebp, esp
+   510 000002D5                                 
+   511 000002D5 56                              	push	esi
+   512 000002D6 57                              	push	edi
+   513 000002D7 51                              	push	ecx
+   514 000002D8                                 
+   515 000002D8 8B 7D 08                        	mov	edi, [ebp + 8]	; Destination
+   516 000002DB 8B 75 0C                        	mov	esi, [ebp + 12]	; Source
+   517 000002DE 8B 4D 10                        	mov	ecx, [ebp + 16]	; Counter
+   518 000002E1                                 .1:
+   519 000002E1 83 F9 00                        	cmp	ecx, 0		; 判断计数器
+   520 000002E4 74 0B                           	jz	.2		; 计数器为零时跳出
+   521 000002E6                                 
+   522 000002E6 3E 8A 06                        	mov	al, [ds:esi]		; ┓
+   523 000002E9 46                              	inc	esi			; ┃
+   524 000002EA                                 					; ┣ 逐字节移动
+   525 000002EA 26 88 07                        	mov	byte [es:edi], al	; ┃
+   526 000002ED 47                              	inc	edi			; ┛
+   527 000002EE                                 
+   528 000002EE 49                              	dec	ecx		; 计数器减一
+   529 000002EF EB F0                           	jmp	.1		; 循环
+   530 000002F1                                 .2:
+   531 000002F1 8B 45 08                        	mov	eax, [ebp + 8]	; 返回值
+   532 000002F4                                 
+   533 000002F4 59                              	pop	ecx
+   534 000002F5 5F                              	pop	edi
+   535 000002F6 5E                              	pop	esi
+   536 000002F7 89 EC                           	mov	esp, ebp
+   537 000002F9 5D                              	pop	ebp
+   538 000002FA                                 
+   539 000002FA C3                              	ret			; 函数结束，返回
+   540 000002FB                                 ; memcpy 结束-------------------------------------------------------------
+   541 000002FB                                 
+   542 000002FB                                 
+   543 000002FB                                 ; ------------------------------------------------------------------------
+   544 000002FB                                 ; void memset(void* p_dst, char ch, int size);
+   545 000002FB                                 ; ------------------------------------------------------------------------
+   546 000002FB                                 _memset:
+   547 000002FB 55                              	push	ebp
+   548 000002FC 89 E5                           	mov	ebp, esp
+   549 000002FE                                 
+   550 000002FE 56                              	push	esi
+   551 000002FF 57                              	push	edi
+   552 00000300 51                              	push	ecx
+   553 00000301                                 
+   554 00000301 8B 7D 08                        	mov	edi, [ebp + 8]	; Destination
+   555 00000304 8B 55 0C                        	mov	edx, [ebp + 12]	; Char to be putted
+   556 00000307 8B 4D 10                        	mov	ecx, [ebp + 16]	; Counter
+   557 0000030A                                 .1:
+   558 0000030A 83 F9 00                        	cmp	ecx, 0		; 判断计数器
+   559 0000030D 74 06                           	jz	.2		; 计数器为零时跳出
+   560 0000030F                                 
+   561 0000030F 88 17                           	mov	byte [edi], dl		; ┓
+   562 00000311 47                              	inc	edi			; ┛
+   563 00000312                                 
+   564 00000312 49                              	dec	ecx		; 计数器减一
+   565 00000313 EB F5                           	jmp	.1		; 循环
+   566 00000315                                 .2:
+   567 00000315                                 
+   568 00000315 59                              	pop	ecx
+   569 00000316 5F                              	pop	edi
+   570 00000317 5E                              	pop	esi
+   571 00000318 89 EC                           	mov	esp, ebp
+   572 0000031A 5D                              	pop	ebp
+   573 0000031B                                 
+   574 0000031B C3                              	ret			; 函数结束，返回

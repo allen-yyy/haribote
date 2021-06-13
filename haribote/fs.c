@@ -8,17 +8,34 @@
 
 #include "bootpack.h"
 
-extern struct dDevEntry dDevs[DR_NUM]; 
+
+extern struct dDevEntry dDevs[DR_NUM];
 
 void FS_task(struct MEMMAN *memman)
 {
-	struct Dobject *hddobj = dDevs[0].Dobj;
-	//struct MESSAGE message;
-	//message.type = HD_OPEN;
-	//message_send(task2pid(hddobj->task),&message);
+	struct Dobject *mydobj = GetMyObj("FS");
+	struct Dobject *hddobj = GetMyObj("Ide HD");
+	int i=100;
+	char s[20];
+	struct MESSAGE *message,*umess;
+	message->type = HD_OPEN;
+	struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
+	/*boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 - 1, 15);
+	sprintf(s,"taskrun %d",message->type);
+	putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, s);*/
+	//io_cli();
+	i = message_send(dDevs[0].Dobj->task,message);
+	//boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 - 1, 15);
+	//sprintf(s,"taskrun %d",hddobj->task->pid);
+	//putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, s);
+	message_receive(ANY,message);
+	//int *p = message->Param;
+	//UINT sectors = *(UINT*)&p[60*2];
 	for(;;)
 	{
-		io_hlt();
+		boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 - 1, 15);
+		sprintf(s,"fs taskrun %d",i);
+		putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, s);
 	} 
 	return;
 } 
@@ -35,11 +52,12 @@ BOOL FSEntry(struct Dobject *Dobj)
 	task->tss.ds = 1 * 8;
 	task->tss.fs = 1 * 8;
 	task->tss.gs = 1 * 8;
-	task_run(task, 2, 1);
+	//*((int *) (task->tss.esp + 4)) = (int) Dobj->memman;
+	task_run(task,3, 2);
 	Dobj->task = task; 
 	/*struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
 		boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 - 1, 15);
 		//sprintf(s,"taskrun %d",i);
-		putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, "123");*/
+		putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, "123");**/
 	return TRUE;
 }

@@ -28,7 +28,7 @@
 		GLOBAL	_WriteByteToPort, _ReadByteStringFromPor
 		GLOBAL	_WriteByteStringToPort, _ReadWordFromPort
 		GLOBAL	_WriteWordToPort, _ReadWordStringFromPort
-		GLOBAL	_WriteWordStringToPort, _inws
+		GLOBAL	_WriteWordStringToPort, _inws, _outws
 		GLOBAL	memcpy
 		GLOBAL	memset
         EXTERN  _inthandler07
@@ -297,7 +297,7 @@ mts_fin:
 		RET
 
 _farjmp:		; void farjmp(int eip, int cs);
-		JMP		FAR	[ESP+4]				; eip, cs
+		JMP		FAR	[ESP+4]		; eip, cs
 		RET
 
 _farcall:		; void farcall(int eip, int cs);

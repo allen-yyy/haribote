@@ -48,6 +48,8 @@ struct BOOTINFO { /* 0x0ff0-0x0fff */
 #define LOBYTE(wr)          BYTE(wr)
 #define HIBYTE(wr)          BYTE(wr >> 16)
 
+#include "list.h"
+
 /* naskfunc.nas */
 void io_hlt(void);
 void io_cli(void);
