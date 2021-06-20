@@ -77,17 +77,21 @@ BOOL ReadHDSector(LPVOID lpBuffer,
 
 void readhddisk(int driver,int sector,int lba,char *buf)
 {
-   io_out8(0x1f2, sector);	 
+	WaitForBsy(IDE_CTRL0_PORT_STATUS,0); 
+	WaitForRdy(IDE_CTRL0_PORT_STATUS,0);
+	io_out8(0x1f2, sector);	 
 
 
-   io_out8(0x1f3, lba);		 
-   io_out8(0x1f4, lba >> 8);		 
-   io_out8(0x1f5, lba >> 16);		 
+	io_out8(0x1f3, lba);		 
+	io_out8(0x1f4, lba >> 8);		 
+	io_out8(0x1f5, lba >> 16);		 
 
-   io_out8(0x1f6, 0xa0 | 0x40 | (driver == 1 ? 0x10 : 0) | lba >> 24);
-   io_out8(0x1f7, 0x20);
-   inws(buf,sector*256,0x1f0);
-   return;
+    io_out8(0x1f6, 0xa0 | 0x40 | (driver == 1 ? 0x10 : 0) | lba >> 24);
+    io_out8(0x1f7, 0x20);
+   
+    WaitForDrq(IDE_CTRL0_PORT_STATUS,0);
+    inws(buf,sector*256,0x1f0);
+    return;
 }
 
 BOOL WriteHDSector(LPVOID lpBuffer,
@@ -164,17 +168,19 @@ BOOL WriteHDSector(LPVOID lpBuffer,
 
 void writehddisk(int driver,int sector,int lba,char *buf)
 {
-   io_out8(0x1f2, sector);	 
+	WaitForBsy(IDE_CTRL0_PORT_STATUS,0); 
+	WaitForRdy(IDE_CTRL0_PORT_STATUS,0);
+    io_out8(0x1f2, sector);	 
 
+    io_out8(0x1f3, lba);		 
+    io_out8(0x1f4, lba >> 8);		 
+    io_out8(0x1f5, lba >> 16);		 
 
-   io_out8(0x1f3, lba);		 
-   io_out8(0x1f4, lba >> 8);		 
-   io_out8(0x1f5, lba >> 16);		 
-
-   io_out8(0x1f6, 0xa0 | 0x40 | (driver == 1 ? 0x10 : 0) | lba >> 24);
-   io_out8(0x1f7, 0x40);
-   outws(buf,sector*256,0x1f0);
-   return;
+    io_out8(0x1f6, 0xa0 | 0x40 | (driver == 1 ? 0x10 : 0) | lba >> 24);
+    io_out8(0x1f7, 0x40);
+    WaitForDrq(IDE_CTRL0_PORT_STATUS,0);
+    outws(buf,sector*256,0x1f0);
+    return;
 }
 
 //Several low level routines to test specified flags in hard disk driver registers.

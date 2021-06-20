@@ -326,7 +326,8 @@ int message_receive(int to_receive,struct MESSAGE *message)
 			if(to_receive==ANY)
 			{
 				task->r_flags = 0;
-				memcpy(message,task->message_r,sizeof(struct MESSAGE));
+				//memcpy(message,task->message_r,sizeof(struct MESSAGE));
+				message = task->message_r;
 				task->message_r = 0;
 				//memset(task->message_r,0,sizeof(struct MESSAGE)); 
 				return 0;

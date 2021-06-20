@@ -17,20 +17,8 @@ void FS_task(struct MEMMAN *memman)
 	struct Dobject *hddobj = GetMyObj("Ide HD");
 	int i=100;
 	char s[20];
-	struct MESSAGE *message,*umess;
-	message->type = HD_OPEN;
+	struct MESSAGE message,umess;
 	struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
-	/*boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 - 1, 15);
-	sprintf(s,"taskrun %d",message->type);
-	putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, s);*/
-	//io_cli();
-	i = message_send(dDevs[0].Dobj->task,message);
-	//boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 - 1, 15);
-	//sprintf(s,"taskrun %d",hddobj->task->pid);
-	//putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, s);
-	message_receive(ANY,message);
-	//int *p = message->Param;
-	//UINT sectors = *(UINT*)&p[60*2];
 	for(;;)
 	{
 		boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 - 1, 15);
