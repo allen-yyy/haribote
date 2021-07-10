@@ -31,8 +31,7 @@ struct exdrivertable etable[DR_ENUM]= {
 };
 
 BOOL LDevs(struct MEMMAN *memman) {
-	int i;
-	io_cli(); 
+	int i; 
 	for(i=0; i<DR_NUM; ++i) {
 		struct Dobject Devobj;
 		Devobj.name = dDevs[i].name;

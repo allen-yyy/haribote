@@ -34,10 +34,12 @@ void init_pid(struct MEMMAN *memman)
 
 int pid_alloc(struct TASK *task)
 {
+	int ret; 
 	struct pid_t *pids = *((int *) 0x0f0a);
 	pids->pido[pids->next].task = task;
+	ret = pids->next;
 	pids->next++;
-	return pids->next-1;
+	return ret;
 }
 
 struct TASK *task_now(void)
@@ -158,7 +160,7 @@ struct TASK *task_init(struct MEMMAN *memman)
 
 struct TASK *task_alloc(void)
 {
-	int i,j;
+	int i;
 	struct TASK *task;
 	for (i = 0; i < MAX_TASKS; i++) {
 		if (taskctl->tasks0[i].flags == 0) {
@@ -183,9 +185,8 @@ struct TASK *task_alloc(void)
             task->fpu[2] = 0xffff; /* TW(tag word)     */
             for (i = 3; i < 108 / 4; i++) {
                 task->fpu[i] = 0;
-            }  
-			j = pid_alloc(task);
-			task->pid = j; 
+            } 
+			task->pid = pid_alloc(task); 
 			task->message_r = 0;                                          /* ココまで */
 			return task;
 		}

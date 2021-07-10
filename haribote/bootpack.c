@@ -106,6 +106,7 @@ void HariMain(void)
 	io_cli();
 	LDevs(memman);
 	initAcpi();
+	io_sti();
 
 	time = timer_alloc();
 	timer_init(time,&fifo,2280);
