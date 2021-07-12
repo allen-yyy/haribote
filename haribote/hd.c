@@ -297,18 +297,20 @@ BOOL Identify(int nHdNum,BYTE* pBuffer)
 void task_hd()
 {
 	struct MESSAGE message;
+	char s[100];
 	for(;;)
 	{
 		struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
 		//---DEBUG--- 
+		boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 - 1, 15);
 		message_receive(ANY,&message);
-		//boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 - 1, 15);
-		//sprintf(s,"taskrun %d",2500);
-		//putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, s);
+		boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 - 1, 15);
+		sprintf(s,"taskrun %d",message.type);
+		putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, s);
 		switch(message.type)
 		{
 			case HD_OPEN:
-				Identify(0,message.params);
+				//Identify(0,message.params);
 				message_send(message.src,&message);
 				break;
 			case HD_IDENTIFY:
@@ -372,7 +374,7 @@ BOOL HDEntry(struct Dobject *Dobj)
 	//io_sti();
 	struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
 	boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 - 1, 15);
-	sprintf(s,"taskrun %d",hdtask->pid);
-	putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, s);
+	sprintf(s,"taskrun %d",(int)hdtask);
+	putfonts8_asc(binfo->vram, binfo->scrnx, 30*8, 0, COL8_FFFFFF, s);
 	return TRUE;
 } 

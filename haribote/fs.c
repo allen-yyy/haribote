@@ -14,16 +14,15 @@ extern struct dDevEntry dDevs[DR_NUM];
 void FS_task(struct MEMMAN *memman)
 {
 	struct Dobject *mydobj = GetMyObj("FS");
-	struct Dobject *hddobj = GetMyObj("Ide HD");
+	struct Dobject *hddobj = dDevs[0].Dobj;
 	int i=100;
 	char s[20];
 	struct MESSAGE message,umess;
 	struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
 	for(;;)
 	{
-		boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 - 1, 15);
-		sprintf(s,"fs taskrun %d",i);
-		putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, s);
+		message.type = 1;
+		i = message_send(10002,&message);
 	} 
 	return;
 } 

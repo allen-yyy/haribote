@@ -304,9 +304,9 @@ struct TASK {
 	char *cmdline;
 	unsigned char langmode, langbyte1;
 	int pid;
-	int r_flags;
+	int r_flags,s_flag;
 	struct MESSAGE *message_r;
-	char *taskname;
+	struct list_elem list_tag;
 	//struct blocks_t *waits;
 };
 struct TASKLEVEL {
@@ -322,11 +322,16 @@ struct TASKCTL {
 	struct TASK tasks0[MAX_TASKS];
 };
 struct pid_t{
-	struct{
+	struct ppiiffdd{
 		int pid;
 		struct TASK *task;
-	}pido[MAX_PID];
+	} pido [MAX_PID];
 	int next;
+};
+struct pid1{
+	int pid;
+	struct TASK *task;
+	struct list_elem list_tag;
 };
 struct blocks_t{
 	struct{
