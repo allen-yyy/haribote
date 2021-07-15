@@ -4,40 +4,31 @@
 
 struct TASKCTL *taskctl;
 struct TIMER *task_timer;
+struct pid_t pid;
 
-struct TASK *pid2task(int pid)
+
+struct TASK *pid2task(int pids)
 {
-	struct TASK *task;
-	struct pid_t *pids = *((int *) 0x0f0a);
-	task = pids->pido[pid].task;
-	return task;
+	return pid.pido[pids].task;
 }
 
 void init_pid(struct MEMMAN *memman)
 {
 	int i;
-	struct pid_t pid;
-	struct blocks_t block;
+
 	pid.next = -1;
-	block.next = 0;
 	for(i=0;i<=MAX_PID;++i)
 	{
 		pid.pido[i].pid = i;
 	}
-	for(i=0;i<=MAX_TASKS;++i)
-	{
-		block.blocko[i].pid = i;
-	}
 	*((int *) 0x0f0a) = &pid;
-	*((int *) 0x0f0f) = &block;
 }
 
 int pid_alloc(struct TASK *task)
 {
-	struct pid_t *pids = *((int *) 0x0f0a);
-	pids->pido[pids->next].task = task;
-	pids->next++;
-	return pids->next;
+	pid.pido[pid.next+1].task = task;
+	pid.next++;
+	return pid.next;
 }
 
 struct TASK *task_now(void)
@@ -160,6 +151,7 @@ struct TASK *task_alloc(void)
 {
 	int i;
 	struct TASK *task;
+	struct MEMMAN *memman = (struct MEMMAN *) 0xef0;
 	for (i = 0; i < MAX_TASKS; i++) {
 		if (taskctl->tasks0[i].flags == 0) {
 			task = &taskctl->tasks0[i];
@@ -184,7 +176,7 @@ struct TASK *task_alloc(void)
             for (i = 3; i < 108 / 4; i++) {
                 task->fpu[i] = 0;
             }  
-			task->pid = pid_alloc(); 
+			task->pid = pid_alloc(task); 
 			task->message_r = memman_alloc_4k(memman, sizeof(struct MESSAGE));                                          /* ･ｳ･ｳ､ﾞ､ﾇ */
 			return task;
 		}
@@ -268,24 +260,16 @@ int *inthandler07(int *esp)
 
 void task_block(struct TASK *task)
 {
-	struct pid_t *pid = *((int *) 0x0f0a);
 	struct TASK *now_task;
-	struct blocks_t *block = *((int *) 0x0f0f);
-	if (task->flags == 2) {
-		
-		now_task = task_now();
-		task_remove(task);
-		task->flags=3;
-		pid->pido[task->pid].task->flags=task->flags;
-		block->blocko[block->next].task = task;
-		block->blocko[block->next].pid = task->pid;
-		block->next++;
-		if (task == now_task) {
+	now_task = task_now();
+	task_remove(task);
+	task->flags=3;
+	pid.pido[task->pid].task->flags=task->flags;
+	if (task == now_task) {
 			
-			task_switchsub();
-			now_task = task_now();
-			farjmp(0, now_task->sel);
-		}
+		task_switchsub();
+		now_task = task_now();
+		farjmp(0, now_task->sel);
 		 
 	}
 	return;
@@ -295,22 +279,9 @@ void task_unblock(struct TASK *task)
 {
 	struct pid_t *pid = *((int *) 0x0f0a);
 	struct TASK *now_task;
-	struct blocks_t *block = *((int *) 0x0f0f);
 	int i; 
 	task_run(task,task->level,task->priority);
-	pid->pido[task->pid].task->flags=task->flags;
-	for (i = 0; i < block->next; i++) {
-		if (block->blocko[i].task == task) {
-			/* ここにいた */
-			block->blocko[i].task = 0;
-			block->blocko[i].pid = 0;
-			break;
-		}
-	}
-	for (; i < block->next; i++) {
-		block->blocko[i] = block->blocko[i + 1];
-	}
-	block->next--;
+	pid->pido[task->pid].task->flags = task->flags;
 	return;
 }
 
@@ -318,25 +289,28 @@ int message_receive(int to_receive,struct MESSAGE *message)
 {
 	struct TASK *task = task_now();
 	char s[30];
+	io_cli();
 	task->r_flags = 1;
 	next:
+		io_cli();
 		if(task->message_r!=0)
 		{
 			if(to_receive==ANY)
 			{
 				task->r_flags = 0;
 				memcpy(message,task->message_r,sizeof(struct MESSAGE));
-				//message = task->message_r;
 				task->message_r = 0;
-				//memset(task->message_r,0,sizeof(struct MESSAGE)); 
+				io_sti();
 				return 0;
 			}else{
 				if(task->message_r->src==to_receive)
 				{
 					task->r_flags = 0;
 					message = task->message_r;
+					io_sti();
 					return 0;
 				}else{
+					io_sti();
 					task_block(task);
 					goto next;
 				} 
@@ -344,7 +318,7 @@ int message_receive(int to_receive,struct MESSAGE *message)
 		}else{
 			
 			//FIXMEOK:bug:Can not run
-			a:
+			io_sti();
 			task_block(task);
 			goto next;
 		} 
@@ -357,15 +331,11 @@ int message_send(int to_send,struct MESSAGE *message)
 {
 	char s[30]; 
 	struct TASK *task = pid2task(to_send);
-	struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
 	if(task==NULL)
 	{
 		return -1;
 	}
 	io_cli();
-	boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 - 1, 15);
-	sprintf(s,"taskrun %d",message->type);
-	putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, s);
 	message->src = task2pid(task_now());
 	memcpy(task->message_r,message,sizeof(struct MESSAGE));
 	if(task->r_flags) task_unblock(task);
