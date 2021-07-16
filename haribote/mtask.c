@@ -151,7 +151,7 @@ struct TASK *task_alloc(void)
 {
 	int i;
 	struct TASK *task;
-	struct MEMMAN *memman = (struct MEMMAN *) 0xef0;
+	struct MEMMAN *memman = (struct MEMMAN *) MEMMAN_ADDR;
 	for (i = 0; i < MAX_TASKS; i++) {
 		if (taskctl->tasks0[i].flags == 0) {
 			task = &taskctl->tasks0[i];

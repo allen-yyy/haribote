@@ -306,7 +306,7 @@
    306 0000039E E8 FFFFFC96                     	CALL	_pid_alloc
    307 000003A3 89 83 0000012C                  	MOV	DWORD [300+EBX],EAX
    308 000003A9 6A 10                           	PUSH	16
-   309 000003AB 68 00000EF0                     	PUSH	3824
+   309 000003AB 68 003C0000                     	PUSH	3932160
    310 000003B0 E8 [00000000]                   	CALL	_memman_alloc_4k
    311 000003B5 89 83 00000138                  	MOV	DWORD [312+EBX],EAX
    312 000003BB 89 D8                           	MOV	EAX,EBX
