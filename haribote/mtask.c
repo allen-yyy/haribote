@@ -17,7 +17,7 @@ void init_pid(struct MEMMAN *memman)
 	int i;
 
 	pid.next = -1;
-	for(i=0;i<=MAX_PID;++i)
+	for(i=0;i<= MAX_PID;++i)
 	{
 		pid.pido[i].pid = i;
 	}
@@ -26,8 +26,11 @@ void init_pid(struct MEMMAN *memman)
 
 int pid_alloc(struct TASK *task)
 {
-	pid.pido[pid.next+1].task = task;
+	io_cli();
 	pid.next++;
+	pid.pido[pid.next].task = task;
+	task->pid = pid.next;
+	io_sti();
 	return pid.next;
 }
 
@@ -263,25 +266,18 @@ void task_block(struct TASK *task)
 	struct TASK *now_task;
 	now_task = task_now();
 	task_remove(task);
-	task->flags=3;
-	pid.pido[task->pid].task->flags=task->flags;
+	task->flags = 3;
 	if (task == now_task) {
-			
 		task_switchsub();
 		now_task = task_now();
 		farjmp(0, now_task->sel);
-		 
 	}
 	return;
 }
 
 void task_unblock(struct TASK *task)
 {
-	struct pid_t *pid = *((int *) 0x0f0a);
-	struct TASK *now_task;
-	int i; 
 	task_run(task,task->level,task->priority);
-	pid->pido[task->pid].task->flags = task->flags;
 	return;
 }
 
@@ -289,41 +285,34 @@ int message_receive(int to_receive,struct MESSAGE *message)
 {
 	struct TASK *task = task_now();
 	char s[30];
-	io_cli();
-	task->r_flags = 1;
-	next:
+	for(;;)
+	{
 		io_cli();
-		if(task->message_r!=0)
+		if(task->s_flag == 1)
 		{
 			if(to_receive==ANY)
 			{
 				task->r_flags = 0;
-				memcpy(message,task->message_r,sizeof(struct MESSAGE));
-				task->message_r = 0;
+				task->s_flag = 0;
+				memcpy(task->message_r,message,sizeof(struct MESSAGE));
+				io_sti();
+				return 0;
+			}else if(to_receive==task->message_r->src)
+			{
+				task->r_flags = 0;
+				task->s_flag = 0;
+				memcpy(task->message_r,message,sizeof(struct MESSAGE));
 				io_sti();
 				return 0;
 			}else{
-				if(task->message_r->src==to_receive)
-				{
-					task->r_flags = 0;
-					message = task->message_r;
-					io_sti();
-					return 0;
-				}else{
-					io_sti();
-					task_block(task);
-					goto next;
-				} 
+				task->s_flag = 0;
+				goto no_message;
 			}
-		}else{
-			
-			//FIXMEOK:bug:Can not run
+		}
+		no_message:
 			io_sti();
 			task_block(task);
-			goto next;
-		} 
-	
-	
+	} 
 	return -1;
 }
 
@@ -331,14 +320,19 @@ int message_send(int to_send,struct MESSAGE *message)
 {
 	char s[30]; 
 	struct TASK *task = pid2task(to_send);
+	struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
 	if(task==NULL)
 	{
 		return -1;
 	}
+	boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 - 1, 15);
+	sprintf(s,"taskrun %d",(int)task);
+	putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, s);
 	io_cli();
 	message->src = task2pid(task_now());
 	memcpy(task->message_r,message,sizeof(struct MESSAGE));
 	if(task->r_flags) task_unblock(task);
+	task->s_flag = 1;
 	io_sti();
 	return 0;
 }
