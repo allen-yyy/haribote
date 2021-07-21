@@ -11,18 +11,25 @@
 
 extern struct dDevEntry dDevs[DR_NUM];
 
-void FS_task(struct MEMMAN *memman)
+void FS_task()
 {
+	struct MEMMAN *memman = MEMMAN_ADDR;
 	struct Dobject *mydobj = GetMyObj("FS");
 	struct Dobject *hddobj = dDevs[0].Dobj;
 	int i=100;
 	char s[20];
 	struct MESSAGE message,umess;
-	struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
+	message.params = memman_alloc(memman,512);
 	for(;;)
 	{
-		message.type = 1;
+		message.type = HD_OPEN;
 		i = message_send(10002,&message);
+		message_receive(ANY,&message);
+		UINT sectors = *(UINT*)&message.params[60*2];
+		struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
+		boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 - 1, 15);
+		sprintf(s,"taskrun %d",sectors*512/1024/1024);
+		putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, s);
 	} 
 	return;
 } 

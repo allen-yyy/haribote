@@ -62,7 +62,7 @@ void HariMain(void)
 	init_keyboard(&fifo, 256);
 	enable_mouse(&fifo, 512, &mdec);
 	io_out8(PIC0_IMR, 0xf8); /* PIT‚ÆPIC1‚ÆƒL[ƒ{[ƒh‚ğ‹–‰Â(11111000) */
-	io_out8(PIC1_IMR, 0xef); /* ƒ}ƒEƒX‚ğ‹–‰Â(11101111) */
+	io_out8(PIC1_IMR, 0xaf); /* ƒ}ƒEƒX‚ğ‚Æƒn[ƒhƒfƒB‹–‰Â (10101111) */
 	fifo32_init(&keycmd, 32, keycmd_buf, 0);
 
 	memtotal = memtest(0x00400000, 0xbfffffff);
@@ -457,8 +457,8 @@ void close_console(struct SHEET *sht)
 	memman_free_4k(memman, (int) sht->buf, 256 * 165);
 	sheet_free(sht);
 	close_constask(task);
-	io_cli();                                               /* ¥³¥³¤«¤é */
-    task->flags = 0; /* task_free(task); ¤Î´ú¤ï¤ê */
+	io_cli();                                               /* ¥³¥³¤«¤E*/
+    task->flags = 0; /* task_free(task); ¤Î´ú¤EE*/
     if (taskctl->task_fpu == task) {
         taskctl->task_fpu = 0;
     }

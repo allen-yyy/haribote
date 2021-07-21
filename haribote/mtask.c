@@ -288,13 +288,14 @@ int message_receive(int to_receive,struct MESSAGE *message)
 	for(;;)
 	{
 		io_cli();
+		task->r_flags = 1;
 		if(task->s_flag == 1)
 		{
 			if(to_receive==ANY)
 			{
 				task->r_flags = 0;
 				task->s_flag = 0;
-				memcpy(task->message_r,message,sizeof(struct MESSAGE));
+				memcpy(message,task->message_r,sizeof(struct MESSAGE));
 				io_sti();
 				return 0;
 			}else if(to_receive==task->message_r->src)
@@ -320,19 +321,15 @@ int message_send(int to_send,struct MESSAGE *message)
 {
 	char s[30]; 
 	struct TASK *task = pid2task(to_send);
-	struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
 	if(task==NULL)
 	{
 		return -1;
 	}
-	boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 - 1, 15);
-	sprintf(s,"taskrun %d",(int)task);
-	putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, s);
 	io_cli();
 	message->src = task2pid(task_now());
 	memcpy(task->message_r,message,sizeof(struct MESSAGE));
-	if(task->r_flags) task_unblock(task);
 	task->s_flag = 1;
 	io_sti();
+	if(task->r_flags) task_unblock(task);
 	return 0;
 }
