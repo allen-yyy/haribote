@@ -69,6 +69,7 @@ haribote.img : haribote/ipl09.bin haribote/haribote.sys Makefile \
 		copy from:nihongo/nihongo.fnt to:@: \
 		copy from:pi/pi.hrb to:@: \
 		copy from:sincurve/sincurve.hrb to:@: \
+		copy from:systest/systest.sys to:@: \
 		imgout:haribote.img
 
 # ƒRƒ}ƒ“ƒh

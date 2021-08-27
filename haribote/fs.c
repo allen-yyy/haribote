@@ -20,16 +20,17 @@ void FS_task()
 	char s[20];
 	struct MESSAGE message,umess;
 	message.params = memman_alloc(memman,512);
+	message.type = HD_OPEN;
+	i = message_send(10002,&message);
+	message_receive(ANY,&message);
+	UINT sectors = *(UINT*)&message.params[60*2];
+	/*struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
+	boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 - 1, 15);
+	sprintf(s,"taskrun %d",sectors*512/1024/1024);
+	putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, s);**/
 	for(;;)
 	{
-		message.type = HD_OPEN;
-		i = message_send(10002,&message);
-		message_receive(ANY,&message);
-		UINT sectors = *(UINT*)&message.params[60*2];
-		struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
-		boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 - 1, 15);
-		sprintf(s,"taskrun %d",sectors*512/1024/1024);
-		putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, s);
+		
 	} 
 	return;
 } 
@@ -47,7 +48,7 @@ BOOL FSEntry(struct Dobject *Dobj)
 	task->tss.fs = 1 * 8;
 	task->tss.gs = 1 * 8;
 	//*((int *) (task->tss.esp + 4)) = (int) Dobj->memman;
-	task_run(task,3, 2);
+	task_run(task,3, 1);
 	Dobj->task = task; 
 	/*struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
 		boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 - 1, 15);

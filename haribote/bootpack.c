@@ -121,6 +121,10 @@ void HariMain(void)
 	fat = (int *) memman_alloc_4k(memman, 4 * 2880);
 	file_readfat(fat, (unsigned char *) (ADR_DISKIMG + 0x000200));
 	
+	io_cli();
+	code_init();
+	load_external_device(fat,memman);
+	io_sti(); 
 
 	finfo = file_search("nihongo.fnt", (struct FILEINFO *) (ADR_DISKIMG + 0x002600), 224);
 	if (finfo != 0) {

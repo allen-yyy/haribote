@@ -3,7 +3,7 @@
 	Copyright: 
 	Author: Allen
 	Date: 04/06/21 20:26
-	Description: It form  https://forum.osdev.org/viewtopic.php?t=16990
+	Description: It form https://forum.osdev.org/viewtopic.php?t=16990
 */
 
 #include "bootpack.h"

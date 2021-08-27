@@ -53,8 +53,6 @@ void task_remove(struct TASK *task)
 {
 	int i;
 	struct TASKLEVEL *tl = &taskctl->level[task->level];
-	struct pid_t *pid = *((int *) 0x0f0a);
-	
 	/* taskがどこにいるかを探す */
 	for (i = 0; i < tl->running; i++) {
 		if (tl->tasks[i] == task) {
@@ -77,10 +75,15 @@ void task_remove(struct TASK *task)
 	for (; i < tl->running; i++) {
 		tl->tasks[i] = tl->tasks[i + 1];
 	}
-	
-	pid->pido[task->pid].task->flags=task->flags; 
 	return;
 }
+
+void task_delete(struct TASK *task)
+{
+	task_remove(task);
+	memset(task,0,sizeof(struct TASK));
+	return;
+} 
 
 void task_switchsub(void)
 {
@@ -128,6 +131,7 @@ struct TASK *task_init(struct MEMMAN *memman)
 	task->flags = 2;	/* 動作中マーク */
 	task->priority = 2; /* 0.02秒 */
 	task->level = 0;	/* 最高レベル */
+	task->tss.cs=2*8;
 	task_add(task);
 	task_switchsub();	/* レベル設定 */
 	load_tr(task->sel);
@@ -219,6 +223,7 @@ void task_sleep(struct TASK *task)
 			/* 自分自身のスリープだったので、タスクスイッチが必要 */
 			task_switchsub();
 			now_task = task_now(); /* 設定後での、「現在のタスク」を教えてもらう */
+			if(now_task->devflag) asm("movl %%esp,%0":"=r"(now_task->tss.esp0)); 
 			farjmp(0, now_task->sel);
 		}
 	}
@@ -230,16 +235,19 @@ void task_switch(void)
 	struct TASKLEVEL *tl = &taskctl->level[taskctl->now_lv];
 	struct TASK *new_task, *now_task = tl->tasks[tl->now];
 	tl->now++;
-	if (tl->now == tl->running) {
+	if (tl->now >= tl->running) {
 		tl->now = 0;
 	}
 	if (taskctl->lv_change != 0) {
+		L1:
 		task_switchsub();
 		tl = &taskctl->level[taskctl->now_lv];
 	}
 	new_task = tl->tasks[tl->now];
+	if(new_task->flags==0) goto L1;
 	timer_settime(task_timer, new_task->priority);
 	if (new_task != now_task) {
+		if(new_task->devflag) asm("movl %%esp,%0":"=r"(new_task->tss.esp0)); 
 		farjmp(0, new_task->sel);
 	}
 	return;
@@ -270,6 +278,7 @@ void task_block(struct TASK *task)
 	if (task == now_task) {
 		task_switchsub();
 		now_task = task_now();
+		if(now_task->devflag) asm("movl %%esp,%0":"=r"(now_task->tss.esp0)); 
 		farjmp(0, now_task->sel);
 	}
 	return;

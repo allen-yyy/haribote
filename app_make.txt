@@ -1,6 +1,7 @@
 TOOLPATH = ../../z_tools/
 INCPATH  = ../../z_tools/haribote/
 APILIBPATH   = ../apilib/
+DPILIBPATH   = ../dpilib/
 HARIBOTEPATH = ../haribote/
 
 MAKE     = $(TOOLPATH)make.exe -r
@@ -11,8 +12,10 @@ OBJ2BIM  = $(TOOLPATH)obj2bim.exe
 MAKEFONT = $(TOOLPATH)makefont.exe
 BIN2OBJ  = $(TOOLPATH)bin2obj.exe
 BIM2HRB  = $(TOOLPATH)bim2hrb.exe
+BIM2SYS  = $(TOOLPATH)bim2sys.exe
 BIM2BIN  = $(TOOLPATH)bim2bin.exe
 RULEFILE = ../haribote.rul
+RULEFILE2= ../haribote2.rul
 EDIMG    = $(TOOLPATH)edimg.exe
 IMGTOL   = $(TOOLPATH)imgtol.com
 GOLIB    = $(TOOLPATH)golib00.exe 
@@ -22,13 +25,22 @@ DEL      = del
 # デフォルト動作
 
 default :
+ifdef MAKE_SYS
+	$(MAKE) $(APP).sys
+else
 	$(MAKE) $(APP).hrb
+endif
 
 # ファイル生成規則
-
+ifndef MAKE_SYS
 $(APP).bim : $(APP).obj $(APILIBPATH)apilib.lib Makefile ../app_make.txt
 	$(OBJ2BIM) @$(RULEFILE) out:$(APP).bim map:$(APP).map stack:$(STACK) \
 		$(APP).obj $(APILIBPATH)apilib.lib
+else
+$(APP).bim : $(APP).obj $(DPILIBPATH)dpilib.lib Makefile ../app_make.txt
+	$(OBJ2BIM) @$(RULEFILE2) out:$(APP).bim map:$(APP).map stack:$(STACK) \
+		$(APP).obj $(DPILIBPATH)dpilib.lib
+endif
 
 haribote.img : ../haribote/ipl09.bin ../haribote/haribote.sys $(APP).hrb \
 		Makefile ../app_make.txt
@@ -52,6 +64,9 @@ haribote.img : ../haribote/ipl09.bin ../haribote/haribote.sys $(APP).hrb \
 
 %.org : %.bim Makefile ../app_make.txt
 	$(BIM2HRB) $*.bim $*.org $(MALLOC)
+	
+%.sys : %.bim Makefile ../app_make.txt
+	$(BIM2SYS) $*.bim $*.sys $(MALLOC)
 
 %.hrb : %.org Makefile ../app_make.txt
 	$(BIM2BIN) -osacmp in:$*.org out:$*.hrb

@@ -7,100 +7,66 @@
      7 00000000                                 	EXTERN	_memman_alloc
      8 00000000                                 	EXTERN	_message_send
      9 00000000                                 	EXTERN	_message_receive
-    10 00000000                                 	EXTERN	_boxfill8
-    11 00000000                                 	EXTERN	_sprintf
-    12 00000000                                 	EXTERN	_putfonts8_asc
-    13 00000000                                 	EXTERN	_task_alloc
-    14 00000000                                 	EXTERN	_memman_alloc_4k
-    15 00000000                                 	EXTERN	_task_run
-    16 00000000                                 [FILE "fs.c"]
-    17                                          [SECTION .data]
-    18 00000000                                 LC0:
-    19 00000000 46 53 00                        	DB	"FS",0x00
-    20 00000003                                 LC1:
-    21 00000003 74 61 73 6B 72 75 6E 20 25 64   	DB	"taskrun %d",0x00
-       0000000D 00 
-    22                                          [SECTION .text]
-    23 00000000                                 	GLOBAL	_FS_task
-    24 00000000                                 _FS_task:
-    25 00000000 55                              	PUSH	EBP
-    26 00000001 89 E5                           	MOV	EBP,ESP
-    27 00000003 53                              	PUSH	EBX
-    28 00000004 83 EC 40                        	SUB	ESP,64
-    29 00000007 68 [00000000]                   	PUSH	LC0
-    30 0000000C E8 [00000000]                   	CALL	_GetMyObj
-    31 00000011 68 00000200                     	PUSH	512
-    32 00000016 68 003C0000                     	PUSH	3932160
-    33 0000001B E8 [00000000]                   	CALL	_memman_alloc
-    34 00000020 83 C4 0C                        	ADD	ESP,12
-    35 00000023 89 45 D4                        	MOV	DWORD [-44+EBP],EAX
-    36 00000026                                 L2:
-    37 00000026 8D 5D CC                        	LEA	EBX,DWORD [-52+EBP]
-    38 00000029 53                              	PUSH	EBX
-    39 0000002A 68 00002712                     	PUSH	10002
-    40 0000002F C7 45 CC 00000001               	MOV	DWORD [-52+EBP],1
-    41 00000036 E8 [00000000]                   	CALL	_message_send
-    42 0000003B 53                              	PUSH	EBX
-    43 0000003C 68 00002710                     	PUSH	10000
-    44 00000041 E8 [00000000]                   	CALL	_message_receive
-    45 00000046 8B 45 D4                        	MOV	EAX,DWORD [-44+EBP]
-    46 00000049 8B 58 78                        	MOV	EBX,DWORD [120+EAX]
-    47 0000004C 6A 0F                           	PUSH	15
-    48 0000004E C1 E3 09                        	SAL	EBX,9
-    49 00000051 68 000000FF                     	PUSH	255
-    50 00000056 C1 EB 14                        	SHR	EBX,20
-    51 00000059 6A 00                           	PUSH	0
-    52 0000005B 6A 00                           	PUSH	0
-    53 0000005D 6A 00                           	PUSH	0
-    54 0000005F 0F BF 05 00000FF4               	MOVSX	EAX,WORD [4084]
-    55 00000066 50                              	PUSH	EAX
-    56 00000067 FF 35 00000FF8                  	PUSH	DWORD [4088]
-    57 0000006D E8 [00000000]                   	CALL	_boxfill8
-    58 00000072 83 C4 2C                        	ADD	ESP,44
-    59 00000075 53                              	PUSH	EBX
-    60 00000076 8D 5D DC                        	LEA	EBX,DWORD [-36+EBP]
-    61 00000079 68 [00000003]                   	PUSH	LC1
-    62 0000007E 53                              	PUSH	EBX
-    63 0000007F E8 [00000000]                   	CALL	_sprintf
-    64 00000084 53                              	PUSH	EBX
-    65 00000085 6A 07                           	PUSH	7
-    66 00000087 6A 00                           	PUSH	0
-    67 00000089 6A 00                           	PUSH	0
-    68 0000008B 0F BF 05 00000FF4               	MOVSX	EAX,WORD [4084]
-    69 00000092 50                              	PUSH	EAX
-    70 00000093 FF 35 00000FF8                  	PUSH	DWORD [4088]
-    71 00000099 E8 [00000000]                   	CALL	_putfonts8_asc
-    72 0000009E 83 C4 24                        	ADD	ESP,36
-    73 000000A1 EB 83                           	JMP	L2
-    74 000000A3                                 	GLOBAL	_FSEntry
-    75 000000A3                                 _FSEntry:
-    76 000000A3 55                              	PUSH	EBP
-    77 000000A4 89 E5                           	MOV	EBP,ESP
-    78 000000A6 56                              	PUSH	ESI
-    79 000000A7 53                              	PUSH	EBX
-    80 000000A8 8B 75 08                        	MOV	ESI,DWORD [8+EBP]
-    81 000000AB E8 [00000000]                   	CALL	_task_alloc
-    82 000000B0 68 00010000                     	PUSH	65536
-    83 000000B5 89 C3                           	MOV	EBX,EAX
-    84 000000B7 FF 76 04                        	PUSH	DWORD [4+ESI]
-    85 000000BA E8 [00000000]                   	CALL	_memman_alloc_4k
-    86 000000BF 05 00010000                     	ADD	EAX,65536
-    87 000000C4 89 43 64                        	MOV	DWORD [100+EBX],EAX
-    88 000000C7 C7 43 4C [00000000]             	MOV	DWORD [76+EBX],_FS_task
-    89 000000CE C7 43 74 00000008               	MOV	DWORD [116+EBX],8
-    90 000000D5 C7 43 78 00000010               	MOV	DWORD [120+EBX],16
-    91 000000DC C7 43 7C 00000008               	MOV	DWORD [124+EBX],8
-    92 000000E3 C7 83 00000080 00000008         	MOV	DWORD [128+EBX],8
-    93 000000ED C7 83 00000084 00000008         	MOV	DWORD [132+EBX],8
-    94 000000F7 C7 83 00000088 00000008         	MOV	DWORD [136+EBX],8
-    95 00000101 6A 02                           	PUSH	2
-    96 00000103 6A 03                           	PUSH	3
-    97 00000105 53                              	PUSH	EBX
-    98 00000106 E8 [00000000]                   	CALL	_task_run
-    99 0000010B B8 00000001                     	MOV	EAX,1
-   100 00000110 89 5E 08                        	MOV	DWORD [8+ESI],EBX
-   101 00000113 8D 65 F8                        	LEA	ESP,DWORD [-8+EBP]
-   102 00000116 5B                              	POP	EBX
-   103 00000117 5E                              	POP	ESI
-   104 00000118 5D                              	POP	EBP
-   105 00000119 C3                              	RET
+    10 00000000                                 	EXTERN	_task_alloc
+    11 00000000                                 	EXTERN	_memman_alloc_4k
+    12 00000000                                 	EXTERN	_task_run
+    13 00000000                                 [FILE "fs.c"]
+    14                                          [SECTION .data]
+    15 00000000                                 LC0:
+    16 00000000 46 53 00                        	DB	"FS",0x00
+    17                                          [SECTION .text]
+    18 00000000                                 	GLOBAL	_FS_task
+    19 00000000                                 _FS_task:
+    20 00000000 55                              	PUSH	EBP
+    21 00000001 89 E5                           	MOV	EBP,ESP
+    22 00000003 53                              	PUSH	EBX
+    23 00000004 83 EC 40                        	SUB	ESP,64
+    24 00000007 8D 5D CC                        	LEA	EBX,DWORD [-52+EBP]
+    25 0000000A 68 [00000000]                   	PUSH	LC0
+    26 0000000F E8 [00000000]                   	CALL	_GetMyObj
+    27 00000014 68 00000200                     	PUSH	512
+    28 00000019 68 003C0000                     	PUSH	3932160
+    29 0000001E E8 [00000000]                   	CALL	_memman_alloc
+    30 00000023 53                              	PUSH	EBX
+    31 00000024 68 00002712                     	PUSH	10002
+    32 00000029 89 45 D4                        	MOV	DWORD [-44+EBP],EAX
+    33 0000002C C7 45 CC 00000001               	MOV	DWORD [-52+EBP],1
+    34 00000033 E8 [00000000]                   	CALL	_message_send
+    35 00000038 53                              	PUSH	EBX
+    36 00000039 68 00002710                     	PUSH	10000
+    37 0000003E E8 [00000000]                   	CALL	_message_receive
+    38 00000043 83 C4 1C                        	ADD	ESP,28
+    39 00000046                                 L2:
+    40 00000046 EB FE                           	JMP	L2
+    41 00000048                                 	GLOBAL	_FSEntry
+    42 00000048                                 _FSEntry:
+    43 00000048 55                              	PUSH	EBP
+    44 00000049 89 E5                           	MOV	EBP,ESP
+    45 0000004B 56                              	PUSH	ESI
+    46 0000004C 53                              	PUSH	EBX
+    47 0000004D 8B 75 08                        	MOV	ESI,DWORD [8+EBP]
+    48 00000050 E8 [00000000]                   	CALL	_task_alloc
+    49 00000055 68 00010000                     	PUSH	65536
+    50 0000005A 89 C3                           	MOV	EBX,EAX
+    51 0000005C FF 76 04                        	PUSH	DWORD [4+ESI]
+    52 0000005F E8 [00000000]                   	CALL	_memman_alloc_4k
+    53 00000064 05 00010000                     	ADD	EAX,65536
+    54 00000069 89 43 64                        	MOV	DWORD [100+EBX],EAX
+    55 0000006C C7 43 4C [00000000]             	MOV	DWORD [76+EBX],_FS_task
+    56 00000073 C7 43 74 00000008               	MOV	DWORD [116+EBX],8
+    57 0000007A C7 43 78 00000010               	MOV	DWORD [120+EBX],16
+    58 00000081 C7 43 7C 00000008               	MOV	DWORD [124+EBX],8
+    59 00000088 C7 83 00000080 00000008         	MOV	DWORD [128+EBX],8
+    60 00000092 C7 83 00000084 00000008         	MOV	DWORD [132+EBX],8
+    61 0000009C C7 83 00000088 00000008         	MOV	DWORD [136+EBX],8
+    62 000000A6 6A 01                           	PUSH	1
+    63 000000A8 6A 03                           	PUSH	3
+    64 000000AA 53                              	PUSH	EBX
+    65 000000AB E8 [00000000]                   	CALL	_task_run
+    66 000000B0 B8 00000001                     	MOV	EAX,1
+    67 000000B5 89 5E 08                        	MOV	DWORD [8+ESI],EBX
+    68 000000B8 8D 65 F8                        	LEA	ESP,DWORD [-8+EBP]
+    69 000000BB 5B                              	POP	EBX
+    70 000000BC 5E                              	POP	ESI
+    71 000000BD 5D                              	POP	EBP
+    72 000000BE C3                              	RET

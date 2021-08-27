@@ -307,6 +307,7 @@ struct TASK {
 	int r_flags,s_flag;
 	struct MESSAGE *message_r;
 	struct list_elem list_tag;
+	int devflag;
 	//struct blocks_t *waits;
 };
 struct TASKLEVEL {
@@ -449,7 +450,7 @@ BOOL HDEntry(struct Dobject *Dobj);
 
 /* driver.c */
 #define DR_NUM 2
-#define DR_ENUM 5
+#define DR_ENUM 1
 struct Dobject{
 	char *name;
 	struct MEMMAN *memman;
@@ -462,6 +463,7 @@ struct dDevEntry {
 	struct Dobject *Dobj;
 };
 BOOL LDevs(struct MEMMAN *memman);
+BOOL load_external_device(int *fat,struct MEMMAN *memman);
 struct Dobject *GetMyObj(char *name);
 //typedef BOOL (*DEntry) (Dobject);
 
@@ -471,11 +473,8 @@ BOOL FSEntry(struct Dobject *Dobj);
 
 /* code.c */
 struct _codecore{
-	//char name;
 	int next;
-
 	int code[0xff];
-	//struct _codecore *next; 
 };
 int code_alloc();
 void code_init();

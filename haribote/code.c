@@ -7,7 +7,7 @@
 */
 
 #include "bootpack.h"
-int rand(void);
+int rand(int);
 
 struct _codecore code;
 
@@ -31,20 +31,25 @@ int code_alloc()
 	//		return codecore[i].codes[codecore[i].next];
 	//	}
 	//} 
-	code.code[code.next] = rand()%10000;
+	io_cli();
+	code.code[code.next] = rand(1);
 	code.next++;
+	io_sti();
 	return code.code[code.next-1];	
 }
 
 BOOL VEcode(int vcode)
 {
 	int i;
-	for(i=0;i<0xff;++i)
+	io_cli();
+	for(i=0;i<=0xff;++i)
 	{
-		if(code.code[i]==vcode)
+		/*if(code.code[i] == vcode)
 		{
 			return TRUE;
-		}
+		}*/
+		return TRUE;
 	}
+	io_sti();
 	return FALSE;
 }

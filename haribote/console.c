@@ -5,6 +5,9 @@
 #include <string.h>
 
 extern struct dDevEntry dDevs[DR_NUM];
+int abs(int);
+
+#define IS_LEAP_YEAR(year) ((year % 4 == 0&&year % 100 !=0) || (year % 400==0))
 
 void readrtc(unsigned char *t)
 {
@@ -37,7 +40,21 @@ void printtime(struct CONSOLE *cons)
     sprintf(s, "%02X%02X.%02X.%02X %02X:%02X:%02X\n", t[6], t[5], t[4], t[3], t[2], t[1], t[0]);
     cons_putstr0(cons,s);
 }
-
+UINT time()
+{
+	unsigned char t[7];
+	int flag=0;
+    readrtc(t);
+    int year=t[6]*100+t[5];
+    int hour=t[2]-8;
+    year-=1970;
+    if(hour<0)
+    {
+    	hour=24-abs(hour);
+    	flag=1;
+	}
+	return t[0]+t[1]*60+hour*3600+(t[3]-flag)*86400+t[4]*2629743+year*31556926;
+}
 void print_identify_info(short* hdinfo,struct CONSOLE *cons)
 {
 	int i, k;
@@ -313,8 +330,7 @@ void cons_runcmd(char *cmdline, struct CONSOLE *cons, int *fat, int memtotal)
 	} else if (strcmp(cmdline, "time") == 0){
 		printtime(cons);
 	} else if (strcmp(cmdline, "shutdown") == 0){
-		
-		
+		acpiPowerOff();
 	} else if (strcmp(cmdline, "version") == 0){
 		ver(cons);
 	} else if (strcmp(cmdline, "hdinfo") == 0){
@@ -831,9 +847,52 @@ void hrb_api_linewin(struct SHEET *sht, int x0, int y0, int x1, int y1, int col)
 
 int hrb_dpi(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx, int eax)
 {
-	if(!VEcode(ecx))
+	int *reg = &eax + 1;
+	if(!VEcode(ecx))//我们只信任系统驱动 
 	{
 		return -1; 
 	} 
+	char s[10];
+	struct TASK *task = task_now();
+	int ds_base = task->ds_base;
+	struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
+	switch(edx)
+	{
+		case 1:
+			io_out8(eax,ecx);
+			break;
+		case 2:
+			reg[7] = io_in8(eax);
+			break;
+		case 3:
+			io_out16(eax,ecx);
+			break;
+		case 4:
+			reg[7] = io_in16(eax);
+			break;	
+		case 5:
+			io_out32(eax,ecx);
+			break;
+		case 6:
+			reg[7] = io_in32(eax);
+			break;
+		case 7:
+			reg[7] = message_send(eax,(struct MESSAGE *)ecx);
+			break; 
+		case 8:
+			break;
+		case 9:
+			break;
+		case 10:
+			io_cli(); 
+			task_delete(task); 
+			task_switchsub();
+			task = task_now();
+			if(task->devflag) asm("movl %%esp,%0":"=r"(task->tss.esp0)); 
+			io_sti();
+			farjmp(0, task->sel);
+		default:
+			return -1;
+	}
 	return 0;
 }
