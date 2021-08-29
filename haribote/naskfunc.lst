@@ -19,7 +19,7 @@
     19 00000000                                 		GLOBAL  _asm_inthandler2e
     20 00000000                                 		GLOBAL	_memtest_sub
     21 00000000                                 		GLOBAL	_farjmp, _farcall
-    22 00000000                                 		GLOBAL	_asm_hrb_api, _start_app, _asm_hrb_dpi
+    22 00000000                                 		GLOBAL	_asm_hrb_api, _start_app,_start_sys, _asm_hrb_dpi
     23 00000000                                 		EXTERN	_inthandler20, _inthandler21
     24 00000000                                 		EXTERN	_inthandler2c, _inthandler0d
     25 00000000                                 		EXTERN	_inthandler0c, _inthandler2e
@@ -367,208 +367,229 @@
    367 0000020E 51                              		PUSH	ECX				; アプリのCS
    368 0000020F 50                              		PUSH	EAX				; アプリのEIP
    369 00000210 CB                              		RETF
-   370 00000211                                 ;	アプリが終了してもここには来ない
-   371 00000211                                 
-   372 00000211                                 ;_shutdown:
-   373 00000211                                 ;		MOV AX,5301H
-   374 00000211                                 ;		XOR BX,BX
-   375 00000211                                 ;		INT 0x15 
-   376 00000211                                 
-   377 00000211                                 _WriteByteToPort:
-   378 00000211 55                              		push ebp
-   379 00000212 89 E5                           		mov ebp,esp
-   380 00000214 52                              		push edx
-   381 00000215 8A 45 08                        		mov al,BYTE [ebp + 8]
-   382 00000218 66 8B 55 0C                     		mov dx,WORD [ebp + 12]
-   383 0000021C EE                              		out dx,al
-   384 0000021D 5A                              		pop edx
-   385 0000021E C9                              		leave
-   386 0000021F C3                              		retn
-   387 00000220                                 
-   388 00000220                                 _ReadByteStringFromPort:
-   389 00000220 55                              		push ebp
-   390 00000221 89 E5                           		mov ebp,esp
-   391 00000223 51                              		push ecx
-   392 00000224 52                              		push edx
-   393 00000225 57                              		push edi
-   394 00000226 8B 7D 08                        		mov edi,dword [ebp + 8]
-   395 00000229 8B 4D 0C                        		mov ecx,dword [ebp + 12]
-   396 0000022C 66 8B 55 10                     		mov dx,word [ebp + 16]
-   397 00000230 F3 6C                           		rep insb
-   398 00000232 5F                              		pop edi
-   399 00000233 5A                              		pop edx
-   400 00000234 59                              		pop ecx
-   401 00000235 C9                              		leave
-   402 00000236 C3                              		retn
-   403 00000237                                 
-   404 00000237                                 
-   405 00000237                                 
-   406 00000237                                 _WriteByteStringToPort:
-   407 00000237 55                              		push ebp
-   408 00000238 89 E5                           		mov ebp,esp
-   409 0000023A 51                              		push ecx
-   410 0000023B 52                              		push edx
-   411 0000023C 56                              		push esi
-   412 0000023D 8B 75 08                        		mov esi,dword [ebp + 8]
-   413 00000240 8B 4D 0C                        		mov ecx,dword [ebp + 12]
-   414 00000243 66 8B 55 10                     		mov dx,word [ebp + 16]
-   415 00000247 F3 6E                           		rep outsb
-   416 00000249 5E                              		pop esi
-   417 0000024A 5A                              		pop edx
-   418 0000024B 59                              		pop ecx
-   419 0000024C C9                              		leave
-   420 0000024D C3                              		retn
-   421 0000024E                                 
-   422 0000024E                                 _ReadWordFromPort:
-   423 0000024E 55                              		push ebp
-   424 0000024F 89 E5                           		mov ebp,esp
-   425 00000251 53                              		push ebx
-   426 00000252 52                              		push edx
-   427 00000253 66 8B 55 0C                     		mov dx,word [ebp + 0x0c]
-   428 00000257 8B 5D 08                        		mov ebx,dword [ebp + 0x08]
-   429 0000025A 66 ED                           		in ax,dx
-   430 0000025C 66 89 03                        		mov word [ebx],ax
-   431 0000025F 5A                              		pop edx
-   432 00000260 5B                              		pop ebx
-   433 00000261 C9                              		leave
-   434 00000262 C3                              		retn
-   435 00000263                                 
-   436 00000263                                 
-   437 00000263                                 _WriteWordToPort:
-   438 00000263 55                              		push ebp
-   439 00000264 89 E5                           		mov ebp,esp
-   440 00000266 66 52                           		push dx
-   441 00000268 66 8B 55 0C                     		mov dx,word [ebp + 0x0c]
-   442 0000026C 66 8B 45 08                     		mov ax,word [ebp + 0x08]
-   443 00000270 66 EF                           		out dx,ax
-   444 00000272 66 5A                           		pop dx
-   445 00000274 C9                              		leave
-   446 00000275 C3                              		retn
-   447 00000276                                 
-   448 00000276                                 _ReadWordStringFromPort:
-   449 00000276 55                              		push ebp
-   450 00000277 89 E5                           		mov ebp,esp
-   451 00000279 51                              		push ecx
-   452 0000027A 52                              		push edx
-   453 0000027B 57                              		push edi
-   454 0000027C 8B 7D 08                        		mov edi,dword [ebp + 0x08]
-   455 0000027F 8B 4D 0C                        		mov ecx,dword [ebp + 0x0c]
-   456 00000282 D1 E9                           		shr ecx,0x01
-   457 00000284 66 8B 55 10                     		mov dx,  word [ebp + 0x10]
-   458 00000288 FC                              		cld
-   459 00000289 F3 66 6D                        		rep insw
-   460 0000028C 5F                              		pop edi
-   461 0000028D 5A                              		pop edx
-   462 0000028E 59                              		pop ecx
-   463 0000028F C9                              		leave
-   464 00000290 C3                              		retn
-   465 00000291                                 
-   466 00000291                                 
-   467 00000291                                 
-   468 00000291                                 
-   469 00000291                                 _WriteWordStringToPort:
-   470 00000291 55                              		push ebp
-   471 00000292 89 E5                           		mov ebp,esp
-   472 00000294 51                              		push ecx
-   473 00000295 52                              		push edx
-   474 00000296 56                              		push esi
-   475 00000297 8B 75 08                        		mov esi,dword [ebp + 0x08]
-   476 0000029A 8B 4D 0C                        		mov ecx,dword  [ebp + 0x0c]
-   477 0000029D C1 E9 02                        		shr ecx,0x02
-   478 000002A0 66 8B 55 10                     		mov dx,  word [ebp + 0x10]
-   479 000002A4 F3 66 6F                        		rep outsw
-   480 000002A7 5E                              		pop esi
-   481 000002A8 5A                              		pop edx
-   482 000002A9 59                              		pop ecx
-   483 000002AA C9                              		leave
-   484 000002AB C3                              		retn
-   485 000002AC                                 
-   486 000002AC                                 _inws:
-   487 000002AC 8B 7C 24 04                     	mov	edi, [esp + 4]	; buf
-   488 000002B0 8B 4C 24 08                     	mov	ecx, [esp + 4 + 4]	; port
-   489 000002B4 8B 54 24 0C                     	mov	edx, [esp + 4 + 4 + 4]   ; n
-   490 000002B8 D1 E9                           	shr	ecx, 1
-   491 000002BA FC                              	cld
-   492 000002BB F3 66 6D                        	rep	insw
-   493 000002BE C3                              	ret
-   494 000002BF                                 	
-   495 000002BF                                 _outws:
-   496 000002BF 8B 7C 24 04                     	mov	edi, [esp + 4]	; buf
-   497 000002C3 8B 4C 24 08                     	mov	ecx, [esp + 4 + 4]	; port
-   498 000002C7 8B 54 24 0C                     	mov	edx, [esp + 4 + 4 + 4]   ; n
-   499 000002CB D1 E9                           	shr	ecx, 1
-   500 000002CD FC                              	cld
-   501 000002CE F3 66 6F                        	rep	outsw
-   502 000002D1 C3                              	ret
-   503 000002D2                                 	
-   504 000002D2                                 ; ------------------------------------------------------------------------
-   505 000002D2                                 ; void* memcpy(void* es:p_dst, void* ds:p_src, int size);
-   506 000002D2                                 ; ------------------------------------------------------------------------
-   507 000002D2                                 _memcpy:
-   508 000002D2 55                              	push	ebp
-   509 000002D3 89 E5                           	mov	ebp, esp
-   510 000002D5                                 
-   511 000002D5 56                              	push	esi
-   512 000002D6 57                              	push	edi
-   513 000002D7 51                              	push	ecx
-   514 000002D8                                 
-   515 000002D8 8B 7D 08                        	mov	edi, [ebp + 8]	; Destination
-   516 000002DB 8B 75 0C                        	mov	esi, [ebp + 12]	; Source
-   517 000002DE 8B 4D 10                        	mov	ecx, [ebp + 16]	; Counter
-   518 000002E1                                 .1:
-   519 000002E1 83 F9 00                        	cmp	ecx, 0		; 判断计数器
-   520 000002E4 74 0B                           	jz	.2		; 计数器为零时跳出
-   521 000002E6                                 
-   522 000002E6 3E 8A 06                        	mov	al, [ds:esi]		; ┓
-   523 000002E9 46                              	inc	esi			; ┃
-   524 000002EA                                 					; ┣ 逐字节移动
-   525 000002EA 26 88 07                        	mov	byte [es:edi], al	; ┃
-   526 000002ED 47                              	inc	edi			; ┛
-   527 000002EE                                 
-   528 000002EE 49                              	dec	ecx		; 计数器减一
-   529 000002EF EB F0                           	jmp	.1		; 循环
-   530 000002F1                                 .2:
-   531 000002F1 8B 45 08                        	mov	eax, [ebp + 8]	; 返回值
-   532 000002F4                                 
-   533 000002F4 59                              	pop	ecx
-   534 000002F5 5F                              	pop	edi
-   535 000002F6 5E                              	pop	esi
-   536 000002F7 89 EC                           	mov	esp, ebp
-   537 000002F9 5D                              	pop	ebp
-   538 000002FA                                 
-   539 000002FA C3                              	ret			; 函数结束，返回
-   540 000002FB                                 ; memcpy 结束-------------------------------------------------------------
-   541 000002FB                                 
-   542 000002FB                                 
-   543 000002FB                                 ; ------------------------------------------------------------------------
-   544 000002FB                                 ; void memset(void* p_dst, char ch, int size);
-   545 000002FB                                 ; ------------------------------------------------------------------------
-   546 000002FB                                 _memset:
-   547 000002FB 55                              	push	ebp
-   548 000002FC 89 E5                           	mov	ebp, esp
-   549 000002FE                                 
-   550 000002FE 56                              	push	esi
-   551 000002FF 57                              	push	edi
-   552 00000300 51                              	push	ecx
-   553 00000301                                 
-   554 00000301 8B 7D 08                        	mov	edi, [ebp + 8]	; Destination
-   555 00000304 8B 55 0C                        	mov	edx, [ebp + 12]	; Char to be putted
-   556 00000307 8B 4D 10                        	mov	ecx, [ebp + 16]	; Counter
-   557 0000030A                                 .1:
-   558 0000030A 83 F9 00                        	cmp	ecx, 0		; 判断计数器
-   559 0000030D 74 06                           	jz	.2		; 计数器为零时跳出
-   560 0000030F                                 
-   561 0000030F 88 17                           	mov	byte [edi], dl		; ┓
-   562 00000311 47                              	inc	edi			; ┛
-   563 00000312                                 
-   564 00000312 49                              	dec	ecx		; 计数器减一
-   565 00000313 EB F5                           	jmp	.1		; 循环
-   566 00000315                                 .2:
-   567 00000315                                 
-   568 00000315 59                              	pop	ecx
-   569 00000316 5F                              	pop	edi
-   570 00000317 5E                              	pop	esi
-   571 00000318 89 EC                           	mov	esp, ebp
-   572 0000031A 5D                              	pop	ebp
-   573 0000031B                                 
-   574 0000031B C3                              	ret			; 函数结束，返回
+   370 00000211                                 _start_sys:		; void start_app(int eip, int cs, int esp, int ds, int *tss_esp0);
+   371 00000211 60                              		PUSHAD		; 32ビットレジスタを全部保存しておく
+   372 00000212 8B 44 24 24                     		MOV		EAX,[ESP+36]	; アプリ用のEIP
+   373 00000216 8B 4C 24 28                     		MOV		ECX,[ESP+40]	; アプリ用のCS
+   374 0000021A 8B 54 24 2C                     		MOV		EDX,[ESP+44]	; アプリ用のESP
+   375 0000021E 8B 5C 24 30                     		MOV		EBX,[ESP+48]	; アプリ用のDS/SS
+   376 00000222 8B 6C 24 34                     		MOV		EBP,[ESP+52]	; tss.esp0の番地
+   377 00000226 89 65 00                        		MOV		[EBP  ],ESP		; OS用のESPを保存
+   378 00000229 8C 55 04                        		MOV		[EBP+4],SS		; OS用のSSを保存
+   379 0000022C 8E C3                           		MOV		ES,BX
+   380 0000022E 8E DB                           		MOV		DS,BX
+   381 00000230 8E E3                           		MOV		FS,BX
+   382 00000232 8E EB                           		MOV		GS,BX
+   383 00000234                                 ;	以下はRETFでアプリに行かせるためのスタック調整
+   384 00000234 83 C9 01                        		OR		ECX,1			; アプリ用のセグメント番号に3をORする
+   385 00000237 83 CB 01                        		OR		EBX,1			; アプリ用のセグメント番号に3をORする
+   386 0000023A 53                              		PUSH	EBX				; アプリのSS
+   387 0000023B 52                              		PUSH	EDX				; アプリのESP
+   388 0000023C 51                              		PUSH	ECX				; アプリのCS
+   389 0000023D 50                              		PUSH	EAX				; アプリのEIP
+   390 0000023E CB                              		RETF
+   391 0000023F                                 ;	アプリが終了してもここには来ない
+   392 0000023F                                 
+   393 0000023F                                 ;_shutdown:
+   394 0000023F                                 ;		MOV AX,5301H
+   395 0000023F                                 ;		XOR BX,BX
+   396 0000023F                                 ;		INT 0x15 
+   397 0000023F                                 
+   398 0000023F                                 _WriteByteToPort:
+   399 0000023F 55                              		push ebp
+   400 00000240 89 E5                           		mov ebp,esp
+   401 00000242 52                              		push edx
+   402 00000243 8A 45 08                        		mov al,BYTE [ebp + 8]
+   403 00000246 66 8B 55 0C                     		mov dx,WORD [ebp + 12]
+   404 0000024A EE                              		out dx,al
+   405 0000024B 5A                              		pop edx
+   406 0000024C C9                              		leave
+   407 0000024D C3                              		retn
+   408 0000024E                                 
+   409 0000024E                                 _ReadByteStringFromPort:
+   410 0000024E 55                              		push ebp
+   411 0000024F 89 E5                           		mov ebp,esp
+   412 00000251 51                              		push ecx
+   413 00000252 52                              		push edx
+   414 00000253 57                              		push edi
+   415 00000254 8B 7D 08                        		mov edi,dword [ebp + 8]
+   416 00000257 8B 4D 0C                        		mov ecx,dword [ebp + 12]
+   417 0000025A 66 8B 55 10                     		mov dx,word [ebp + 16]
+   418 0000025E F3 6C                           		rep insb
+   419 00000260 5F                              		pop edi
+   420 00000261 5A                              		pop edx
+   421 00000262 59                              		pop ecx
+   422 00000263 C9                              		leave
+   423 00000264 C3                              		retn
+   424 00000265                                 
+   425 00000265                                 
+   426 00000265                                 
+   427 00000265                                 _WriteByteStringToPort:
+   428 00000265 55                              		push ebp
+   429 00000266 89 E5                           		mov ebp,esp
+   430 00000268 51                              		push ecx
+   431 00000269 52                              		push edx
+   432 0000026A 56                              		push esi
+   433 0000026B 8B 75 08                        		mov esi,dword [ebp + 8]
+   434 0000026E 8B 4D 0C                        		mov ecx,dword [ebp + 12]
+   435 00000271 66 8B 55 10                     		mov dx,word [ebp + 16]
+   436 00000275 F3 6E                           		rep outsb
+   437 00000277 5E                              		pop esi
+   438 00000278 5A                              		pop edx
+   439 00000279 59                              		pop ecx
+   440 0000027A C9                              		leave
+   441 0000027B C3                              		retn
+   442 0000027C                                 
+   443 0000027C                                 _ReadWordFromPort:
+   444 0000027C 55                              		push ebp
+   445 0000027D 89 E5                           		mov ebp,esp
+   446 0000027F 53                              		push ebx
+   447 00000280 52                              		push edx
+   448 00000281 66 8B 55 0C                     		mov dx,word [ebp + 0x0c]
+   449 00000285 8B 5D 08                        		mov ebx,dword [ebp + 0x08]
+   450 00000288 66 ED                           		in ax,dx
+   451 0000028A 66 89 03                        		mov word [ebx],ax
+   452 0000028D 5A                              		pop edx
+   453 0000028E 5B                              		pop ebx
+   454 0000028F C9                              		leave
+   455 00000290 C3                              		retn
+   456 00000291                                 
+   457 00000291                                 
+   458 00000291                                 _WriteWordToPort:
+   459 00000291 55                              		push ebp
+   460 00000292 89 E5                           		mov ebp,esp
+   461 00000294 66 52                           		push dx
+   462 00000296 66 8B 55 0C                     		mov dx,word [ebp + 0x0c]
+   463 0000029A 66 8B 45 08                     		mov ax,word [ebp + 0x08]
+   464 0000029E 66 EF                           		out dx,ax
+   465 000002A0 66 5A                           		pop dx
+   466 000002A2 C9                              		leave
+   467 000002A3 C3                              		retn
+   468 000002A4                                 
+   469 000002A4                                 _ReadWordStringFromPort:
+   470 000002A4 55                              		push ebp
+   471 000002A5 89 E5                           		mov ebp,esp
+   472 000002A7 51                              		push ecx
+   473 000002A8 52                              		push edx
+   474 000002A9 57                              		push edi
+   475 000002AA 8B 7D 08                        		mov edi,dword [ebp + 0x08]
+   476 000002AD 8B 4D 0C                        		mov ecx,dword [ebp + 0x0c]
+   477 000002B0 D1 E9                           		shr ecx,0x01
+   478 000002B2 66 8B 55 10                     		mov dx,  word [ebp + 0x10]
+   479 000002B6 FC                              		cld
+   480 000002B7 F3 66 6D                        		rep insw
+   481 000002BA 5F                              		pop edi
+   482 000002BB 5A                              		pop edx
+   483 000002BC 59                              		pop ecx
+   484 000002BD C9                              		leave
+   485 000002BE C3                              		retn
+   486 000002BF                                 
+   487 000002BF                                 
+   488 000002BF                                 
+   489 000002BF                                 
+   490 000002BF                                 _WriteWordStringToPort:
+   491 000002BF 55                              		push ebp
+   492 000002C0 89 E5                           		mov ebp,esp
+   493 000002C2 51                              		push ecx
+   494 000002C3 52                              		push edx
+   495 000002C4 56                              		push esi
+   496 000002C5 8B 75 08                        		mov esi,dword [ebp + 0x08]
+   497 000002C8 8B 4D 0C                        		mov ecx,dword  [ebp + 0x0c]
+   498 000002CB C1 E9 02                        		shr ecx,0x02
+   499 000002CE 66 8B 55 10                     		mov dx,  word [ebp + 0x10]
+   500 000002D2 F3 66 6F                        		rep outsw
+   501 000002D5 5E                              		pop esi
+   502 000002D6 5A                              		pop edx
+   503 000002D7 59                              		pop ecx
+   504 000002D8 C9                              		leave
+   505 000002D9 C3                              		retn
+   506 000002DA                                 
+   507 000002DA                                 _inws:
+   508 000002DA 8B 7C 24 04                     	mov	edi, [esp + 4]	; buf
+   509 000002DE 8B 4C 24 08                     	mov	ecx, [esp + 4 + 4]	; port
+   510 000002E2 8B 54 24 0C                     	mov	edx, [esp + 4 + 4 + 4]   ; n
+   511 000002E6 D1 E9                           	shr	ecx, 1
+   512 000002E8 FC                              	cld
+   513 000002E9 F3 66 6D                        	rep	insw
+   514 000002EC C3                              	ret
+   515 000002ED                                 	
+   516 000002ED                                 _outws:
+   517 000002ED 8B 7C 24 04                     	mov	edi, [esp + 4]	; buf
+   518 000002F1 8B 4C 24 08                     	mov	ecx, [esp + 4 + 4]	; port
+   519 000002F5 8B 54 24 0C                     	mov	edx, [esp + 4 + 4 + 4]   ; n
+   520 000002F9 D1 E9                           	shr	ecx, 1
+   521 000002FB FC                              	cld
+   522 000002FC F3 66 6F                        	rep	outsw
+   523 000002FF C3                              	ret
+   524 00000300                                 	
+   525 00000300                                 ; ------------------------------------------------------------------------
+   526 00000300                                 ; void* memcpy(void* es:p_dst, void* ds:p_src, int size);
+   527 00000300                                 ; ------------------------------------------------------------------------
+   528 00000300                                 _memcpy:
+   529 00000300 55                              	push	ebp
+   530 00000301 89 E5                           	mov	ebp, esp
+   531 00000303                                 
+   532 00000303 56                              	push	esi
+   533 00000304 57                              	push	edi
+   534 00000305 51                              	push	ecx
+   535 00000306                                 
+   536 00000306 8B 7D 08                        	mov	edi, [ebp + 8]	; Destination
+   537 00000309 8B 75 0C                        	mov	esi, [ebp + 12]	; Source
+   538 0000030C 8B 4D 10                        	mov	ecx, [ebp + 16]	; Counter
+   539 0000030F                                 .1:
+   540 0000030F 83 F9 00                        	cmp	ecx, 0		; 判断计数器
+   541 00000312 74 0B                           	jz	.2		; 计数器为零时跳出
+   542 00000314                                 
+   543 00000314 3E 8A 06                        	mov	al, [ds:esi]		; ┓
+   544 00000317 46                              	inc	esi			; ┃
+   545 00000318                                 					; ┣ 逐字节移动
+   546 00000318 26 88 07                        	mov	byte [es:edi], al	; ┃
+   547 0000031B 47                              	inc	edi			; ┛
+   548 0000031C                                 
+   549 0000031C 49                              	dec	ecx		; 计数器减一
+   550 0000031D EB F0                           	jmp	.1		; 循环
+   551 0000031F                                 .2:
+   552 0000031F 8B 45 08                        	mov	eax, [ebp + 8]	; 返回值
+   553 00000322                                 
+   554 00000322 59                              	pop	ecx
+   555 00000323 5F                              	pop	edi
+   556 00000324 5E                              	pop	esi
+   557 00000325 89 EC                           	mov	esp, ebp
+   558 00000327 5D                              	pop	ebp
+   559 00000328                                 
+   560 00000328 C3                              	ret			; 函数结束，返回
+   561 00000329                                 ; memcpy 结束-------------------------------------------------------------
+   562 00000329                                 
+   563 00000329                                 
+   564 00000329                                 ; ------------------------------------------------------------------------
+   565 00000329                                 ; void memset(void* p_dst, char ch, int size);
+   566 00000329                                 ; ------------------------------------------------------------------------
+   567 00000329                                 _memset:
+   568 00000329 55                              	push	ebp
+   569 0000032A 89 E5                           	mov	ebp, esp
+   570 0000032C                                 
+   571 0000032C 56                              	push	esi
+   572 0000032D 57                              	push	edi
+   573 0000032E 51                              	push	ecx
+   574 0000032F                                 
+   575 0000032F 8B 7D 08                        	mov	edi, [ebp + 8]	; Destination
+   576 00000332 8B 55 0C                        	mov	edx, [ebp + 12]	; Char to be putted
+   577 00000335 8B 4D 10                        	mov	ecx, [ebp + 16]	; Counter
+   578 00000338                                 .1:
+   579 00000338 83 F9 00                        	cmp	ecx, 0		; 判断计数器
+   580 0000033B 74 06                           	jz	.2		; 计数器为零时跳出
+   581 0000033D                                 
+   582 0000033D 88 17                           	mov	byte [edi], dl		; ┓
+   583 0000033F 47                              	inc	edi			; ┛
+   584 00000340                                 
+   585 00000340 49                              	dec	ecx		; 计数器减一
+   586 00000341 EB F5                           	jmp	.1		; 循环
+   587 00000343                                 .2:
+   588 00000343                                 
+   589 00000343 59                              	pop	ecx
+   590 00000344 5F                              	pop	edi
+   591 00000345 5E                              	pop	esi
+   592 00000346 89 EC                           	mov	esp, ebp
+   593 00000348 5D                              	pop	ebp
+   594 00000349                                 
+   595 00000349 C3                              	ret			; 函数结束，返回

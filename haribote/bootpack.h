@@ -76,6 +76,7 @@ void farcall(int eip, int cs);
 void asm_hrb_api(void);
 void asm_hrb_dpi(void);
 void start_app(int eip, int cs, int esp, int ds, int *tss_esp0);
+void start_sys(int eip, int cs, int esp, int ds, int *tss_esp0);
 void asm_end_app(void);
 void clts(void);
 void fnsave(int *addr);

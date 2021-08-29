@@ -848,14 +848,15 @@ void hrb_api_linewin(struct SHEET *sht, int x0, int y0, int x1, int y1, int col)
 int hrb_dpi(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx, int eax)
 {
 	int *reg = &eax + 1;
-	if(!VEcode(ecx))//我们只信任系统驱动 
-	{
-		return -1; 
-	} 
-	char s[10];
+	//if(!VEcode(ecx))//我们只信任系统驱动 
+	//{
+	//	return -1; 
+	//} 
+	char s[2];
 	struct TASK *task = task_now();
 	int ds_base = task->ds_base;
 	struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
+	putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, "t");
 	switch(edx)
 	{
 		case 1:
@@ -882,6 +883,9 @@ int hrb_dpi(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx, int e
 		case 8:
 			break;
 		case 9:
+			s[0]=ebx&0xff;
+			s[1]=0;
+			putfonts8_asc(binfo->vram, binfo->scrnx, eax, eax, COL8_FFFFFF, "t");
 			break;
 		case 10:
 			io_cli(); 
