@@ -360,7 +360,7 @@ void ps(struct CONSOLE *cons)
 void ver(struct CONSOLE *cons)
 {
 	char s[61];
-	cons_putstr0(cons, "Haribote version 0.2\n\n");
+	cons_putstr0(cons, "Haribote version 0.2A\n\n");
 	return;
 }
 
