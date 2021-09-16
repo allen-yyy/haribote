@@ -24,13 +24,24 @@ void FS_task()
 	i = message_send(10002,&message);
 	message_receive(ANY,&message);
 	UINT sectors = *(UINT*)&message.params[60*2];
+	struct fs_message *fmess;
 	/*struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
 	boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 - 1, 15);
 	sprintf(s,"taskrun %d",sectors*512/1024/1024);
 	putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, s);**/
 	for(;;)
 	{
-		
+		message_receive(ANY,&umess);
+		switch(umess.type)
+		{
+			case FS_HDSIZE:
+				message_send(task2pid(dDevs[1].Dobj->task),&umess);
+				break;
+			case FS_READ:
+				fmess=umess.expar;
+				message_send(10002,&message);
+				message_receive(ANY,&message);
+		}
 	} 
 	return;
 } 

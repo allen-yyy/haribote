@@ -297,18 +297,52 @@ BOOL Identify(int nHdNum,BYTE* pBuffer)
 void task_hd()
 {
 	struct MESSAGE message;
+	struct hd2fs_message *h2f;
 	char s[100];
 	for(;;)
 	{
 		message_receive(ANY,&message);
+		h2f = message.expar;
 		switch(message.type)
 		{
 			case HD_OPEN:
+				if(h2f->command!=HD_OPEN||!h2f->isbuf)
+				{
+					message.params = (char )0;
+					message_send(message.src,&message);
+					break;	
+				}
 				Identify(0,message.params);
 				message_send(message.src,&message);
 				break;
 			case HD_IDENTIFY:
-				//Identify(0,message.params);
+				if(h2f->command!=HD_IDENTIFY||!h2f->isbuf)
+				{
+					message.params = (char )0;
+					message_send(message.src,&message);
+					break;	
+				}
+				Identify(0,message.params);
+				message_send(message.src,&message);
+				break;
+			case HD_READ:
+				if(h2f->command!=HD_READ||!h2f->isbuf)
+				{
+					message.params = (char )0;
+					message_send(message.src,&message);
+					break;	
+				}
+				readhddisk(h2f->drive,h2f->sector,h2f->lba,message.params);
+				message_send(message.src,&message);
+				break;
+			case HD_WRITE:
+				if(h2f->command!=HD_WRITE||!h2f->isbuf)
+				{
+					message.params = (char )0;
+					message_send(message.src,&message);
+					break;	
+				}
+				writehddisk(h2f->drive,h2f->sector,h2f->lba,message.params);
 				message_send(message.src,&message);
 				break;
 			default:
@@ -339,12 +373,10 @@ void inthandler2e(int *esp)
 
 BOOL HDEntry(struct Dobject *Dobj)
 {
-	//struct MEMMAN *memman = *((int *) 0x0ef0);
 	struct TASK *hdtask;
 	char s[31]; 
 	DWORD dwLba;
 	UCHAR Buff[512];
-	//IdeInitialize();
 	//Identify(0,(BYTE*)&Buff[0]);
 	//UINT sectors = *(UINT*)&Buff[60*2];
 			
@@ -358,11 +390,6 @@ BOOL HDEntry(struct Dobject *Dobj)
 	hdtask->tss.fs = 1 * 8;
 	hdtask->tss.gs = 1 * 8;
 	task_run(hdtask, 2, 1);
-	
-	//*((int *) 0x0f01) = hdtask;
 	Dobj->task = hdtask;
-	//---DEBUG--- 
-	//io_cli();
-	//io_sti();
 	return TRUE;
 } 

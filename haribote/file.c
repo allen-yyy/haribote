@@ -14,6 +14,21 @@ void file_readfat(int *fat, unsigned char *img)
 	return;
 }
 
+/*void file_readfat_hd(int *fat)
+/* ディスクイメージ内のFATの圧縮をとく */
+/*{
+	int i, j = 0;
+	struct MEMMAN *memman = MEMMAN_ADDR;
+	unsigned char *img = memman_alloc(memman,2880);
+	fs_read()
+	for (i = 0; i < 2880; i += 2) {
+		fat[i + 0] = (img[j + 0]      | img[j + 1] << 8) & 0xfff;
+		fat[i + 1] = (img[j + 1] >> 4 | img[j + 2] << 4) & 0xfff;
+		j += 3;
+	}
+	return;
+}*/ 
+
 void file_loadfile(int clustno, int size, char *buf, int *fat, char *img)
 {
 	int i;

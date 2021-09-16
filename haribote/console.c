@@ -92,13 +92,18 @@ void print_identify_info(short* hdinfo,struct CONSOLE *cons)
 	cons_putstr0(cons,s);
 }
 
-struct TIME time2TIME()
+struct TIME *time2TIME()
 {
 	struct TIME time;
 	unsigned char *t;
 	readrtc(t);
 	time.year = (t[6]<<100)+t[5];
 	time.moon = t[4];
+	time.day = t[3];
+	time.min = t[0];
+	time.sec = t[1];
+	time.hour = t[2];
+	return &time;
 }
 
 void hdinfo(struct CONSOLE *cons)
@@ -571,7 +576,7 @@ int *hrb_api(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx, int 
 	struct FILEINFO *finfo;
 	struct FILEHANDLE *fh;
 	struct MEMMAN *memman = (struct MEMMAN *) MEMMAN_ADDR;
-	struct TIME time = time2TIME();
+	struct TIME *time1 = time2TIME();
 
 	if (edx == 1) {
 		cons_putchar(cons, eax & 0xff, 1);
@@ -769,7 +774,9 @@ int *hrb_api(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx, int 
 	} else if (edx == 27) {
 		reg[7] = task->langmode;
 	} else if (edx == 28) {
-		//reg[7] = *((int *)time);
+		reg[7] = (int *)time1;
+	} else if (edx == 29) {
+		reg[7] = time();
 	} 
 	return 0;
 }

@@ -347,6 +347,7 @@ struct MESSAGE{
 	int *Param;
 	char *params;
 	int src;
+	void *expar; 
 }; 
 extern struct TASKCTL *taskctl;
 extern struct TIMER *task_timer;
@@ -439,8 +440,11 @@ typedef BOOL (*DEntry)(Dobject);
 
 
 /* hd.c */
-#define HD_OPEN 0x1
-#define HD_IDENTIFY 0x2
+#define HD_OPEN 		0x1
+#define HD_IDENTIFY 	0x2
+#define HD_READ 		0x3
+#define HD_WRITE		0x4
+#include "hd2fs.h"
 void inthandler2e(int *esp);
 BOOL Identify(int nHdNum,BYTE* pBuffer);
 static BOOL CmdSucc(WORD wPort);
@@ -470,6 +474,7 @@ struct Dobject *GetMyObj(char *name);
 
 /* fs.c */
 #define FS_HDSIZE 0x1
+#define FS_READ 0x2
 BOOL FSEntry(struct Dobject *Dobj); 
 
 /* code.c */
