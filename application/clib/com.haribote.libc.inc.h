@@ -11,3 +11,4 @@ void exit(int status);
 void *malloc(int size);
 void free(void *p);
 int getchar();
+int puts();

@@ -27,7 +27,7 @@ ALL :
 	$(GAS2NASK) $*.gas $*.nas
 
 %.obj : %.nas Makefile
-	$(NASK) $*.nas $*.obj
+	$(NASK) $*.nas $*.obj $*.lst
 
 $(TARGET) : $(OBJS) Makefile
 	$(GOLIB) out:$(TARGET) $(OBJS)

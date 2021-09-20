@@ -1,0 +1,107 @@
+     1 00000000                                 [FORMAT "WCOFF"]
+     2 00000000                                 [INSTRSET "i486p"]
+     3 00000000                                 [OPTIMIZE 1]
+     4 00000000                                 [OPTION 1]
+     5 00000000                                 [BITS 32]
+     6 00000000                                 	EXTERN	_vsprintf
+     7 00000000                                 	EXTERN	_api_putstr0
+     8 00000000                                 	EXTERN	_api_putchar
+     9 00000000                                 	EXTERN	_api_end
+    10 00000000                                 	EXTERN	_api_malloc
+    11 00000000                                 	EXTERN	_api_free
+    12 00000000                                 	EXTERN	_api_getkey
+    13 00000000                                 [FILE "com.haribote.libc.ca"]
+    14                                          [SECTION .text]
+    15 00000000                                 	GLOBAL	_printf
+    16 00000000                                 _printf:
+    17 00000000 55                              	PUSH	EBP
+    18 00000001 89 E5                           	MOV	EBP,ESP
+    19 00000003 56                              	PUSH	ESI
+    20 00000004 53                              	PUSH	EBX
+    21 00000005 81 EC 000003F0                  	SUB	ESP,1008
+    22 0000000B 8D 45 0C                        	LEA	EAX,DWORD [12+EBP]
+    23 0000000E 8D 9D FFFFFC08                  	LEA	EBX,DWORD [-1016+EBP]
+    24 00000014 50                              	PUSH	EAX
+    25 00000015 FF 75 08                        	PUSH	DWORD [8+EBP]
+    26 00000018 53                              	PUSH	EBX
+    27 00000019 E8 [00000000]                   	CALL	_vsprintf
+    28 0000001E 53                              	PUSH	EBX
+    29 0000001F 89 C6                           	MOV	ESI,EAX
+    30 00000021 E8 [00000000]                   	CALL	_api_putstr0
+    31 00000026 8D 65 F8                        	LEA	ESP,DWORD [-8+EBP]
+    32 00000029 89 F0                           	MOV	EAX,ESI
+    33 0000002B 5B                              	POP	EBX
+    34 0000002C 5E                              	POP	ESI
+    35 0000002D 5D                              	POP	EBP
+    36 0000002E C3                              	RET
+    37 0000002F                                 	GLOBAL	_putchar
+    38 0000002F                                 _putchar:
+    39 0000002F 55                              	PUSH	EBP
+    40 00000030 89 E5                           	MOV	EBP,ESP
+    41 00000032 53                              	PUSH	EBX
+    42 00000033 8B 5D 08                        	MOV	EBX,DWORD [8+EBP]
+    43 00000036 53                              	PUSH	EBX
+    44 00000037 E8 [00000000]                   	CALL	_api_putchar
+    45 0000003C 89 D8                           	MOV	EAX,EBX
+    46 0000003E 8B 5D FC                        	MOV	EBX,DWORD [-4+EBP]
+    47 00000041 C9                              	LEAVE
+    48 00000042 C3                              	RET
+    49 00000043                                 	GLOBAL	_exit
+    50 00000043                                 _exit:
+    51 00000043 55                              	PUSH	EBP
+    52 00000044 89 E5                           	MOV	EBP,ESP
+    53 00000046 5D                              	POP	EBP
+    54 00000047 E9 [00000000]                   	JMP	_api_end
+    55 0000004C                                 	GLOBAL	_malloc
+    56 0000004C                                 _malloc:
+    57 0000004C 55                              	PUSH	EBP
+    58 0000004D 89 E5                           	MOV	EBP,ESP
+    59 0000004F 53                              	PUSH	EBX
+    60 00000050 8B 5D 08                        	MOV	EBX,DWORD [8+EBP]
+    61 00000053 8D 43 10                        	LEA	EAX,DWORD [16+EBX]
+    62 00000056 50                              	PUSH	EAX
+    63 00000057 E8 [00000000]                   	CALL	_api_malloc
+    64 0000005C 5A                              	POP	EDX
+    65 0000005D 85 C0                           	TEST	EAX,EAX
+    66 0000005F 74 05                           	JE	L5
+    67 00000061 89 18                           	MOV	DWORD [EAX],EBX
+    68 00000063 83 C0 10                        	ADD	EAX,16
+    69 00000066                                 L5:
+    70 00000066 8B 5D FC                        	MOV	EBX,DWORD [-4+EBP]
+    71 00000069 C9                              	LEAVE
+    72 0000006A C3                              	RET
+    73 0000006B                                 	GLOBAL	_free
+    74 0000006B                                 _free:
+    75 0000006B 55                              	PUSH	EBP
+    76 0000006C 89 E5                           	MOV	EBP,ESP
+    77 0000006E 8B 45 08                        	MOV	EAX,DWORD [8+EBP]
+    78 00000071 85 C0                           	TEST	EAX,EAX
+    79 00000073 74 12                           	JE	L6
+    80 00000075 8D 50 F0                        	LEA	EDX,DWORD [-16+EAX]
+    81 00000078 8B 40 F0                        	MOV	EAX,DWORD [-16+EAX]
+    82 0000007B 83 C0 10                        	ADD	EAX,16
+    83 0000007E 50                              	PUSH	EAX
+    84 0000007F 52                              	PUSH	EDX
+    85 00000080 E8 [00000000]                   	CALL	_api_free
+    86 00000085 59                              	POP	ECX
+    87 00000086 58                              	POP	EAX
+    88 00000087                                 L6:
+    89 00000087 C9                              	LEAVE
+    90 00000088 C3                              	RET
+    91 00000089                                 	GLOBAL	_getchar
+    92 00000089                                 _getchar:
+    93 00000089 55                              	PUSH	EBP
+    94 0000008A 89 E5                           	MOV	EBP,ESP
+    95 0000008C 6A 01                           	PUSH	1
+    96 0000008E E8 [00000000]                   	CALL	_api_getkey
+    97 00000093 C9                              	LEAVE
+    98 00000094 C3                              	RET
+    99 00000095                                 	GLOBAL	_puts
+   100 00000095                                 _puts:
+   101 00000095 55                              	PUSH	EBP
+   102 00000096 89 E5                           	MOV	EBP,ESP
+   103 00000098 FF 75 08                        	PUSH	DWORD [8+EBP]
+   104 0000009B E8 [00000000]                   	CALL	_api_putstr0
+   105 000000A0 B8 00000001                     	MOV	EAX,1
+   106 000000A5 C9                              	LEAVE
+   107 000000A6 C3                              	RET

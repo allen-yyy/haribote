@@ -2,6 +2,7 @@ TOOLPATH = ../../z_tools/
 INCPATH  = ../../z_tools/haribote/
 INCPATH2  = ../application/include/
 APILIBPATH   = ../apilib/
+CLIBPATH   = ../application/clib/
 DPILIBPATH   = ../dpilib/
 HARIBOTEPATH = ../haribote/
 
@@ -36,7 +37,7 @@ endif
 ifndef MAKE_SYS
 $(APP).bim : $(APP).obj $(APILIBPATH)apilib.lib Makefile ../app_make.txt
 	$(OBJ2BIM) @$(RULEFILE) out:$(APP).bim map:$(APP).map stack:$(STACK) \
-		$(APP).obj $(APILIBPATH)apilib.lib
+		$(APP).obj $(APILIBPATH)apilib.lib $(CLIBPATH)haribotelibc.lib
 else
 $(APP).bim : $(APP).obj $(DPILIBPATH)dpilib.lib Makefile ../app_make.txt
 	$(OBJ2BIM) @$(RULEFILE2) out:$(APP).bim map:$(APP).map stack:$(STACK) \
