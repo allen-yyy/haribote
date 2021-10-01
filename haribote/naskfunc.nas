@@ -593,3 +593,7 @@ _memset:
 	pop	ebp
 
 	ret			; 函数结束，返回
+	
+[SECTION .initfunc.init]
+__initfunc_start:
+__initfunc_end:

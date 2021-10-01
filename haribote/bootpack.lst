@@ -26,8 +26,8 @@
     26 00000000                                 	EXTERN	_sheet_slide
     27 00000000                                 	EXTERN	_sheet_updown
     28 00000000                                 	EXTERN	_io_cli
-    29 00000000                                 	EXTERN	_LDevs
-    30 00000000                                 	EXTERN	_initAcpi
+    29 00000000                                 	EXTERN	_init_all_device
+    30 00000000                                 	EXTERN	_LDevs
     31 00000000                                 	EXTERN	_timer_alloc
     32 00000000                                 	EXTERN	_timer_init
     33 00000000                                 	EXTERN	_timer_settime
@@ -420,7 +420,7 @@
    417 00000190 68 003C0000                     	PUSH	3932160
    418 00000195 89 85 FFFFFBEC                  	MOV	DWORD [-1044+EBP],EAX
    419 0000019B E8 [00000000]                   	CALL	_task_init
-   420 000001A0 6A 02                           	PUSH	2
+   420 000001A0 6A 03                           	PUSH	3
    421 000001A2 6A 01                           	PUSH	1
    422 000001A4 89 85 FFFFFBC8                  	MOV	DWORD [-1080+EBP],EAX
    423 000001AA 50                              	PUSH	EAX
@@ -501,9 +501,9 @@
    498 000002BE FF B5 FFFFFBCC                  	PUSH	DWORD [-1076+EBP]
    499 000002C4 E8 [00000000]                   	CALL	_sheet_updown
    500 000002C9 E8 [00000000]                   	CALL	_io_cli
-   501 000002CE 68 003C0000                     	PUSH	3932160
-   502 000002D3 E8 [00000000]                   	CALL	_LDevs
-   503 000002D8 E8 [00000000]                   	CALL	_initAcpi
+   501 000002CE E8 [00000000]                   	CALL	_init_all_device
+   502 000002D3 68 003C0000                     	PUSH	3932160
+   503 000002D8 E8 [00000000]                   	CALL	_LDevs
    504 000002DD E8 [00000000]                   	CALL	_io_sti
    505 000002E2 E8 [00000000]                   	CALL	_timer_alloc
    506 000002E7 68 000008E8                     	PUSH	2280

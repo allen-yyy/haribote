@@ -432,7 +432,7 @@ int tek_decomp(unsigned char *p, char *q, int size);
 /* bootpack.c */
 struct TASK *open_constask(struct SHEET *sht, unsigned int memtotal);
 struct SHEET *open_console(struct SHTCTL *shtctl, unsigned int memtotal);
-
+#include "init.h"
 
 
 struct Dobject;
@@ -456,11 +456,17 @@ BOOL HDEntry(struct Dobject *Dobj);
 /* driver.c */
 #define DR_NUM 2
 #define DR_ENUM 1
+
+#define IDE_HD_CALLON	0
+#define FS_CALLON		1
 struct Dobject{
 	char *name;
 	struct MEMMAN *memman;
 	struct TASK *task;
 	void (*unload)(struct Dobject *this); 
+};
+enum typeof_dev{
+	IDE_HD_DEV = 0,FS_DEV,PCI_DEV,SCSI_DEV
 };
 struct dDevEntry {
 	char *name;
@@ -471,6 +477,11 @@ BOOL LDevs(struct MEMMAN *memman);
 BOOL load_external_device(int *fat,struct MEMMAN *memman);
 struct Dobject *GetMyObj(char *name);
 //typedef BOOL (*DEntry) (Dobject);
+struct dev_callon {
+	struct list_elem tag;
+	int id; 
+	int pid;
+};
 
 /* fs.c */
 #define FS_HDSIZE 0x1

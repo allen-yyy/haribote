@@ -1,0 +1,21 @@
+     1 00000000                                 [FORMAT "WCOFF"]
+     2 00000000                                 [INSTRSET "i486p"]
+     3 00000000                                 [OPTIMIZE 1]
+     4 00000000                                 [OPTION 1]
+     5 00000000                                 [BITS 32]
+     6 00000000                                 	EXTERN	_initAcpi
+     7 00000000                                 [FILE "init.c"]
+     8                                          [SECTION .text]
+     9 00000000                                 	GLOBAL	_init_all_device
+    10 00000000                                 _init_all_device:
+    11 00000000 55                              	PUSH	EBP
+    12 00000001 89 E5                           	MOV	EBP,ESP
+    13 00000003 E8 00000006                     	CALL	_run_init_functions
+    14 00000008 5D                              	POP	EBP
+    15 00000009 E9 [00000000]                   	JMP	_initAcpi
+    16 0000000E                                 	GLOBAL	_run_init_functions
+    17 0000000E                                 _run_init_functions:
+    18 0000000E 55                              	PUSH	EBP
+    19 0000000F 89 E5                           	MOV	EBP,ESP
+    20 00000011 5D                              	POP	EBP
+    21 00000012 C3                              	RET

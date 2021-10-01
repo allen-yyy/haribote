@@ -75,7 +75,7 @@ void HariMain(void)
 	shtctl = shtctl_init(memman, binfo->vram, binfo->scrnx, binfo->scrny);
 	task_a = task_init(memman);
 	fifo.task = task_a;
-	task_run(task_a, 1, 2);
+	task_run(task_a, 1, 3);
 	*((int *) 0x0fe4) = (int) shtctl;
 	task_a->langmode = 0;
 
@@ -104,8 +104,8 @@ void HariMain(void)
 	//keywin_on(key_win);
 	
 	io_cli();
+	init_all_device();
 	LDevs(memman);
-	initAcpi();
 	io_sti();
 
 	time = timer_alloc();

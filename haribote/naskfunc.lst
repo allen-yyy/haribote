@@ -593,3 +593,7 @@
    593 00000348 5D                              	pop	ebp
    594 00000349                                 
    595 00000349 C3                              	ret			; 函数结束，返回
+   596 0000034A                                 	
+   597                                          [SECTION .initfunc.init]
+   598 00000000                                 __initfunc_start:
+   599 00000000                                 __initfunc_end:

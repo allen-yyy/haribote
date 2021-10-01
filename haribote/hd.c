@@ -3,6 +3,8 @@
 #include "ide.h" 
 #include <stdio.h>
 
+extern struct dev_callon *devcalls[10];
+
 BOOL ReadHDSector(LPVOID lpBuffer,
 				  UCHAR byStartSector,
 				  UCHAR byCylinderLo,
@@ -391,5 +393,13 @@ BOOL HDEntry(struct Dobject *Dobj)
 	hdtask->tss.gs = 1 * 8;
 	task_run(hdtask, 2, 1);
 	Dobj->task = hdtask;
+	struct dev_callon hdcallon;
+	hdcallon.id = IDE_HD_CALLON;
+	hdcallon.pid = task2pid(hdtask);
+	devcalls[IDE_HD_CALLON] = &hdcallon;
+	struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
+	boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 - 1, 15);
+	sprintf(s,"taskrun %d",devcalls[IDE_HD_CALLON]->pid);
+	putfonts8_asc(binfo->vram, binfo->scrnx, 20, 20, COL8_FFFFFF, s);
 	return TRUE;
 } 

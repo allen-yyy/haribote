@@ -22,6 +22,8 @@ struct dDevEntry dDevs[DR_NUM] = {
 	{"FS",FSEntry}
 };
 
+struct dev_callon *devcalls[10];
+
 struct exdrivertable etable[DR_ENUM]= {
 	/*{"HAFS","hafs.sys"},
 	{"IO","io.sys"},
