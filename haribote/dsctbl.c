@@ -2,6 +2,11 @@
 
 #include "bootpack.h"
 
+#define BI1(n)  set_gatedesc(idt + n, (int) asm_inthandler##n, 2*8, AR_INTGATE32);
+#define BI  BI1(0x20) BI1(0x21) BI1(0x22) BI1(0x23) BI1(0x24) BI1(0x25) \
+BI1(0x26) BI1(0x27) BI1(0x28) BI1(0x29) BI1(0x2a) \
+BI1(0x2b) BI1(0x2c) BI1(0x2d) BI1(0x2e) BI1(0x2f) 
+
 void init_gdtidt(void)
 {
 	struct SEGMENT_DESCRIPTOR *gdt = (struct SEGMENT_DESCRIPTOR *) ADR_GDT;
@@ -20,6 +25,8 @@ void init_gdtidt(void)
 	for (i = 0; i <= LIMIT_IDT / 8; i++) {
 		set_gatedesc(idt + i, 0, 0, 0);
 	}
+	BI
+	set_gatedesc(idt + 0x22, 0, 0, 0);
 	load_idtr(LIMIT_IDT, ADR_IDT);
 
 	/* IDT‚ÌÝ’è */

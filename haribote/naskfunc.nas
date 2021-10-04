@@ -1,10 +1,10 @@
 ; naskfunc
 ; TAB=4
 
-[FORMAT "WCOFF"]				; オブジェクトファイルを作るモード	
-[INSTRSET "i486p"]				; 486の命令まで使いたいという記述
+;[FORMAT "WCOFF"]				; オブジェクトファイルを作るモード	
+;[INSTRSET "i486p"]				; 486の命令まで使いたいという記述
 [BITS 32]						; 32ビットモード用の機械語を作らせる
-[FILE "naskfunc.nas"]			; ソースファイル名情報
+;[FILE "naskfunc.nas"]			; ソースファイル名情報
 
 		GLOBAL	_io_hlt, _io_cli, _io_sti, _io_stihlt
 		GLOBAL	_io_in8,  _io_in16,  _io_in32
@@ -31,9 +31,47 @@
 		GLOBAL	_WriteWordStringToPort, _inws, _outws
 		GLOBAL	memcpy
 		GLOBAL	memset
-        EXTERN  _inthandler07
+        EXTERN  _inthandler07,_inthandlers 
 
 [SECTION .text]
+
+%MACRO INTN 1
+		GLOBAL _asm_inthandler%1
+_asm_inthandler%1:
+		PUSH	ES
+		PUSH	DS
+		PUSHAD
+		MOV		EAX,ESP
+		PUSH	EAX
+		PUSH	%1
+		MOV		AX,SS
+		MOV		DS,AX
+		MOV		ES,AX
+		CALL	_inthandlers
+		ADD		ESP,4
+		POP		EAX
+		POPAD
+		POP		DS
+		POP		ES
+		IRETD
+%ENDMACRO
+
+INTN 0x20
+INTN 0x21
+INTN 0x22
+INTN 0x23
+INTN 0x24
+INTN 0x25
+INTN 0x26
+INTN 0x27
+INTN 0x28
+INTN 0x29
+INTN 0x2a
+INTN 0x2b
+INTN 0x2c
+INTN 0x2d
+INTN 0x2e
+INTN 0x2f
 
 _clts:          ; void clts(void);
         CLTS
@@ -594,6 +632,6 @@ _memset:
 
 	ret			; 函数结束，返回
 	
-[SECTION .initfunc.init]
-__initfunc_start:
-__initfunc_end:
+;[SECTION .initfunc.init]
+;__initfunc_start:
+;__initfunc_end:

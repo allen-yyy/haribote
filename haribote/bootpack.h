@@ -103,7 +103,23 @@ void outws(char *b,long len,short port);
 	VOID ReadWordStringFromPort(LPVOID, DWORD, WORD);
 
 	VOID WriteWordStringToPort(LPVOID, DWORD, WORD);
+	
+#define BI3 int asm_inthandler##n(int *esp);
+#define BI2  BI3(0x20) BI3(0x21) BI3(0x22) BI3(0x23) BI3(0x24) BI3(0x25) \
+BI3(0x26) BI3(0x27) BI3(0x28) BI3(0x29) BI3(0x2a) \
+BI3(0x2b) BI3(0x2c) BI3(0x2d) BI3(0x2e) BI3(0x2f)
 
+int asm_inthandler0x20(int *esp);
+int asm_inthandler0x21(int *esp);
+int asm_inthandler0x22(int *esp);
+int asm_inthandler0x23(int *esp);
+int asm_inthandler0x24(int *esp);
+int asm_inthandler0x25(int *esp);
+int asm_inthandler0x26(int *esp);int asm_inthandler0x27(int *esp);
+int asm_inthandler0x28(int *esp);int asm_inthandler0x29(int *esp);
+int asm_inthandler0x2a(int *esp);int asm_inthandler0x2b(int *esp);
+int asm_inthandler0x2c(int *esp);int asm_inthandler0x2d(int *esp);
+int asm_inthandler0x2e(int *esp);int asm_inthandler0x2f(int *esp);
 
 /* realcall.nas */
 typedef struct __attribute__ ((packed)) {
@@ -193,6 +209,9 @@ void init_pic(void);
 #define PIC1_ICW3		0x00a1
 #define PIC1_ICW4		0x00a1
 
+#define MAX_IRQUSED 5
+typedef int (*irqfunc) (int *);
+
 /* keyboard.c */
 void inthandler21(int *esp);
 void wait_KBC_sendready(void);
@@ -228,9 +247,6 @@ unsigned int memman_alloc_4k(struct MEMMAN *man, unsigned int size);
 int memman_free_4k(struct MEMMAN *man, unsigned int addr, unsigned int size);
 
 void init_screen8(char *vram, int x, int y, int *fat,struct MEMMAN *memman);
-
-int info_BMP(struct DLL_STRPICENV *env, int *info, int size, char *fp);
-int decode0_BMP(struct DLL_STRPICENV *env, int size, char *fp, int b_type, char *buf, int skip);
 
 /* sheet.c */
 #define MAX_SHEETS		256
@@ -436,7 +452,7 @@ struct SHEET *open_console(struct SHTCTL *shtctl, unsigned int memtotal);
 
 
 struct Dobject;
-typedef BOOL (*DEntry)(Dobject);
+typedef BOOL (*DEntry)(struct Dobject *);
 
 
 /* hd.c */
@@ -447,10 +463,10 @@ typedef BOOL (*DEntry)(Dobject);
 #include "hd2fs.h"
 void inthandler2e(int *esp);
 BOOL Identify(int nHdNum,BYTE* pBuffer);
-static BOOL CmdSucc(WORD wPort);
-static BOOL WaitForDrq(WORD wPort,DWORD dwMillionSecond);
-static BOOL WaitForBsy(WORD wPort,DWORD dwMillionSecond);
-static BOOL WaitForRdy(WORD wPort,DWORD dwMillionSecond);
+BOOL CmdSucc(WORD wPort);
+BOOL WaitForDrq(WORD wPort,DWORD dwMillionSecond);
+BOOL WaitForBsy(WORD wPort,DWORD dwMillionSecond);
+BOOL WaitForRdy(WORD wPort,DWORD dwMillionSecond);
 BOOL HDEntry(struct Dobject *Dobj);
 
 /* driver.c */
