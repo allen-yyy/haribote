@@ -296,6 +296,17 @@ BOOL Identify(int nHdNum,BYTE* pBuffer)
 	return FALSE;
 }
 
+void identify_hd(int driver,char *buf)
+{
+	WaitForBsy(IDE_CTRL0_PORT_STATUS,0); 
+	WaitForRdy(IDE_CTRL0_PORT_STATUS,0);
+    io_out8(0x1f6, 0xa0 | 0x40 | (driver == 1 ? 0x10 : 0));
+    io_out8(0x1f7, 0xec);
+    WaitForDrq(IDE_CTRL0_PORT_STATUS,0);
+    inws(buf,512,IDE_CTRL0_PORT_DATA);
+    return;
+}
+
 void task_hd()
 {
 	struct MESSAGE message;
@@ -314,7 +325,7 @@ void task_hd()
 					message_send(message.src,&message);
 					break;	
 				}
-				Identify(0,message.params);
+				identify_hd(0,message.params);
 				message_send(message.src,&message);
 				break;
 			case HD_IDENTIFY:
@@ -324,7 +335,7 @@ void task_hd()
 					message_send(message.src,&message);
 					break;	
 				}
-				Identify(0,message.params);
+				identify_hd(0,message.params);
 				message_send(message.src,&message);
 				break;
 			case HD_READ:

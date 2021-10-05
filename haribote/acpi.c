@@ -7,6 +7,7 @@
 */
 
 #include "bootpack.h"
+int memcmp(void *_Buf1,void *_Buf2,int _Size);
 
 //
 // here is the slighlty complicated ACPI poweroff code

@@ -83,7 +83,7 @@ BOOL load_external_device(int *fat,struct MEMMAN *memman)
 	return TRUE;
 }
 
-struct Dobject *GetMyObj(char *name) {
+/*struct Dobject *GetMyObj(char *name) {
 	int i;
 	for(i=0; i<DR_NUM; ++i) {
 		if(strcmp(dDevs[i].name,name) == 0) {
@@ -91,7 +91,7 @@ struct Dobject *GetMyObj(char *name) {
 		}
 	}
 	return NULL;
-}
+}*/
 void opensys(int *buf,int size)
 {
 	struct SEGMENT_DESCRIPTOR *gdt = (struct SEGMENT_DESCRIPTOR *) ADR_GDT;

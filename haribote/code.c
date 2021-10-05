@@ -21,7 +21,6 @@ void code_init()
 
 int code_alloc()
 {
-	int i;
 	
 	//for(i=0;i<885;i++){
 	//	if(strcmp(codecore[i].name,name)==0)

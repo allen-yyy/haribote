@@ -7,41 +7,57 @@
 */
 
 #include "bootpack.h"
+#include "FAT12.h"
 
 extern struct dev_callon *devcalls[10];
 extern struct dDevEntry dDevs[DR_NUM];
+int *fat;
+void fs_send2hd(struct MESSAGE *mess);
 
 void FS_task()
 {
-	struct MEMMAN *memman = MEMMAN_ADDR;
-	struct Dobject *mydobj = GetMyObj("FS");
-	struct Dobject *hddobj = dDevs[0].Dobj;
-	int i=100;
-	char s[20];
+	struct MEMMAN *memman = (struct MEMMAN *)MEMMAN_ADDR;
+	fat=(int *) memman_alloc_4k(memman, 4 * 2880);
 	struct MESSAGE message,umess;
-	message.params = memman_alloc(memman,512);
-	message.type = HD_OPEN;
-	fs_send2hd(&message);
-	//i = message_send(,&message);
-	message_receive(ANY,&message);
+	int fs=FST_NOWFS;
+	{//send HD_OPEN
+		message.params = (char *)memman_alloc(memman,512);
+		message.type = HD_OPEN;
+		fs_send2hd(&message);
+		message_receive(ANY,&message);	
+	}
 	UINT sectors = *(UINT*)&message.params[60*2];
 	struct fs_message *fmess;
-	struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
-	boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 - 1, 15);
-	sprintf(s,"taskrun %d",sectors*512/1024/1024);
-	putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, s);
 	for(;;)
 	{
 		message_receive(ANY,&umess);
 		switch(umess.type)
 		{
+			case FS_INIT:
+				switch(fs)
+				{
+					case FST_FAT12:
+						FAT12_readfat(fat,(unsigned char *) (ADR_DISKIMG + 0x000200));
+						break;
+					case FST_HAFS1:
+						memman_free_4k(memman,(int)fat,4 * 2880);
+						break;
+					default:
+						io_cli(); /*BUG£¡*/
+						io_hlt();
+				}
+				break; 
 			case FS_HDSIZE:
+				umess.Param=&sectors;
 				message_send(task2pid(dDevs[1].Dobj->task),&umess);
 				break;
 			case FS_READ:
 				fmess=umess.expar;
 				message_send(devcalls[IDE_HD_CALLON]->pid,&message);
 				message_receive(ANY,&message);
+				break;
+			default:
+				break;
 		}
 	} 
 	return;
@@ -59,17 +75,12 @@ BOOL FSEntry(struct Dobject *Dobj)
 	task->tss.ds = 1 * 8;
 	task->tss.fs = 1 * 8;
 	task->tss.gs = 1 * 8;
-	//*((int *) (task->tss.esp + 4)) = (int) Dobj->memman;
 	task_run(task, 2 , 1);
 	Dobj->task = task; 
 	struct dev_callon fscallon;
 	fscallon.id = FS_CALLON;
 	fscallon.pid = task2pid(task);
 	devcalls[FS_CALLON] = &fscallon;
-	/*struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
-		boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 - 1, 15);
-		//sprintf(s,"taskrun %d",i);
-		putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, "123");**/
 	return TRUE;
 }
 void fs_send2hd(struct MESSAGE *mess)
@@ -81,3 +92,11 @@ void fs_send2hd(struct MESSAGE *mess)
 	message_send(devcalls[IDE_HD_CALLON]->pid,mess);
 	return;
 } 
+
+
+/* //debug1:hd size
+	struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
+	boxfill8(binfo->vram, binfo->scrnx, COL8_000000, 0, 0, 32 * 8 - 1, 15);
+	sprintf(s,"taskrun %d",sectors*512/1024/1024);
+	putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, s);
+*/

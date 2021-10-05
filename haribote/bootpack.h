@@ -57,6 +57,10 @@ void io_sti(void);
 void io_stihlt(void);
 int io_in8(int port);
 void io_out8(int port, int data);
+int io_in16(int port);
+void io_out16(int port, int data);
+int io_in32(int port);
+void io_out32(int port, int data);
 int io_load_eflags(void);
 void io_store_eflags(int eflags);
 void load_gdtr(int limit, int addr);
@@ -377,6 +381,8 @@ void task_sleep(struct TASK *task);
 void task_block(struct TASK *task);
 void task_unblock(struct TASK *task);
 struct TASK *pid2task(int pid);
+int message_send(int to_send,struct MESSAGE *message);
+int message_receive(int to_receive,struct MESSAGE *message);
 int *inthandler07(int *esp);
 
 #define ANY 10000
@@ -482,7 +488,7 @@ struct Dobject{
 	void (*unload)(struct Dobject *this); 
 };
 enum typeof_dev{
-	IDE_HD_DEV = 0,FS_DEV,PCI_DEV,SCSI_DEV
+	IDE_HD_DEV = 0,FS_DEV,PCI_DEV,SCSI_DEV,IDE_CD_DEV,USB_DEV
 };
 struct dDevEntry {
 	char *name;
@@ -502,6 +508,11 @@ struct dev_callon {
 /* fs.c */
 #define FS_HDSIZE 0x1
 #define FS_READ 0x2
+#define FS_INIT 0x3
+
+#define FST_FAT12 1
+#define FST_HAFS1 2
+#define FST_NOWFS FST_FAT12
 BOOL FSEntry(struct Dobject *Dobj); 
 
 /* code.c */
