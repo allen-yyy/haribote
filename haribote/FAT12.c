@@ -6,6 +6,17 @@
 	Description: FAT12 FS
 */
 #include "bootpack.h"
+#include "FAT12.h"
+
+int *fatg;
+
+void FAT12_init()
+{
+	struct MEMMAN *memman = (struct MEMMAN *)MEMMAN_ADDR;
+	fatg = (int *)memman_alloc_4k(memman,4*2880);
+	FAT12_readfat(fatg, (unsigned char *) (ADR_DISKIMG + 0x000200)); 
+	return;
+}
 
 void FAT12_readfat(int *fat, unsigned char *img)
 {

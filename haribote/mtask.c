@@ -21,7 +21,6 @@ void init_pid(struct MEMMAN *memman)
 	{
 		pid.pido[i].pid = i;
 	}
-	*((int *) 0x0f0a) = &pid;
 }
 
 int pid_alloc(struct TASK *task)
@@ -183,7 +182,7 @@ struct TASK *task_alloc(void)
                 task->fpu[i] = 0;
             }  
 			task->pid = pid_alloc(task); 
-			task->message_r = memman_alloc_4k(memman, sizeof(struct MESSAGE));                                          /* ･ｳ･ｳ､ﾞ､ﾇ */
+			task->message_r = (struct MESSAGE *)memman_alloc_4k(memman, sizeof(struct MESSAGE));                                          /* ･ｳ･ｳ､ﾞ､ﾇ */
 			return task;
 		}
 	}
@@ -233,14 +232,12 @@ void task_switch(void)
 {
 	struct TASKLEVEL *tl = &taskctl->level[taskctl->now_lv];
 	struct TASK *new_task, *now_task = tl->tasks[tl->now];
-	struct SEGMENT_DESCRIPTOR *gdt = (struct SEGMENT_DESCRIPTOR *) ADR_GDT;
 	L2:
 	tl->now++;
 	if (tl->now >= tl->running) {
 		tl->now = 0;
 	}
 	if (taskctl->lv_change != 0) {
-		L1:
 		task_switchsub();
 		tl = &taskctl->level[taskctl->now_lv];
 	}
@@ -294,7 +291,6 @@ void task_unblock(struct TASK *task)
 int message_receive(int to_receive,struct MESSAGE *message)
 {
 	struct TASK *task = task_now();
-	char s[30];
 	for(;;)
 	{
 		io_cli();
@@ -329,7 +325,6 @@ int message_receive(int to_receive,struct MESSAGE *message)
 
 int message_send(int to_send,struct MESSAGE *message)
 {
-	char s[30]; 
 	struct TASK *task = pid2task(to_send);
 	if(task==NULL)
 	{

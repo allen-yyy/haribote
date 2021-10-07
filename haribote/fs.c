@@ -11,13 +11,11 @@
 
 extern struct dev_callon *devcalls[10];
 extern struct dDevEntry dDevs[DR_NUM];
-int *fat;
 void fs_send2hd(struct MESSAGE *mess);
 
 void FS_task()
 {
 	struct MEMMAN *memman = (struct MEMMAN *)MEMMAN_ADDR;
-	fat=(int *) memman_alloc_4k(memman, 4 * 2880);
 	struct MESSAGE message,umess;
 	int fs=FST_NOWFS;
 	{//send HD_OPEN
@@ -37,10 +35,9 @@ void FS_task()
 				switch(fs)
 				{
 					case FST_FAT12:
-						FAT12_readfat(fat,(unsigned char *) (ADR_DISKIMG + 0x000200));
+						FAT12_init();
 						break;
 					case FST_HAFS1:
-						memman_free_4k(memman,(int)fat,4 * 2880);
 						break;
 					default:
 						io_cli(); /*BUG£¡*/
