@@ -78,7 +78,7 @@ BOOL WaitForBsy(WORD wPort,DWORD dwMillionSecond)
 			break;
 		}
 		cnt --;
-		if(0 == cnt)
+		if(cnt == 0)
 		{
 			break;
 		}
@@ -124,7 +124,11 @@ void task_hd()
 {
 	struct MESSAGE message;
 	struct hd2fs_message *h2f;
-	{
+	{//init
+		
+	}
+	while(1)
+	{ 
 		message_receive(ANY,&message);
 		h2f = message.expar;
 		switch(message.type)
@@ -137,6 +141,7 @@ void task_hd()
 					break;	
 				}
 				identify_hd(0,message.params);
+				
 				message_send(message.src,&message);
 				break;
 			case HD_IDENTIFY:

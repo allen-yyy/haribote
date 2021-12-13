@@ -506,9 +506,23 @@ struct dev_callon {
 };
 
 /* fs.c */
+struct fs_struct{
+	char *name;
+	int all_partition;//a partition as a bit
+	struct fs_operation operations;
+};
+struct fs_operation
+{
+	int (*open) (char *name,int mode);
+	int (*read) (int handle,int size,char *buf);
+	int (*write) (int handle,int size,char *buf);
+	int (*lseek) (int handle,int offset,int where);
+}
 #define FS_HDSIZE 0x1
 #define FS_READ 0x2
 #define FS_INIT 0x3
+#define FS_WRITE 0x4
+#define FS_OPEN 0x5
 
 #define FST_FAT12 1
 #define FST_HAFS1 2

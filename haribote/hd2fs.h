@@ -18,7 +18,12 @@ struct hd2fs_message{
 };
 struct fs_message{
 	int offset;
-	int code;
 	int command;
+	char *name;
+	int size;
+	void *buf;
+	char letter;
+	int handle;
+	int mode;
 };
 #endif // HD2FS_H

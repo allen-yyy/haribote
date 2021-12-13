@@ -12,8 +12,14 @@
 extern struct dev_callon *devcalls[10];
 extern struct dDevEntry dDevs[DR_NUM];
 void fs_send2hd(struct MESSAGE *mess);
+struct fs_partition{
+	char letter;
+	int is_mount;
+	struct fs_struct fs_s;
+}; 
+struct fs_partition partitions[26]; 
 
-void FS_task()
+void FS_task(void)
 {
 	struct MEMMAN *memman = (struct MEMMAN *)MEMMAN_ADDR;
 	struct MESSAGE message,umess;
@@ -24,6 +30,12 @@ void FS_task()
 		fs_send2hd(&message);
 		message_receive(ANY,&message);	
 	}
+	int i=0;
+	for(i=0;i<26;i++)//init partitions 
+	{
+		partitions[i].letter='A'+i;
+		partitions[i].is_mount=0;
+	}
 	UINT sectors = *(UINT*)&message.params[60*2];
 	struct fs_message *fmess;
 	for(;;)
@@ -32,12 +44,15 @@ void FS_task()
 		switch(umess.type)
 		{
 			case FS_INIT:
+				fmess=(struct fs_message *)umess->expar;
 				switch(fs)
 				{
 					case FST_FAT12:
 						FAT12_init();
+						partitions[fmess->letter-'A'].is_mount=1;
 						break;
 					case FST_HAFS1:
+						partitions[fmess->letter-'A'].is_mount=1;
 						break;
 					default:
 						io_cli(); /*BUG£¡*/
@@ -48,11 +63,26 @@ void FS_task()
 				umess.Param=&sectors;
 				message_send(task2pid(dDevs[1].Dobj->task),&umess);
 				break;
-			case FS_READ:
-				fmess=umess.expar;
-				message_send(devcalls[IDE_HD_CALLON]->pid,&message);
-				message_receive(ANY,&message);
+				
+			///@fmess->name file name
+			///@fmess->mode open mode
+			case FS_OPEN:
+				char letter=fmess->name[0];
+				int handle=partitions[letter-'A'].fs_s.operations.open(fmess->name,fmess->mode);
+				
 				break;
+			
+			///@fmess->handle fs handle
+			///@fmess->buf buf
+			///@fmess->size read size
+			case FS_READ:
+				//fmess=umess.expar;
+				//message_send(devcalls[IDE_HD_CALLON]->pid,&message);
+				//message_receive(ANY,&message);
+				
+				break;
+			case FS_WRITE:
+				break; 
 			default:
 				break;
 		}
