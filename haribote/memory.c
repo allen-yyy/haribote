@@ -156,3 +156,27 @@ int memman_free_4k(struct MEMMAN *man, unsigned int addr, unsigned int size)
 	i = memman_free(man, addr, size);
 	return i;
 }
+
+void *kalloc(unsigned int size)
+{
+	unsigned int a;
+	struct MEMMAN *memman = (struct MEMMAN *) MEMMAN_ADDR;
+	a = memman_alloc_4k(memman,size+16);
+	int *p=(int *)a;
+	int i; 
+	for(i=0;i<size;i+=4)
+	{
+		*(p+i)=0;
+	}
+	*p=size;
+	return a;
+}
+
+void kfree(void *addr)
+{
+	int i;
+	unsigned int size=addr;
+	struct MEMMAN *man = (struct MEMMAN *) MEMMAN_ADDR;
+	i = memman_free_4k(man, (unsigned int)addr, size+16);
+	return;
+}

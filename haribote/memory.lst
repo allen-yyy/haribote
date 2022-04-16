@@ -275,3 +275,40 @@
    275 00000231 89 45 10                        	MOV	DWORD [16+EBP],EAX
    276 00000234 5D                              	POP	EBP
    277 00000235 E9 FFFFFEE8                     	JMP	_memman_free
+   278 0000023A                                 	GLOBAL	_kalloc
+   279 0000023A                                 _kalloc:
+   280 0000023A 55                              	PUSH	EBP
+   281 0000023B 89 E5                           	MOV	EBP,ESP
+   282 0000023D 53                              	PUSH	EBX
+   283 0000023E 8B 5D 08                        	MOV	EBX,DWORD [8+EBP]
+   284 00000241 8D 43 10                        	LEA	EAX,DWORD [16+EBX]
+   285 00000244 50                              	PUSH	EAX
+   286 00000245 68 003C0000                     	PUSH	3932160
+   287 0000024A E8 FFFFFFB9                     	CALL	_memman_alloc_4k
+   288 0000024F 59                              	POP	ECX
+   289 00000250 31 D2                           	XOR	EDX,EDX
+   290 00000252 59                              	POP	ECX
+   291 00000253 39 DA                           	CMP	EDX,EBX
+   292 00000255 73 0E                           	JAE	L74
+   293 00000257                                 L72:
+   294 00000257 C7 04 90 00000000               	MOV	DWORD [EAX+EDX*4],0
+   295 0000025E 83 C2 04                        	ADD	EDX,4
+   296 00000261 39 DA                           	CMP	EDX,EBX
+   297 00000263 72 F2                           	JB	L72
+   298 00000265                                 L74:
+   299 00000265 89 18                           	MOV	DWORD [EAX],EBX
+   300 00000267 8B 5D FC                        	MOV	EBX,DWORD [-4+EBP]
+   301 0000026A C9                              	LEAVE
+   302 0000026B C3                              	RET
+   303 0000026C                                 	GLOBAL	_kfree
+   304 0000026C                                 _kfree:
+   305 0000026C 55                              	PUSH	EBP
+   306 0000026D 89 E5                           	MOV	EBP,ESP
+   307 0000026F 8B 55 08                        	MOV	EDX,DWORD [8+EBP]
+   308 00000272 8D 42 10                        	LEA	EAX,DWORD [16+EDX]
+   309 00000275 50                              	PUSH	EAX
+   310 00000276 52                              	PUSH	EDX
+   311 00000277 68 003C0000                     	PUSH	3932160
+   312 0000027C E8 FFFFFFA0                     	CALL	_memman_free_4k
+   313 00000281 C9                              	LEAVE
+   314 00000282 C3                              	RET

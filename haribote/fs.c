@@ -44,7 +44,7 @@ void FS_task(void)
 		switch(umess.type)
 		{
 			case FS_INIT:
-				fmess=(struct fs_message *)umess->expar;
+				fmess=(struct fs_message *)umess.expar;
 				switch(fs)
 				{
 					case FST_FAT12:
@@ -59,16 +59,17 @@ void FS_task(void)
 						io_hlt();
 				}
 				break; 
+				
 			case FS_HDSIZE:
-				umess.Param=&sectors;
-				message_send(task2pid(dDevs[1].Dobj->task),&umess);
+				//umess.Param=&sectors;
+				//message_send(task2pid(dDevs[1].Dobj->task),&umess);
 				break;
 				
 			///@fmess->name file name
 			///@fmess->mode open mode
 			case FS_OPEN:
-				char letter=fmess->name[0];
-				int handle=partitions[letter-'A'].fs_s.operations.open(fmess->name,fmess->mode);
+				//char letter=fmess->name[0];
+				//int handle=partitions[letter-'A'].fs_s.operations.open(fmess->name,fmess->mode);
 				
 				break;
 			
@@ -102,6 +103,7 @@ BOOL FSEntry(struct Dobject *Dobj)
 	task->tss.ds = 1 * 8;
 	task->tss.fs = 1 * 8;
 	task->tss.gs = 1 * 8;
+	task->devflag=1;
 	task_run(task, 2 , 1);
 	Dobj->task = task; 
 	struct dev_callon fscallon;

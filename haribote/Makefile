@@ -1,7 +1,8 @@
 OBJS_BOOTPACK = bootpack.obj naskfunc.obj hankaku.obj graphic.obj dsctbl.obj \
 		int.obj fifo.obj keyboard.obj mouse.obj memory.obj sheet.obj timer.obj \
 		mtask.obj window.obj console.obj file.obj tek.obj hd.obj fs.obj driver.obj \
-		code.obj bmp.obj alloca.obj acpi.obj init.obj FAT12.obj
+		code.obj bmp.obj alloca.obj acpi.obj init.obj FAT12.obj list.obj pci.obj \
+		int32.obj ofifo.obj 
 
 TOOLPATH = ../../z_tools/
 INCPATH  = ../../z_tools/haribote/
@@ -69,6 +70,9 @@ naskfunc.obj : naskfunc.nas Makefile
 
 %.obj : %.nas Makefile
 	$(NASK) $*.nas $*.obj $*.lst
+	
+%.obj : %.asm Makefile
+	$(NASM) -o $*.obj -f coff $*.asm
 
 # ƒRƒ}ƒ“ƒh
 

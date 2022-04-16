@@ -24,14 +24,14 @@ struct dDevEntry dDevs[DR_NUM] = {
 
 struct dev_callon *devcalls[10];
 
-struct exdrivertable etable[DR_ENUM]= {
+struct exdrivertable etable[DR_ENUM];/*= {
 	/*{"HAFS","hafs.sys"},
 	{"IO","io.sys"},
 	{"NET","net.sys"},
 	{"SETM","setm.sys"},
-	{"SETH","seth.sys"}*/
+	{"SETH","seth.sys"}*
 	{"test","systest.sys"}
-};
+};*/ 
 
 
 
@@ -78,7 +78,7 @@ BOOL load_external_device(int *fat,struct MEMMAN *memman)
 		task->tss.gs = 1*8;
 		*((int *) (task->tss.esp + 4)) = (int) buf;
 		*((int *) (task->tss.esp + 8)) = (int) c->size;
-		task_run(task, 2, 1);
+		//task_run(task, 3, 1);
 	}
 	return TRUE;
 }

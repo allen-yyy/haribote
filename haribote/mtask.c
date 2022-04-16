@@ -5,7 +5,8 @@
 struct TASKCTL *taskctl;
 struct TIMER *task_timer;
 struct pid_t pid;
-
+int taskruns=0,taskfree=0; 
+struct OFIFO32 free_ofifo;
 
 struct TASK *pid2task(int pids)
 {
@@ -21,6 +22,7 @@ void init_pid(struct MEMMAN *memman)
 	{
 		pid.pido[i].pid = i;
 	}
+	return;
 }
 
 int pid_alloc(struct TASK *task)
@@ -101,6 +103,7 @@ void task_switchsub(void)
 void task_idle(void)
 {
 	for (;;) {
+		task_now()->name="cpu idle";
 		io_hlt();
 	}
 }
@@ -110,7 +113,7 @@ struct TASK *task_init(struct MEMMAN *memman)
 	int i;
 	struct TASK *task, *idle;
 	struct SEGMENT_DESCRIPTOR *gdt = (struct SEGMENT_DESCRIPTOR *) ADR_GDT;
-
+	
 	init_pid(memman);
 
 	taskctl = (struct TASKCTL *) memman_alloc_4k(memman, sizeof (struct TASKCTL));
@@ -127,6 +130,8 @@ struct TASK *task_init(struct MEMMAN *memman)
 	}
 
 	task = task_alloc();
+	task->name="haribote kernel";
+	task->devflag=0;
 	task->flags = 2;	/* 動作中マーク */
 	task->priority = 2; /* 0.02秒 */
 	task->level = 0;	/* 最高レベル */
@@ -135,7 +140,7 @@ struct TASK *task_init(struct MEMMAN *memman)
 	load_tr(task->sel);
 	task_timer = timer_alloc();
 	timer_settime(task_timer, task->priority);
-
+	
 	idle = task_alloc();
 	idle->tss.esp = memman_alloc_4k(memman, 64 * 1024) + 64 * 1024;
 	idle->tss.eip = (int) &task_idle;
@@ -145,9 +150,12 @@ struct TASK *task_init(struct MEMMAN *memman)
 	idle->tss.ds = 1 * 8;
 	idle->tss.fs = 1 * 8;
 	idle->tss.gs = 1 * 8;
-	task_run(idle, MAX_TASKLEVELS - 1, 1);
-	
+	idle->devflag=0;
+	task_run(idle, MAX_TASKLEVELS - 1, 1); 
 	taskctl->task_fpu = 0; 
+	
+	free_ofifo.buf=(struct OFIFO32 *) memman_alloc_4k(memman, 1000);
+	ofifo32_init(&free_ofifo,1000,free_ofifo.buf,NULL);
 
 	return task;
 }
@@ -183,6 +191,7 @@ struct TASK *task_alloc(void)
             }  
 			task->pid = pid_alloc(task); 
 			task->message_r = (struct MESSAGE *)memman_alloc_4k(memman, sizeof(struct MESSAGE));                                          /* ･ｳ･ｳ､ﾞ､ﾇ */
+			task->devflag=0;
 			return task;
 		}
 	}
@@ -243,6 +252,16 @@ void task_switch(void)
 	}
 	new_task = tl->tasks[tl->now];
 	if(new_task->flags==0) goto L2;
+	if(taskruns==100)
+	{
+		taskruns=0;
+		//printk("      %d%%",taskfree);
+		ofifo32_put(&free_ofifo,taskfree);
+		taskfree=0;
+	}
+	if(new_task->pid==10001) taskfree++;
+	//printk("%d",new_task->pid);
+	taskruns++;
 	timer_settime(task_timer, new_task->priority);
 	if (new_task != now_task && new_task->sel != now_task->sel) {
 		if(new_task->devflag) asm("movl %%esp,%0":"=r"(new_task->tss.esp0)); 

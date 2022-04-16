@@ -6,7 +6,36 @@
 
 extern struct dDevEntry dDevs[DR_NUM];
 int abs(int);
+char now_dir[100000];
 
+int printk(char *format, ...)
+{
+	va_list ap;
+	char s[1000];
+	int i;
+	
+	va_start(ap,format);
+	i = vsprintf(s,format,ap);
+	error_print(s);
+	va_end(ap);
+	return i;
+}
+
+void error_print(char *s)
+{
+	struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
+	int x=0,y=0;
+	extern char hankaku[4096];
+	for(;*s!=0;s++)
+	{
+		if(*s==0x0a) {y+=16;continue;}
+		if(*s==0x0d) {x=0;continue;}
+		boxfill8(binfo->vram, binfo->scrnx, COL8_000000, x, y, x+16, y+16);
+		putfont8(binfo->vram, binfo->scrnx, x, y, COL8_FFFFFF, hankaku + *s * 16);
+		x+=10;
+	}
+	return;
+}
 #define IS_LEAP_YEAR(year) ((year % 4 == 0&&year % 100 !=0) || (year % 400==0))
 
 void readrtc(unsigned char *t)
@@ -40,21 +69,48 @@ void printtime(struct CONSOLE *cons)
     sprintf(s, "%02X%02X.%02X.%02X %02X:%02X:%02X\n", t[6], t[5], t[4], t[3], t[2], t[1], t[0]);
     cons_putstr0(cons,s);
 }
-UINT time()
+#define MINUTE 60
+#define HOUR (60*MINUTE)
+#define DAY (24*HOUR)
+#define YEAR (365*DAY)
+
+/* interestingly, we assume leap-years */
+static int month[12] = {
+	0,
+	DAY*(31),
+	DAY*(31+29),
+	DAY*(31+29+31),
+	DAY*(31+29+31+30),
+	DAY*(31+29+31+30+31),
+	DAY*(31+29+31+30+31+30),
+	DAY*(31+29+31+30+31+30+31),
+	DAY*(31+29+31+30+31+30+31+31),
+	DAY*(31+29+31+30+31+30+31+31+30),
+	DAY*(31+29+31+30+31+30+31+31+30+31),
+	DAY*(31+29+31+30+31+30+31+31+30+31+30)
+};
+
+long kernel_mktime(struct TIME *tm)
 {
-	unsigned char t[7];
-	int flag=0;
-    readrtc(t);
-    int year=t[6]*100+t[5];
-    int hour=t[2]-8;
-    year-=1970;
-    if(hour<0)
-    {
-    	hour=24-abs(hour);
-    	flag=1;
-	}
-	return t[0]+t[1]*60+hour*3600+(t[3]-flag)*86400+t[4]*2629743+year*31556926;
+	long res;
+	int year;
+
+	year = tm->year - 1970;
+	res = YEAR*year + DAY*((year+1)/4);
+	res += month[tm->moon];
+	if (tm->moon>1 && ((year+2)%4))
+		res -= DAY;
+	res += DAY*(tm->day-1);
+	res += HOUR*tm->hour;
+	res += MINUTE*tm->min;
+	res += tm->sec;
+	return res;
 }
+unsigned int time()
+{
+	struct TIME *tm=time2TIME();
+	return kernel_mktime(tm);
+} 
 void print_identify_info(short* hdinfo,struct CONSOLE *cons)
 {
 	int i, k;
@@ -152,12 +208,16 @@ void console_task(struct SHEET *sheet, int memtotal)
 		task->langmode = 0;
 	}
 	task->langbyte1 = 0;
-
+	now_dir[0]='C';now_dir[1]=':';now_dir[2]='/';now_dir[3]='\0';now_dir[4]='\0';
+	
+	int dirlen=4;
 	/* プロンプト表示 */
+	cons_putstr0(&cons, now_dir);
 	cons_putchar(&cons, '>', 1);
-
+	int l=0,num=0;
 	for (;;) {
 		io_cli();
+		if(num<0) num=0;
 		if (fifo32_status(&task->fifo) == 0) {
 			task_sleep(task);
 			io_sti();
@@ -194,32 +254,62 @@ void console_task(struct SHEET *sheet, int memtotal)
 			if (256 <= i && i <= 511) { /* キーボードデータ（タスクA経由） */
 				if (i == 8 + 256) {
 					/* バックスペース */
-					if (cons.cur_x > 16) {
+					if (cons.cur_x > 8+dirlen*8) {
 						/* カーソルをスペースで消してから、カーソルを1つ戻す */
 						cons_putchar(&cons, ' ', 0);
 						cons.cur_x -= 8;
+						num--;
+					}else if(l>0&&cons.cur_x > 8)
+					{
+						cons_putchar(&cons, ' ', 0);
+						cons.cur_x -= 8;
+						num--;
+					}else if(l>0&&cons.cur_x <= 8)
+					{
+						cons_putchar(&cons, ' ', 0);
+						cons.cur_x = 240;
+						l-=240;
+						cons.cur_y -= 16;
+						num--;
 					}
 				} else if (i == 10 + 256) {
 					/* Enter */
 					/* カーソルをスペースで消してから改行する */
 					cons_putchar(&cons, ' ', 0);
-					cmdline[cons.cur_x / 8 - 2] = 0;
+					cmdline[num] = 0;
 					cons_newline(&cons);
-					cons_runcmd(cmdline, &cons, fat, memtotal);	/* コマンド実行 */
+					cons_runcmd(cmdline, &cons, fat, memtotal, now_dir);	/* コマンド実行 */
 					if (cons.sht == 0) {
 						cmd_exit(&cons, fat);
 					}
+					io_cli();
+					//cmdline[0]='\0';
+					//struct FIFO32 *tmp=(struct FIFO *)0x0fec;
+					//task_run(tmp->task,-1,0);
 					/* プロンプト表示 */
+					cons_putstr0(&cons, now_dir);
 					cons_putchar(&cons, '>', 1);
+					num=0;
+					l=0;
 				} else {
 					/* 一般文字 */
 					if (cons.cur_x < 240) {
 						/* 一文字表示してから、カーソルを1つ進める */
-						cmdline[cons.cur_x / 8 - 2] = i - 256;
+						cmdline[num] = i - 256;
+						cons_putchar(&cons, i - 256, 1);
+					}else{
+						cons_putchar(&cons, ' ', 1);
+						//cons_putchar(&cons, '\n', 1);
+						cmdline[num] = i - 256;
+						l+=cons.cur_x;
+						cons_putchar(&cons, ' ', 0);
+						cons.cur_x=8;
 						cons_putchar(&cons, i - 256, 1);
 					}
+					num++;
 				}
 			}
+			io_sti();
 			/* カーソル再表示 */
 			if (cons.sht != 0) {
 				if (cons.cur_c >= 0) {
@@ -316,7 +406,7 @@ void cons_putstr1(struct CONSOLE *cons, char *s, int l)
 	return;
 }
 
-void cons_runcmd(char *cmdline, struct CONSOLE *cons, int *fat, int memtotal)
+void cons_runcmd(char *cmdline, struct CONSOLE *cons, int *fat, int memtotal, char *now_dir)
 {
 	if (strcmp(cmdline, "mem") == 0 && cons->sht != 0) {
 		cmd_mem(cons, memtotal);
@@ -338,18 +428,21 @@ void cons_runcmd(char *cmdline, struct CONSOLE *cons, int *fat, int memtotal)
 		acpiPowerOff();
 	} else if (strcmp(cmdline, "version") == 0){
 		ver(cons);
+	} else if (strcmp(cmdline, "ver") == 0){
+		ver(cons);
 	} else if (strcmp(cmdline, "hdinfo") == 0){
 		hdinfo(cons);
 	} else if (strcmp(cmdline, "ps") == 0){
 		ps(cons);
+	} else if (strncmp(cmdline, "cd ",2) == 0){
+		cons_putstr0(cons, "cd : Error!Not ready!\n\n");
+		cd(cons, cmdline, now_dir); 
 	} else if (cmdline[0] != 0) {
-			if (cmd_app(cons, fat, cmdline) == 0) {
+			if (cmd_app(cons, fat, cmdline, now_dir) == 0) {
 				/* コマンドではなく、アプリでもなく、さらに空行でもない */
 				cons_putstr0(cons, "Bad command.\n\n");
 			}
 		}
-		
-	
 	return;
 }
 
@@ -357,15 +450,36 @@ void cons_runcmd(char *cmdline, struct CONSOLE *cons, int *fat, int memtotal)
 void ps(struct CONSOLE *cons)
 {
 	char s[31];
-	struct pid_t *pid = *((int *) 0x0f0a);
-	sprintf(s,"%d\n\n\n",pid->next);
+	int i,j=0;
+	extern struct pid_t pid;
+	sprintf(s,"PID\tname\n");
 	cons_putstr0(cons,s);
+	sprintf(s,"%d\tHaribote kernel\n",0);
+	cons_putstr0(cons,s);
+	for(i=10000;i<=pid.next;i++)
+	{
+		if(!pid2task(i)->devflag)
+		{
+			if(i==10001) sprintf(s,"%d\tCPU idle\n",i-10000),j++;
+			else
+			sprintf(s,"%d\t%s\n",i-10000,pid2task(i)->name),j++;
+			cons_putstr0(cons,s);
+		}
+	}
+	sprintf(s,"%dtasks run\n",j+1);
+	cons_putstr0(cons,s);
+	return;
+}
+
+void cd(struct CONSOLE *cons)
+{
+	return;
 }
 
 void ver(struct CONSOLE *cons)
 {
 	char s[61];
-	cons_putstr0(cons, "Haribote version 0.2A\n\n");
+	cons_putstr0(cons, "Haribote version 0.2B\n\n");
 	return;
 }
 
@@ -484,26 +598,26 @@ void cmd_langmode(struct CONSOLE *cons, char *cmdline)
 	return;
 }
 
-int cmd_app(struct CONSOLE *cons, int *fat, char *cmdline)
+int cmd_app(struct CONSOLE *cons, int *fat, char *cmdline, char *cmdpath)
 {
 	struct MEMMAN *memman = (struct MEMMAN *) MEMMAN_ADDR;
 	struct FILEINFO *finfo;
-	char name[18], *p, *q;
+	char name[0x100], *p, *q;
 	struct TASK *task = task_now();
 	int i, segsiz, datsiz, esp, dathrb, appsiz;
 	struct SHTCTL *shtctl;
 	struct SHEET *sht;
 
 	/* コマンドラインからファイル名を生成 */
-	for (i = 0; i < 13; i++) {
-		if (cmdline[i] <= ' ') {
+	for (i = 0; i < 0xff; i++) {
+		if (cmdline[i] == '\0') {
 			break;
 		}
 		name[i] = cmdline[i];
 	}
 	name[i] = 0; /* とりあえずファイル名の後ろを0にする */
-
 	/* ファイルを探す */
+	printk("%s",name);
 	finfo = file_search(name, (struct FILEINFO *) (ADR_DISKIMG + 0x002600), 224);
 	if (finfo == 0 && name[i - 1] != '.') {
 		/* 見つからなかったので後ろに".HRB"をつけてもう一度探してみる */
@@ -514,11 +628,11 @@ int cmd_app(struct CONSOLE *cons, int *fat, char *cmdline)
 		name[i + 4] = 0;
 		finfo = file_search(name, (struct FILEINFO *) (ADR_DISKIMG + 0x002600), 224);
 	}
-
 	if (finfo != 0) {
 		/* ファイルが見つかった場合 */
 		appsiz = finfo->size;
 		p = file_loadfile2(finfo->clustno, &appsiz, fat);
+		printk("%02X %02X %02X %02X %02X %02X %02X %02X\r\n%02X %02X %02X %02X %02X %02X %02X %02X",p[0],p[1],p[2],p[3],p[4],p[5],p[6],p[7],p[8],p[9],p[10],p[11],p[12],p[13],p[14],p[15]);
 		if (appsiz >= 36 && strncmp(p + 4, "Hari", 4) == 0 && *p == 0x00) {
 			segsiz = *((int *) (p + 0x0000));
 			esp    = *((int *) (p + 0x000c));
@@ -546,6 +660,9 @@ int cmd_app(struct CONSOLE *cons, int *fat, char *cmdline)
 					task->fhandle[i].buf = 0;
 				}
 			}
+			int i;
+			i = io_in8(0x61);
+			io_out8(0x61, i & 0x0d);
 			timer_cancelall(&task->fifo);
 			memman_free_4k(memman, (int) q, segsiz);
 			task->langbyte1 = 0;
@@ -863,7 +980,7 @@ int hrb_dpi(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx, int e
 	struct TASK *task = task_now();
 	int ds_base = task->ds_base;
 	struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
-	putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, "t");
+	//putfonts8_asc(binfo->vram, binfo->scrnx, 0, 0, COL8_FFFFFF, "t");
 	switch(edx)
 	{
 		case 1:
@@ -892,7 +1009,7 @@ int hrb_dpi(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx, int e
 		case 9:
 			s[0]=ebx&0xff;
 			s[1]=0;
-			putfonts8_asc(binfo->vram, binfo->scrnx, eax, eax, COL8_FFFFFF, "t");
+			putfonts8_asc(binfo->vram, binfo->scrnx, eax, eax, COL8_FFFFFF, s);
 			break;
 		case 10:
 			io_cli(); 

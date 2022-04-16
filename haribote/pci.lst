@@ -1,0 +1,287 @@
+     1 00000000                                 [FORMAT "WCOFF"]
+     2 00000000                                 [INSTRSET "i486p"]
+     3 00000000                                 [OPTIMIZE 1]
+     4 00000000                                 [OPTION 1]
+     5 00000000                                 [BITS 32]
+     6 00000000                                 	EXTERN	_io_out32
+     7 00000000                                 	EXTERN	_io_in32
+     8 00000000                                 	EXTERN	_io_out8
+     9 00000000                                 	EXTERN	_io_out16
+    10 00000000                                 	EXTERN	_kalloc
+    11 00000000                                 [FILE "pci.c"]
+    12                                          [SECTION .text]
+    13 00000000                                 	GLOBAL	__pci_read_byte
+    14 00000000                                 __pci_read_byte:
+    15 00000000 55                              	PUSH	EBP
+    16 00000001 89 E5                           	MOV	EBP,ESP
+    17 00000003 53                              	PUSH	EBX
+    18 00000004 8B 55 08                        	MOV	EDX,DWORD [8+EBP]
+    19 00000007 8B 45 0C                        	MOV	EAX,DWORD [12+EBP]
+    20 0000000A C1 E0 0B                        	SAL	EAX,11
+    21 0000000D 8B 5D 14                        	MOV	EBX,DWORD [20+EBP]
+    22 00000010 C1 E2 10                        	SAL	EDX,16
+    23 00000013 8B 4D 10                        	MOV	ECX,DWORD [16+EBP]
+    24 00000016 C1 E1 08                        	SAL	ECX,8
+    25 00000019 09 C2                           	OR	EDX,EAX
+    26 0000001B 89 D8                           	MOV	EAX,EBX
+    27 0000001D 09 CA                           	OR	EDX,ECX
+    28 0000001F 25 000000FC                     	AND	EAX,252
+    29 00000024 83 E3 03                        	AND	EBX,3
+    30 00000027 09 C2                           	OR	EDX,EAX
+    31 00000029 81 CA 80000000                  	OR	EDX,-2147483648
+    32 0000002F 52                              	PUSH	EDX
+    33 00000030 68 00000CF8                     	PUSH	3320
+    34 00000035 E8 [00000000]                   	CALL	_io_out32
+    35 0000003A 68 00000CFC                     	PUSH	3324
+    36 0000003F E8 [00000000]                   	CALL	_io_in32
+    37 00000044 8D 0C DD 00000000               	LEA	ECX,DWORD [0+EBX*8]
+    38 0000004B D3 F8                           	SAR	EAX,CL
+    39 0000004D 25 000000FF                     	AND	EAX,255
+    40 00000052 8B 5D FC                        	MOV	EBX,DWORD [-4+EBP]
+    41 00000055 C9                              	LEAVE
+    42 00000056 C3                              	RET
+    43 00000057                                 	GLOBAL	__pci_read_word
+    44 00000057                                 __pci_read_word:
+    45 00000057 55                              	PUSH	EBP
+    46 00000058 89 E5                           	MOV	EBP,ESP
+    47 0000005A 53                              	PUSH	EBX
+    48 0000005B 8B 55 08                        	MOV	EDX,DWORD [8+EBP]
+    49 0000005E 8B 45 0C                        	MOV	EAX,DWORD [12+EBP]
+    50 00000061 C1 E0 0B                        	SAL	EAX,11
+    51 00000064 8B 5D 14                        	MOV	EBX,DWORD [20+EBP]
+    52 00000067 C1 E2 10                        	SAL	EDX,16
+    53 0000006A 8B 4D 10                        	MOV	ECX,DWORD [16+EBP]
+    54 0000006D C1 E1 08                        	SAL	ECX,8
+    55 00000070 09 C2                           	OR	EDX,EAX
+    56 00000072 89 D8                           	MOV	EAX,EBX
+    57 00000074 09 CA                           	OR	EDX,ECX
+    58 00000076 25 000000FC                     	AND	EAX,252
+    59 0000007B 83 E3 02                        	AND	EBX,2
+    60 0000007E 09 C2                           	OR	EDX,EAX
+    61 00000080 81 CA 80000000                  	OR	EDX,-2147483648
+    62 00000086 52                              	PUSH	EDX
+    63 00000087 68 00000CF8                     	PUSH	3320
+    64 0000008C E8 [00000000]                   	CALL	_io_out32
+    65 00000091 68 00000CFC                     	PUSH	3324
+    66 00000096 E8 [00000000]                   	CALL	_io_in32
+    67 0000009B 8D 0C DD 00000000               	LEA	ECX,DWORD [0+EBX*8]
+    68 000000A2 D3 F8                           	SAR	EAX,CL
+    69 000000A4 25 0000FFFF                     	AND	EAX,65535
+    70 000000A9 8B 5D FC                        	MOV	EBX,DWORD [-4+EBP]
+    71 000000AC C9                              	LEAVE
+    72 000000AD C3                              	RET
+    73 000000AE                                 	GLOBAL	__pci_read_dword
+    74 000000AE                                 __pci_read_dword:
+    75 000000AE 55                              	PUSH	EBP
+    76 000000AF 89 E5                           	MOV	EBP,ESP
+    77 000000B1 8B 55 08                        	MOV	EDX,DWORD [8+EBP]
+    78 000000B4 8B 45 0C                        	MOV	EAX,DWORD [12+EBP]
+    79 000000B7 C1 E0 0B                        	SAL	EAX,11
+    80 000000BA 8B 4D 10                        	MOV	ECX,DWORD [16+EBP]
+    81 000000BD C1 E2 10                        	SAL	EDX,16
+    82 000000C0 C1 E1 08                        	SAL	ECX,8
+    83 000000C3 09 C2                           	OR	EDX,EAX
+    84 000000C5 8B 45 14                        	MOV	EAX,DWORD [20+EBP]
+    85 000000C8 09 CA                           	OR	EDX,ECX
+    86 000000CA 25 000000FC                     	AND	EAX,252
+    87 000000CF 09 C2                           	OR	EDX,EAX
+    88 000000D1 81 CA 80000000                  	OR	EDX,-2147483648
+    89 000000D7 52                              	PUSH	EDX
+    90 000000D8 68 00000CF8                     	PUSH	3320
+    91 000000DD E8 [00000000]                   	CALL	_io_out32
+    92 000000E2 58                              	POP	EAX
+    93 000000E3 5A                              	POP	EDX
+    94 000000E4 C7 45 08 00000CFC               	MOV	DWORD [8+EBP],3324
+    95 000000EB C9                              	LEAVE
+    96 000000EC E9 [00000000]                   	JMP	_io_in32
+    97 000000F1                                 	GLOBAL	__pci_write_byte
+    98 000000F1                                 __pci_write_byte:
+    99 000000F1 55                              	PUSH	EBP
+   100 000000F2 89 E5                           	MOV	EBP,ESP
+   101 000000F4 53                              	PUSH	EBX
+   102 000000F5 8B 55 08                        	MOV	EDX,DWORD [8+EBP]
+   103 000000F8 8B 45 0C                        	MOV	EAX,DWORD [12+EBP]
+   104 000000FB C1 E0 0B                        	SAL	EAX,11
+   105 000000FE 8B 5D 14                        	MOV	EBX,DWORD [20+EBP]
+   106 00000101 C1 E2 10                        	SAL	EDX,16
+   107 00000104 8B 4D 10                        	MOV	ECX,DWORD [16+EBP]
+   108 00000107 C1 E1 08                        	SAL	ECX,8
+   109 0000010A 09 C2                           	OR	EDX,EAX
+   110 0000010C 89 D8                           	MOV	EAX,EBX
+   111 0000010E 09 CA                           	OR	EDX,ECX
+   112 00000110 25 000000FC                     	AND	EAX,252
+   113 00000115 83 E3 03                        	AND	EBX,3
+   114 00000118 09 C2                           	OR	EDX,EAX
+   115 0000011A 81 C3 00000CFC                  	ADD	EBX,3324
+   116 00000120 81 CA 80000000                  	OR	EDX,-2147483648
+   117 00000126 52                              	PUSH	EDX
+   118 00000127 68 00000CF8                     	PUSH	3320
+   119 0000012C E8 [00000000]                   	CALL	_io_out32
+   120 00000131 53                              	PUSH	EBX
+   121 00000132 0F BE 45 18                     	MOVSX	EAX,BYTE [24+EBP]
+   122 00000136 50                              	PUSH	EAX
+   123 00000137 E8 [00000000]                   	CALL	_io_out8
+   124 0000013C 8B 5D FC                        	MOV	EBX,DWORD [-4+EBP]
+   125 0000013F 31 C0                           	XOR	EAX,EAX
+   126 00000141 C9                              	LEAVE
+   127 00000142 C3                              	RET
+   128 00000143                                 	GLOBAL	__pci_write_word
+   129 00000143                                 __pci_write_word:
+   130 00000143 55                              	PUSH	EBP
+   131 00000144 89 E5                           	MOV	EBP,ESP
+   132 00000146 53                              	PUSH	EBX
+   133 00000147 8B 55 08                        	MOV	EDX,DWORD [8+EBP]
+   134 0000014A 8B 45 0C                        	MOV	EAX,DWORD [12+EBP]
+   135 0000014D C1 E0 0B                        	SAL	EAX,11
+   136 00000150 8B 5D 14                        	MOV	EBX,DWORD [20+EBP]
+   137 00000153 C1 E2 10                        	SAL	EDX,16
+   138 00000156 8B 4D 10                        	MOV	ECX,DWORD [16+EBP]
+   139 00000159 C1 E1 08                        	SAL	ECX,8
+   140 0000015C 09 C2                           	OR	EDX,EAX
+   141 0000015E 89 D8                           	MOV	EAX,EBX
+   142 00000160 09 CA                           	OR	EDX,ECX
+   143 00000162 25 000000FC                     	AND	EAX,252
+   144 00000167 83 E3 02                        	AND	EBX,2
+   145 0000016A 09 C2                           	OR	EDX,EAX
+   146 0000016C 81 C3 00000CFC                  	ADD	EBX,3324
+   147 00000172 81 CA 80000000                  	OR	EDX,-2147483648
+   148 00000178 52                              	PUSH	EDX
+   149 00000179 68 00000CF8                     	PUSH	3320
+   150 0000017E E8 [00000000]                   	CALL	_io_out32
+   151 00000183 53                              	PUSH	EBX
+   152 00000184 0F BF 45 18                     	MOVSX	EAX,WORD [24+EBP]
+   153 00000188 50                              	PUSH	EAX
+   154 00000189 E8 [00000000]                   	CALL	_io_out16
+   155 0000018E 8B 5D FC                        	MOV	EBX,DWORD [-4+EBP]
+   156 00000191 31 C0                           	XOR	EAX,EAX
+   157 00000193 C9                              	LEAVE
+   158 00000194 C3                              	RET
+   159 00000195                                 	GLOBAL	__pci_write_dword
+   160 00000195                                 __pci_write_dword:
+   161 00000195 55                              	PUSH	EBP
+   162 00000196 89 E5                           	MOV	EBP,ESP
+   163 00000198 8B 55 08                        	MOV	EDX,DWORD [8+EBP]
+   164 0000019B 8B 45 0C                        	MOV	EAX,DWORD [12+EBP]
+   165 0000019E C1 E0 0B                        	SAL	EAX,11
+   166 000001A1 8B 4D 10                        	MOV	ECX,DWORD [16+EBP]
+   167 000001A4 C1 E2 10                        	SAL	EDX,16
+   168 000001A7 C1 E1 08                        	SAL	ECX,8
+   169 000001AA 09 C2                           	OR	EDX,EAX
+   170 000001AC 8B 45 14                        	MOV	EAX,DWORD [20+EBP]
+   171 000001AF 09 CA                           	OR	EDX,ECX
+   172 000001B1 25 000000FC                     	AND	EAX,252
+   173 000001B6 09 C2                           	OR	EDX,EAX
+   174 000001B8 81 CA 80000000                  	OR	EDX,-2147483648
+   175 000001BE 52                              	PUSH	EDX
+   176 000001BF 68 00000CF8                     	PUSH	3320
+   177 000001C4 E8 [00000000]                   	CALL	_io_out32
+   178 000001C9 68 00000CFC                     	PUSH	3324
+   179 000001CE FF 75 18                        	PUSH	DWORD [24+EBP]
+   180 000001D1 E8 [00000000]                   	CALL	_io_out32
+   181 000001D6 31 C0                           	XOR	EAX,EAX
+   182 000001D8 C9                              	LEAVE
+   183 000001D9 C3                              	RET
+   184 000001DA                                 	GLOBAL	_pci_read_byte
+   185 000001DA                                 _pci_read_byte:
+   186 000001DA 55                              	PUSH	EBP
+   187 000001DB 89 E5                           	MOV	EBP,ESP
+   188 000001DD 8B 45 08                        	MOV	EAX,DWORD [8+EBP]
+   189 000001E0 FF 75 0C                        	PUSH	DWORD [12+EBP]
+   190 000001E3 FF 70 08                        	PUSH	DWORD [8+EAX]
+   191 000001E6 FF 70 04                        	PUSH	DWORD [4+EAX]
+   192 000001E9 FF 30                           	PUSH	DWORD [EAX]
+   193 000001EB E8 FFFFFE10                     	CALL	__pci_read_byte
+   194 000001F0 C9                              	LEAVE
+   195 000001F1 C3                              	RET
+   196 000001F2                                 	GLOBAL	_pci_read_word
+   197 000001F2                                 _pci_read_word:
+   198 000001F2 55                              	PUSH	EBP
+   199 000001F3 89 E5                           	MOV	EBP,ESP
+   200 000001F5 8B 45 08                        	MOV	EAX,DWORD [8+EBP]
+   201 000001F8 FF 75 0C                        	PUSH	DWORD [12+EBP]
+   202 000001FB FF 70 08                        	PUSH	DWORD [8+EAX]
+   203 000001FE FF 70 04                        	PUSH	DWORD [4+EAX]
+   204 00000201 FF 30                           	PUSH	DWORD [EAX]
+   205 00000203 E8 FFFFFE4F                     	CALL	__pci_read_word
+   206 00000208 C9                              	LEAVE
+   207 00000209 C3                              	RET
+   208 0000020A                                 	GLOBAL	_pci_read_dword
+   209 0000020A                                 _pci_read_dword:
+   210 0000020A 55                              	PUSH	EBP
+   211 0000020B 89 E5                           	MOV	EBP,ESP
+   212 0000020D 8B 45 08                        	MOV	EAX,DWORD [8+EBP]
+   213 00000210 FF 75 0C                        	PUSH	DWORD [12+EBP]
+   214 00000213 FF 70 08                        	PUSH	DWORD [8+EAX]
+   215 00000216 FF 70 04                        	PUSH	DWORD [4+EAX]
+   216 00000219 FF 30                           	PUSH	DWORD [EAX]
+   217 0000021B E8 FFFFFE8E                     	CALL	__pci_read_dword
+   218 00000220 C9                              	LEAVE
+   219 00000221 C3                              	RET
+   220 00000222                                 	GLOBAL	_pci_write_byte
+   221 00000222                                 _pci_write_byte:
+   222 00000222 55                              	PUSH	EBP
+   223 00000223 89 E5                           	MOV	EBP,ESP
+   224 00000225 FF 75 10                        	PUSH	DWORD [16+EBP]
+   225 00000228 8B 45 08                        	MOV	EAX,DWORD [8+EBP]
+   226 0000022B FF 75 0C                        	PUSH	DWORD [12+EBP]
+   227 0000022E FF 70 08                        	PUSH	DWORD [8+EAX]
+   228 00000231 FF 70 04                        	PUSH	DWORD [4+EAX]
+   229 00000234 FF 30                           	PUSH	DWORD [EAX]
+   230 00000236 E8 FFFFFEB6                     	CALL	__pci_write_byte
+   231 0000023B 31 C0                           	XOR	EAX,EAX
+   232 0000023D C9                              	LEAVE
+   233 0000023E C3                              	RET
+   234 0000023F                                 	GLOBAL	_pci_write_word
+   235 0000023F                                 _pci_write_word:
+   236 0000023F 55                              	PUSH	EBP
+   237 00000240 89 E5                           	MOV	EBP,ESP
+   238 00000242 FF 75 10                        	PUSH	DWORD [16+EBP]
+   239 00000245 8B 45 08                        	MOV	EAX,DWORD [8+EBP]
+   240 00000248 FF 75 0C                        	PUSH	DWORD [12+EBP]
+   241 0000024B FF 70 08                        	PUSH	DWORD [8+EAX]
+   242 0000024E FF 70 04                        	PUSH	DWORD [4+EAX]
+   243 00000251 FF 30                           	PUSH	DWORD [EAX]
+   244 00000253 E8 FFFFFEEB                     	CALL	__pci_write_word
+   245 00000258 31 C0                           	XOR	EAX,EAX
+   246 0000025A C9                              	LEAVE
+   247 0000025B C3                              	RET
+   248 0000025C                                 	GLOBAL	_pci_write_dword
+   249 0000025C                                 _pci_write_dword:
+   250 0000025C 55                              	PUSH	EBP
+   251 0000025D 89 E5                           	MOV	EBP,ESP
+   252 0000025F FF 75 10                        	PUSH	DWORD [16+EBP]
+   253 00000262 8B 45 08                        	MOV	EAX,DWORD [8+EBP]
+   254 00000265 FF 75 0C                        	PUSH	DWORD [12+EBP]
+   255 00000268 FF 70 08                        	PUSH	DWORD [8+EAX]
+   256 0000026B FF 70 04                        	PUSH	DWORD [4+EAX]
+   257 0000026E FF 30                           	PUSH	DWORD [EAX]
+   258 00000270 E8 FFFFFF20                     	CALL	__pci_write_dword
+   259 00000275 31 C0                           	XOR	EAX,EAX
+   260 00000277 C9                              	LEAVE
+   261 00000278 C3                              	RET
+   262 00000279                                 	GLOBAL	_pci_add_dev
+   263 00000279                                 _pci_add_dev:
+   264 00000279 55                              	PUSH	EBP
+   265 0000027A 89 E5                           	MOV	EBP,ESP
+   266 0000027C C7 45 08 0000001C               	MOV	DWORD [8+EBP],28
+   267 00000283 5D                              	POP	EBP
+   268 00000284 E9 [00000000]                   	JMP	_kalloc
+   269 00000289                                 	GLOBAL	_PCIEntry
+   270 00000289                                 _PCIEntry:
+   271 00000289 55                              	PUSH	EBP
+   272 0000028A B8 00000001                     	MOV	EAX,1
+   273 0000028F 89 E5                           	MOV	EBP,ESP
+   274 00000291 5D                              	POP	EBP
+   275 00000292 C3                              	RET
+   276 00000293                                 	GLOBAL	_pci_dev_list
+   277                                          [SECTION .data]
+   278 00000000                                 	ALIGNB	16
+   279 00000000                                 _pci_dev_list:
+   280 00000000 00 00 00 00 00 00 00 00 00 00   	RESB	16
+       0000000A 00 00 00 00 00 00 
+   281 00000010                                 	GLOBAL	_pci_bus_list
+   282                                          [SECTION .data]
+   283 00000010                                 	ALIGNB	16
+   284 00000010                                 _pci_bus_list:
+   285 00000010 00 00 00 00 00 00 00 00 00 00   	RESB	16
+       0000001A 00 00 00 00 00 00 

@@ -25,9 +25,9 @@ void HariMain(void)
 	struct SHEET *sht_back, *sht_mouse;
 	struct TASK *task_a, *task;
 	static char keytable0[0x80] = {
-		0,   0,   '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '^', 0x08, 0,
-		'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '@', '[', 0x0a, 0, 'A', 'S',
-		'D', 'F', 'G', 'H', 'J', 'K', 'L', ';', ':', 0,   0,   ']', 'Z', 'X', 'C', 'V',
+		0,   0,   '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', 0x08, 0,
+		'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '[', ']', 0x0a, 0, 'A', 'S',
+		'D', 'F', 'G', 'H', 'J', 'K', 'L', ';', '\'', '`', 0, '\\', 'Z', 'X', 'C', 'V',
 		'B', 'N', 'M', ',', '.', '/', 0,   '*', 0,   ' ', 0,   0,   0,   0,   0,   0,
 		0,   0,   0,   0,   0,   0,   0,   '7', '8', '9', '-', '4', '5', '6', '+', '1',
 		'2', '3', '0', '.', 0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
@@ -35,9 +35,9 @@ void HariMain(void)
 		0,   0,   0,   0x5c, 0,  0,   0,   0,   0,   0,   0,   0,   0,   0x5c, 0,  0
 	};
 	static char keytable1[0x80] = {
-		0,   0,   '!', 0x22, '#', '$', '%', '&', 0x27, '(', ')', '~', '=', '~', 0x08, 0,
+		0,   0,   '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', 0x08, 0,
 		'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '`', '{', 0x0a, 0, 'A', 'S',
-		'D', 'F', 'G', 'H', 'J', 'K', 'L', '+', '*', 0,   0,   '}', 'Z', 'X', 'C', 'V',
+		'D', 'F', 'G', 'H', 'J', 'K', 'L', ':', '"', '~',  0,  '}', 'Z', 'X', 'C', 'V',
 		'B', 'N', 'M', '<', '>', '?', 0,   '*', 0,   ' ', 0,   0,   0,   0,   0,   0,
 		0,   0,   0,   0,   0,   0,   0,   '7', '8', '9', '-', '4', '5', '6', '+', '1',
 		'2', '3', '0', '.', 0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
@@ -123,7 +123,7 @@ void HariMain(void)
 	
 	io_cli();
 	code_init();
-	load_external_device(fat,memman);
+	//load_external_device(fat,memman);
 	io_sti(); 
 
 	finfo = file_search("nihongo.fnt", (struct FILEINFO *) (ADR_DISKIMG + 0x002600), 224);
@@ -161,8 +161,8 @@ void HariMain(void)
 				sheet_slide(sht, new_wx, new_wy);
 				new_wx = 0x7fffffff;
 			} else {
-				task_sleep(task_a);
 				io_sti();
+				task_sleep(task_a);
 			}
 		} else {
 			i = fifo32_get(&fifo);
@@ -297,6 +297,7 @@ void HariMain(void)
 					}
 					new_mx = mx;
 					new_my = my;
+					int f=0;
 					if ((mdec.btn & 0x01) != 0) {
 						/* 左ボタンを押している */
 						if (mmx < 0) {
@@ -329,7 +330,9 @@ void HariMain(void)
 												task->tss.eax = (int) &(task->tss.esp0);
 												task->tss.eip = (int) asm_end_app;
 												io_sti();
+												printk("hello!");
 												task_run(task, -1, 0);
+												f=1;
 											} else {	/* コンソール */
 												task = sht->task;
 												sheet_updown(sht, -1); /* とりあえず非表示にしておく */
@@ -339,6 +342,7 @@ void HariMain(void)
 												io_cli();
 												fifo32_put(&task->fifo, 4);
 												io_sti();
+												f=1;
 											}
 										}/* else if(1<=x && x<8*12&&1<=y && y < 8)
 										{
@@ -358,7 +362,7 @@ void HariMain(void)
 								sheet_updown(key_win, shtctl->top);
 								keywin_on(key_win);*/
 								acpiPowerOff();
-							} 
+							}else if(f==0);
 						} else {
 							/* ウィンドウ移動モードの場合 */
 							x = mx - mmx;	/* マウスの移動量を計算 */
@@ -424,6 +428,7 @@ struct TASK *open_constask(struct SHEET *sht, unsigned int memtotal)
 	task->tss.ds = 1 * 8;
 	task->tss.fs = 1 * 8;
 	task->tss.gs = 1 * 8;
+	task->name="command line";
 	*((int *) (task->tss.esp + 4)) = (int) sht;
 	*((int *) (task->tss.esp + 8)) = memtotal;
 	task_run(task, 2, 2); /* level=2, priority=2 */

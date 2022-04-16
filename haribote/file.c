@@ -34,42 +34,88 @@ void file_loadfile(int clustno, int size, char *buf, int *fat, char *img)
 	return;
 }
 
+char *file_name(char *name,char *nowdir)
+{
+	char sum[0xfff];
+	int i;
+	for(i=0;nowdir[i]!='\0',i<0xfff;i++)
+	{
+		if(nowdir[i]=='\\'&&nowdir[i-1]=='\\') continue;
+		sum[i]=nowdir[i];
+	}
+	for(;name[i]!='\0',i<0xfff;i++)
+	{
+		if(name[i]=='\\'&&name[i-1]=='\\') continue;
+		sum[i]=name[i];
+	}
+	name[i+1]='\0';
+	return sum;
+}
+
+struct FILEINFO *file_depth_search(char *name, struct FILEINFO *finfo)
+{
+	int n=224,end=0;
+	name+=3;
+	while(1)
+	{
+		int i;
+		for(i=0;i<0xfff;i++)
+		{
+			if(name[i]=='\\') break;
+			if(name[i]=='\0') end=1;
+		}
+		name[i]='\0';
+		finfo=file_search(name,finfo,n);
+		if(!finfo) break;
+		if((finfo->type&0x10)==0&&end==0) break;
+		else if(end==1) return finfo;
+		name+=i+1;
+	}
+	return 0;
+}
+
 struct FILEINFO *file_search(char *name, struct FILEINFO *finfo, int max)
 {
 	int i, j;
 	char s[12];
-	for (j = 0; j < 11; j++) {
-		s[j] = ' ';
-	}
-	j = 0;
-	for (i = 0; name[i] != 0; i++) {
-		if (j >= 11) { return 0; /* 見つからなかった */ }
-		if (name[i] == '.' && j <= 8) {
-			j = 8;
-		} else {
-			s[j] = name[i];
-			if ('a' <= s[j] && s[j] <= 'z') {
-				/* 小文字は大文字に直す */
-				s[j] -= 0x20;
-			} 
-			j++;
+	if(name[1]==':'&&name[2]=='\\')
+	{
+		return file_depth_search(name, finfo);
+	}else{
+		for (j = 0; j < 11; j++) {
+			s[j] = ' ';
 		}
-	}
-	for (i = 0; i < max; ) {
-		if (finfo->name[0] == 0x00) {
-			break;
-		}
-		if ((finfo[i].type & 0x18) == 0) {
-			for (j = 0; j < 11; j++) {
-				if (finfo[i].name[j] != s[j]) {
-					goto next;
-				}
+		j = 0;
+		for (i = 0; name[i] != 0; i++) {
+			if (j >= 11) { return 0; /* 見つからなかった */ }
+			if (name[i] == '.' && j <= 8) {
+				j = 8;
+			} else {
+				s[j] = name[i];
+				if ('a' <= s[j] && s[j] <= 'z') {
+					/* 小文字は大文字に直す */
+					s[j] -= 0x20;
+				} 
+				j++;
 			}
-			return finfo + i; /* ファイルが見つかった */
 		}
-next:
-		i++;
+		for (i = 0; i < max; ) {
+			if (finfo->name[0] == 0x00) {
+				break;
+			}
+			if ((finfo[i].type & 0x8) == 0) {
+				for (j = 0; j < 11; j++) {
+					if (finfo[i].name[j] != s[j]) {
+						goto next;
+					}
+				}
+				return finfo + i; /* ファイルが見つかった */
+			}
+			next:
+				i++;
+		}
 	}
+	
 	return 0; /* 見つからなかった */
 }
 

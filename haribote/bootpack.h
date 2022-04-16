@@ -10,6 +10,9 @@ struct BOOTINFO { /* 0x0ff0-0x0fff */
 #define ADR_BOOTINFO	0x00000ff0
 #define ADR_DISKIMG		0x00100000
 
+/* debug */
+int printk(char *format, ...);
+
 /* types */
 #define BYTE                char
 #define CHAR                char
@@ -132,8 +135,6 @@ typedef struct __attribute__ ((packed)) {
 } regs16_t;
 void int32(unsigned char intnum, regs16_t *regs);
 
-
-
 /* fifo.c */
 struct FIFO32 {
 	int *buf;
@@ -144,6 +145,17 @@ void fifo32_init(struct FIFO32 *fifo, int size, int *buf, struct TASK *task);
 int fifo32_put(struct FIFO32 *fifo, int data);
 int fifo32_get(struct FIFO32 *fifo);
 int fifo32_status(struct FIFO32 *fifo);
+
+/* ofifo.c */
+struct OFIFO32 {
+	int *buf;
+	int p, q, size, flags;
+	struct TASK *task;
+};
+void ofifo32_init(struct OFIFO32 *fifo, int size, int *buf, struct TASK *task);
+int ofifo32_put(struct OFIFO32 *fifo, int data);
+int ofifo32_get(struct OFIFO32 *fifo);
+int ofifo32_status(struct OFIFO32 *fifo);
 
 /* graphic.c */
 void init_palette(void);
@@ -249,6 +261,8 @@ unsigned int memman_alloc(struct MEMMAN *man, unsigned int size);
 int memman_free(struct MEMMAN *man, unsigned int addr, unsigned int size);
 unsigned int memman_alloc_4k(struct MEMMAN *man, unsigned int size);
 int memman_free_4k(struct MEMMAN *man, unsigned int addr, unsigned int size);
+void *kalloc(unsigned int size);
+void kfree(void *addr);
 
 void init_screen8(char *vram, int x, int y, int *fat,struct MEMMAN *memman);
 
@@ -318,6 +332,7 @@ struct TASK {
 	struct TSS32 tss;
 	int fpu[108 / 4];
 	struct SEGMENT_DESCRIPTOR ldt[2];
+	char *name;
 	struct CONSOLE *cons;
 	int ds_base, cons_stack;
 	struct FILEHANDLE *fhandle;
@@ -349,11 +364,6 @@ struct pid_t{
 		struct TASK *task;
 	} pido [MAX_PID];
 	int next;
-};
-struct pid1{
-	int pid;
-	struct TASK *task;
-	struct list_elem list_tag;
 };
 struct blocks_t{
 	struct{
@@ -418,7 +428,7 @@ void cons_putchar(struct CONSOLE *cons, int chr, char move);
 void cons_newline(struct CONSOLE *cons);
 void cons_putstr0(struct CONSOLE *cons, char *s);
 void cons_putstr1(struct CONSOLE *cons, char *s, int l);
-void cons_runcmd(char *cmdline, struct CONSOLE *cons, int *fat, int memtotal);
+void cons_runcmd(char *cmdline, struct CONSOLE *cons, int *fat, int memtotal, char *now_dir);
 void cmd_mem(struct CONSOLE *cons, int memtotal);
 void cmd_cls(struct CONSOLE *cons);
 void cmd_dir(struct CONSOLE *cons);
@@ -426,7 +436,7 @@ void cmd_exit(struct CONSOLE *cons, int *fat);
 void cmd_start(struct CONSOLE *cons, char *cmdline, int memtotal);
 void cmd_ncst(struct CONSOLE *cons, char *cmdline, int memtotal);
 void cmd_langmode(struct CONSOLE *cons, char *cmdline);
-int cmd_app(struct CONSOLE *cons, int *fat, char *cmdline);
+int cmd_app(struct CONSOLE *cons, int *fat, char *cmdline, char *);
 int *hrb_api(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx, int eax);
 int hrb_dpi(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx, int eax);
 int *inthandler0d(int *esp);
@@ -477,7 +487,7 @@ BOOL HDEntry(struct Dobject *Dobj);
 
 /* driver.c */
 #define DR_NUM 2
-#define DR_ENUM 1
+#define DR_ENUM 0
 
 #define IDE_HD_CALLON	0
 #define FS_CALLON		1
@@ -505,19 +515,21 @@ struct dev_callon {
 	int pid;
 };
 
-/* fs.c */
-struct fs_struct{
-	char *name;
-	int all_partition;//a partition as a bit
-	struct fs_operation operations;
-};
 struct fs_operation
 {
 	int (*open) (char *name,int mode);
 	int (*read) (int handle,int size,char *buf);
 	int (*write) (int handle,int size,char *buf);
 	int (*lseek) (int handle,int offset,int where);
-}
+};
+
+/* fs.c */
+struct fs_struct{
+	char *name;
+	int all_partition;//a partition as a bit
+	struct fs_operation operations;
+};
+ 
 #define FS_HDSIZE 0x1
 #define FS_READ 0x2
 #define FS_INIT 0x3

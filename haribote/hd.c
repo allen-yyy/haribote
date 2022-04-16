@@ -213,6 +213,7 @@ BOOL HDEntry(struct Dobject *Dobj)
 	hdtask->tss.ds = 1 * 8;
 	hdtask->tss.fs = 1 * 8;
 	hdtask->tss.gs = 1 * 8;
+	hdtask->devflag=1;
 	task_run(hdtask, 2, 1);
 	Dobj->task = hdtask;
 	struct dev_callon hdcallon;

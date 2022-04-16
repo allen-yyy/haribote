@@ -40,15 +40,13 @@ int code_alloc()
 BOOL VEcode(int vcode)
 {
 	int i;
-	io_cli();
 	for(i=0;i<=0xff;++i)
 	{
-		/*if(code.code[i] == vcode)
+		if(code.code[i] == vcode)
 		{
 			return TRUE;
-		}*/
+		}
 		return TRUE;
 	}
-	io_sti();
 	return FALSE;
 }
