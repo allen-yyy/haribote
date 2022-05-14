@@ -125,6 +125,7 @@ void HariMain(void)
 	code_init();
 	//load_external_device(fat,memman);
 	io_sti(); 
+	printk("\\\\\\\\"); 
 
 	finfo = file_search("nihongo.fnt", (struct FILEINFO *) (ADR_DISKIMG + 0x002600), 224);
 	if (finfo != 0) {

@@ -3,13 +3,16 @@
 	Copyright: 
 	Author: Allen
 	Date: 06/02/21 21:35
-	Description: 
+	Description: pci driver 
 */
 
 #include "bootpack.h" 
 #include "pci.h"
 struct list pci_dev_list; 
 struct list pci_bus_list;
+int busnum;
+
+/* Hardware */
 
 int _pci_read_byte(int bus,int slot,int func,int offset){
 	int address = ((bus << 16) | (slot << 11) |(func << 8) | (offset & 0xFC) | 0x80000000);
@@ -70,14 +73,39 @@ int pci_write_dword(struct pci_dev *dev,int offset,int value){
 	return 0;
 }
 
+/* Software */
+
 struct pci_dev *pci_add_dev(struct pci_dev *tmp)
 {
 	struct pci_dev *dev = (struct pci_dev *) kalloc(sizeof(struct pci_dev));
+	int i;
+	dev->bus_num = tmp->bus_num;
+	dev->bus_slot = tmp->bus_slot;
+	dev->slot_func = tmp->slot_func;
+	dev->header_type = tmp->header_type;
+	dev->vendor = _pci_read_word(dev->bus->number,dev->bus_slot,dev->slot_func,PCI_VENDOR_ID);
+	dev->int_pin = _pci_read_byte(dev->bus->number,dev->bus_slot,dev->slot_func,PCI_DEVICE_ID);
+	dev->class_revision = _pci_read_dword(dev->bus->number,dev->bus_slot,dev->slot_func,PCI_CLASS_REVISION);
+	list_append(&pci_dev_list,dev->tag);
+	list_append(dev->bus->devs,dev->tag);
 	return dev;
+}
+
+BOOL pci_probe()
+{
+	if(_pci_read_dword(0,0,0,0)==0xFFFFFFFF) return 0;
+	return 1;
+}
+
+int pci_init()
+{
+	if(!pci_probe()) return 0;
+	list_init(&pci_bus_list);
+	list_init(&pci_dev_list);
+	return 1;
 }
 
 BOOL PCIEntry(struct Dobject *Dobj)
 {
-	//pci_init();
-	return TRUE;
+	return pci_init();
 }
