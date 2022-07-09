@@ -125,8 +125,8 @@ void HariMain(void)
 	code_init();
 	//load_external_device(fat,memman);
 	io_sti(); 
-	//printk("\\\\\\\\"); 
-
+	//printk("\\\\\\\\");
+	make_button8(sht_back,0,0,0,"shutdown",&fifo);
 	finfo = file_search("nihongo.fnt", (struct FILEINFO *) (ADR_DISKIMG + 0x002600), 224);
 	if (finfo != 0) {
 		i = finfo->size;
@@ -304,6 +304,7 @@ void HariMain(void)
 						if (mmx < 0) {
 							/* 通常モードの場合 */
 							/* 上の下じきから順番にマウスが指している下じきを探す */
+							do_mouse_click(mx, my);
 							for (j = shtctl->top - 1; j > 0; j--) {
 								sht = shtctl->sheets[j];
 								x = mx - sht->vx0;
@@ -331,7 +332,6 @@ void HariMain(void)
 												task->tss.eax = (int) &(task->tss.esp0);
 												task->tss.eip = (int) asm_end_app;
 												io_sti();
-												printk("hello!");
 												task_run(task, -1, 0);
 												f=1;
 											} else {	/* コンソール */
@@ -345,25 +345,27 @@ void HariMain(void)
 												io_sti();
 												f=1;
 											}
-										}/* else if(1<=x && x<8*12&&1<=y && y < 8)
+										}	
+										//other
+										/* else if(1<=x && x<8*12&&1<=y && y < 8)
 										{
 											key_win = open_console(shtctl, memtotal);
 											sheet_slide(key_win, 32, 4);
 											sheet_updown(key_win, shtctl->top);
 											keywin_on(key_win);
 										}*/ 
-										break;
+										//break;
 									}
 								}
 							}
-							if(0<=mx && mx<16&&0<=my && my < 16)
-							{
+							//if(0<=mx && mx<16&&0<=my && my < 16)
+							//{
 								/*key_win = open_console(shtctl, memtotal);
 								sheet_slide(key_win, 32, 4);
 								sheet_updown(key_win, shtctl->top);
 								keywin_on(key_win);*/
-								acpiPowerOff();
-							}else if(f==0);
+							//	acpiPowerOff();
+							//}else if(f==0);
 						} else {
 							/* ウィンドウ移動モードの場合 */
 							x = mx - mmx;	/* マウスの移動量を計算 */
@@ -392,6 +394,8 @@ void HariMain(void)
 			} else if (i == 2280) {		/* time out */
 				printtime2();
 				timer_settime(time,100);
+			} else if (i == 3000) {		/* shutdown button clicked */
+				acpiPowerOff();
 			}
 		}
 	}

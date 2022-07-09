@@ -104,7 +104,7 @@ void init_screen8(char *vram, int x, int y, int *fat,struct MEMMAN *memman)
 	
 	//draw_icon(buf,finfo->size,vram);
 	
-	putfonts8_asc(vram, x, 1, 77, COL8_FFFFFF ,"console");
+	//putfonts8_asc(vram, x, 1, 77, COL8_FFFFFF ,"console");
 	return;
 }
 

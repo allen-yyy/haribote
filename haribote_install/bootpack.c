@@ -84,7 +84,8 @@ void HariMain(void)
 	buf_back  = (unsigned char *) memman_alloc_4k(memman, binfo->scrnx * binfo->scrny);
 	sheet_setbuf(sht_back, buf_back, binfo->scrnx, binfo->scrny, -1); /* “§–¾F‚È‚µ */
 	init_screen8(buf_back, binfo->scrnx, binfo->scrny,fat,memman);
-
+	*((int *) 0x0ef8) = sht_back;
+	
 	/* sht_cons */
 	//key_win = open_console(shtctl, memtotal);
 
@@ -126,7 +127,7 @@ void HariMain(void)
 	//load_external_device(fat,memman);
 	io_sti(); 
 	//printk("\\\\\\\\"); 
-
+	make_button8(sht_back,0,0,0,"install haribote ",&fifo);
 	finfo = file_search("nihongo.fnt", (struct FILEINFO *) (ADR_DISKIMG + 0x002600), 224);
 	if (finfo != 0) {
 		i = finfo->size;
@@ -345,7 +346,11 @@ void HariMain(void)
 												io_sti();
 												f=1;
 											}
-										}/* else if(1<=x && x<8*12&&1<=y && y < 8)
+										}else	//other
+										{
+											do_mouse_click(x, y);
+										}
+										/* else if(1<=x && x<8*12&&1<=y && y < 8)
 										{
 											key_win = open_console(shtctl, memtotal);
 											sheet_slide(key_win, 32, 4);
@@ -392,6 +397,8 @@ void HariMain(void)
 			} else if (i == 2280) {		/* time out */
 				printtime2();
 				timer_settime(time,100);
+			} else if (i == 3000) {		/* install button clicked */
+				//acpiPowerOff();
 			}
 		}
 	}
@@ -483,6 +490,8 @@ void printtime2()
     char *vram = binfo->vram;
     int x = binfo->scrnx;
     int y = binfo->scrny;
+    struct SHEET *sht_back = 0x0ef8;
+    vram = sht_back->buf;
     readrtc(t);
     sprintf(s, "%02X:%02X",t[2], t[1]);
     
@@ -510,5 +519,5 @@ void printtime2()
 	boxfill8(vram, x, COL8_FFFFFF, x -  3, y - 24, x -  3, y -  3);
 	
     putfonts8_asc(vram,x,x-46,y-22,COL8_FFFFFF,s);
-    sheet_refresh(task->cons->sht,x-48,y-25,x-1,y-1);
+    sheet_refresh(sht_back,x-48,y-25,x-1,y-1);
 }

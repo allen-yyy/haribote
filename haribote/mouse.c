@@ -4,6 +4,14 @@
 
 struct FIFO32 *mousefifo;
 int mousedata0;
+struct _mouse_click_table
+{
+	int x,y,x0,y0;
+	struct FIFO32 *fifo;
+	struct SHEET *sht;
+};
+struct _mouse_click_table mouse_click_table[10000];
+int mouse_click_num = 0;
 
 void inthandler2c(int *esp)
 /* PS/2É}ÉEÉXÇ©ÇÁÇÃäÑÇËçûÇ› */
@@ -75,4 +83,29 @@ int mouse_decode(struct MOUSE_DEC *mdec, unsigned char dat)
 		return 1;
 	}
 	return -1; /* Ç±Ç±Ç…óàÇÈÇ±Ç∆ÇÕÇ»Ç¢ÇÕÇ∏ */
+}
+
+void mouse_click_register(struct SHEET *sht, int x, int y, int x0, int y0, struct FIFO32 *fifo)
+{
+	mouse_click_table[mouse_click_num].x = x;
+	mouse_click_table[mouse_click_num].y = y;
+	mouse_click_table[mouse_click_num].x0 = x0;
+	mouse_click_table[mouse_click_num].y0 = y0;
+	mouse_click_table[mouse_click_num].fifo = fifo;
+	mouse_click_table[mouse_click_num].sht = sht;
+	mouse_click_num++;
+	return;
+}
+
+void do_mouse_click(int x, int y)
+{
+	int i;
+	for(i=0;i<mouse_click_num;i++)
+	{
+		if((mouse_click_table[i].x)<=x && x<(mouse_click_table[i].x0)&&(mouse_click_table[i].y)<=y && y < (mouse_click_table[i].y0))
+		{
+			fifo32_put(mouse_click_table[i].fifo, 3000);
+		}
+	}
+	return;	
 }

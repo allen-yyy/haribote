@@ -93,22 +93,121 @@ void make_textbox8(struct SHEET *sht, int x0, int y0, int sx, int sy, int c)
 	return;
 }
 
-void make_button8(struct SHEET *sht, int x, int y, int c, char *name)
+void make_button8(struct SHEET *sht, int x0, int y0, int c, char *name, struct FIFO32 *fifo)
 {
 	char *buf = sht->buf;
-	int len = 0,i,j;
+	int len = 0,i,j,x,y;
 	for(len=0;;len++) if(name[len]=='\0') break;
-	for(i=0;i<len*16;i++)
-		for(j=0;j<16;j++)
-			buf[(i+x)*(y+j)] = COL8_C6C6C6;
-	for(i=16;i>=0;i--) buf[x*(y+i)] = COL8_FFFFFF;
-	for(i=0;i<len*16;i++) buf[(x+i)*y] = COL8_FFFFFF;
-	for(i=1;i<len*16;i++) buf[(x+i)*(y+15)] = COL8_848484;
-	for(i=1;i<16;i++) buf[(x+i)*(y+len*16-1)] = COL8_848484;
-	for(i=0;i<len*16;i++) buf[(x+16)*(y+i)] = COL8_000000;
-	for(i=0;i<16;i++) buf[(x+i)*y] = COL8_000000;
-	struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
-	putfonts8_asc(buf, binfo->scrnx, x, y, COL8_FFFFFF, name); 
+	static char btna[16][16] = {
+		"OOOOOOOOOOOOOOOO",
+		"OQQQQQQQQQQQQQQQ",
+		"OQQQQQQQQQQQQQQQ",
+		"OQQQQQQQQQQQQQQQ",
+		"OQQQQQQQQQQQQQQQ",
+		"OQQQQQQQQQQQQQQQ",
+		"OQQQQQQQQQQQQQQQ",
+		"OQQQQQQQQQQQQQQQ",
+		"OQQQQQQQQQQQQQQQ",
+		"OQQQQQQQQQQQQQQQ",
+		"OQQQQQQQQQQQQQQQ",
+		"OQQQQQQQQQQQQQQQ",
+		"OQQQQQQQQQQQQQQQ",
+		"OQQQQQQQQQQQQQQQ",
+		"O$$$$$$$$$$$$$$$",
+		"@@@@@@@@@@@@@@@@"
+	};
+	char btnb[16][16] = {
+		"OOOOOOOOOOOOOOOO",
+		"QQQQQQQQQQQQQQQQ",
+		"QQQQQQQQQQQQQQQQ",
+		"QQQQQQQQQQQQQQQQ",
+		"QQQQQQQQQQQQQQQQ",
+		"QQQQQQQQQQQQQQQQ",
+		"QQQQQQQQQQQQQQQQ",
+		"QQQQQQQQQQQQQQQQ",
+		"QQQQQQQQQQQQQQQQ",
+		"QQQQQQQQQQQQQQQQ",
+		"QQQQQQQQQQQQQQQQ",
+		"QQQQQQQQQQQQQQQQ",
+		"QQQQQQQQQQQQQQQQ",
+		"QQQQQQQQQQQQQQQQ",
+		"$$$$$$$$$$$$$$$$",
+		"@@@@@@@@@@@@@@@@"
+	};
+	static char btnc[16][16] = {
+		"OOOOOOOOOOOOOOO@",
+		"QQQQQQQQQQQQQQ$@",
+		"QQQQQQQQQQQQQQ$@",
+		"QQQQQQQQQQQQQQ$@",
+		"QQQQQQQQQQQQQQ$@",
+		"QQQQQQQQQQQQQQ$@",
+		"QQQQQQQQQQQQQQ$@",
+		"QQQQQQQQQQQQQQ$@",
+		"QQQQQQQQQQQQQQ$@",
+		"QQQQQQQQQQQQQQ$@",
+		"QQQQQQQQQQQQQQ$@",
+		"QQQQQQQQQQQQQQ$@",
+		"QQQQQQQQQQQQQQ$@",
+		"QQQQQQQQQQQQQQ$@",
+		"$$$$$$$$$$$$$$$@",
+		"@@@@@@@@@@@@@@@@"
+	};
+	for (y = 0; y < 16; y++) {
+		for (x = 0; x < 16; x++) {
+			c = btna[y][x];
+			if (c == '@') {
+				c = COL8_000000;
+			} else if (c == '$') {
+				c = COL8_848484;
+			} else if (c == 'Q') {
+				c = COL8_C6C6C6;
+			} else {
+				c = COL8_FFFFFF;
+			}
+			buf[(x0+x)+(y0+y)*sht->bxsize] = c;
+		}
+	}
+	for (y = 0; y < 16; y++) {
+		for (x = 0; x < 16; x++) {
+			c = btnb[y][x];
+			if (c == '@') {
+				c = COL8_000000;
+			} else if (c == '$') {
+				c = COL8_848484;
+			} else if (c == 'Q') {
+				c = COL8_C6C6C6;
+			} else {
+				c = COL8_FFFFFF;
+			}
+			btnb[y][x] = c;
+		}
+	}
+	for(i=0;i<len/2-2;i++)
+	{
+		for (y = 0; y < 16; y++) {
+			for (x = 0; x < 16; x++) {
+				buf[(x0+16+x+i*16)+(y0+y)*sht->bxsize] = btnb[y][x];
+			}
+		}
+	}
+	for (y = 0; y < 16; y++) {
+		for (x = 0; x < 16; x++) {
+			c = btnc[y][x];
+			if (c == '@') {
+				c = COL8_000000;
+			} else if (c == '$') {
+				c = COL8_848484;
+			} else if (c == 'Q') {
+				c = COL8_C6C6C6;
+			} else {
+				c = COL8_FFFFFF;
+			}
+			buf[(x0+(len-2)*8+x)+(y0+y)*sht->bxsize] = c;
+		}
+	}
+	putfonts8_asc(buf, sht->bxsize, x0, y0, COL8_FFFFFF, name);
+	sheet_refresh(sht, 0, 0, sht->bxsize, sht->bysize);
+	mouse_click_register(sht, x0, y0, x0+len*16, y0+16, fifo);
 	return;
 }
 

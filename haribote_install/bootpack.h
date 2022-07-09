@@ -243,6 +243,7 @@ struct MOUSE_DEC {
 void inthandler2c(int *esp);
 void enable_mouse(struct FIFO32 *fifo, int data0, struct MOUSE_DEC *mdec);
 int mouse_decode(struct MOUSE_DEC *mdec, unsigned char dat);
+void do_mouse_click(int x, int y);
 
 /* memory.c */
 #define MEMMAN_FREES		4090	/* これで約32KB */
@@ -288,6 +289,8 @@ void sheet_refresh(struct SHEET *sht, int bx0, int by0, int bx1, int by1);
 void sheet_slide(struct SHEET *sht, int vx0, int vy0);
 void sheet_free(struct SHEET *sht);
 
+
+void mouse_click_register(struct SHEET *sht, int x, int y, int x0, int y0, struct FIFO32 *fifo);
 /* timer.c */
 #define MAX_TIMER		500
 struct TIMER {
