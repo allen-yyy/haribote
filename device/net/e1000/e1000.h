@@ -6,7 +6,7 @@
 #ifndef _E1000_H_
 #define _E1000_H_
 
-#include <linux/stddef.h>
+/*#include <linux/stddef.h>
 #include <linux/module.h>
 #include <linux/types.h>
 #include <asm/byteorder.h>
@@ -41,7 +41,7 @@
 #include <net/checksum.h>
 #include <linux/mii.h>
 #include <linux/ethtool.h>
-#include <linux/if_vlan.h>
+#include <linux/if_vlan.h>*/
 
 #define BAR_0		0
 #define BAR_1		1

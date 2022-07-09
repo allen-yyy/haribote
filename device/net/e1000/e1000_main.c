@@ -1,12 +1,15 @@
 // SPDX-License-Identifier: GPL-2.0
 /* Copyright(c) 1999 - 2006 Intel Corporation. */
+/* Copyright(c) 2020 - 2020 Allen He. */
+/* ONLY For Haribote. */
 
 #include "e1000.h"
-#include <net/ip6_checksum.h>
-#include <linux/io.h>
-#include <linux/prefetch.h>
-#include <linux/bitops.h>
-#include <linux/if_vlan.h>
+//#include <net/ip6_checksum.h>
+//#include <linux/io.h>		
+//#include <linux/prefetch.h>
+//#include <linux/bitops.h>
+//#include <linux/if_vlan.h>
+#include <driver/pci.h>
 
 char e1000_driver_name[] = "e1000";
 static char e1000_driver_string[] = "Intel(R) PRO/1000 Network Driver";

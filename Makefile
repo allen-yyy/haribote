@@ -209,3 +209,6 @@ refresh :
 	$(MAKE) full
 	$(MAKE) clean_full
 	-$(DEL) haribote.img
+
+#driver :
+#	$(MAKE) -
