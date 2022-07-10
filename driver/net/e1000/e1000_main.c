@@ -152,10 +152,6 @@ static int e1000_vlan_rx_kill_vid(struct net_device *netdev,
 				  __be16 proto, u16 vid);
 static void e1000_restore_vlan(struct e1000_adapter *adapter);
 
-static int __maybe_unused e1000_suspend(struct device *dev);
-static int __maybe_unused e1000_resume(struct device *dev);
-static void e1000_shutdown(struct pci_dev *pdev);
-
 #ifdef CONFIG_NET_POLL_CONTROLLER
 /* for netdump / net console */
 static void e1000_netpoll (struct net_device *netdev);
@@ -163,43 +159,43 @@ static void e1000_netpoll (struct net_device *netdev);
 
 #define COPYBREAK_DEFAULT 256
 static unsigned int copybreak __read_mostly = COPYBREAK_DEFAULT;
-module_param(copybreak, uint, 0644);
-MODULE_PARM_DESC(copybreak,
-	"Maximum size of packet that is copied to a new buffer on receive");
+//module_param(copybreak, uint, 0644);
+//MODULE_PARM_DESC(copybreak,
+//	"Maximum size of packet that is copied to a new buffer on receive");
 
-static pci_ers_result_t e1000_io_error_detected(struct pci_dev *pdev,
-						pci_channel_state_t state);
-static pci_ers_result_t e1000_io_slot_reset(struct pci_dev *pdev);
-static void e1000_io_resume(struct pci_dev *pdev);
+//static pci_ers_result_t e1000_io_error_detected(struct pci_dev *pdev,
+//						pci_channel_state_t state);
+//static pci_ers_result_t e1000_io_slot_reset(struct pci_dev *pdev);
+//static void e1000_io_resume(struct pci_dev *pdev);
 
-static const struct pci_error_handlers e1000_err_handler = {
-	.error_detected = e1000_io_error_detected,
-	.slot_reset = e1000_io_slot_reset,
-	.resume = e1000_io_resume,
-};
+//static const struct pci_error_handlers e1000_err_handler = {
+//	.error_detected = e1000_io_error_detected,
+//	.slot_reset = e1000_io_slot_reset,
+//	.resume = e1000_io_resume,
+//};
 
-static SIMPLE_DEV_PM_OPS(e1000_pm_ops, e1000_suspend, e1000_resume);
+s//tatic SIMPLE_DEV_PM_OPS(e1000_pm_ops, e1000_suspend, e1000_resume);
 
 static struct pci_driver e1000_driver = {
 	.name     = e1000_driver_name,
 	.id_table = e1000_pci_tbl,
 	.probe    = e1000_probe,
 	.remove   = e1000_remove,
-	.driver = {
-		.pm = &e1000_pm_ops,
-	},
-	.shutdown = e1000_shutdown,
-	.err_handler = &e1000_err_handler
+	//.driver = {
+	//	.pm = &e1000_pm_ops,
+	//},
+	//.shutdown = e1000_shutdown,
+	//.err_handler = &e1000_err_handler
 };
 
-MODULE_AUTHOR("Intel Corporation, <linux.nics@intel.com>");
-MODULE_DESCRIPTION("Intel(R) PRO/1000 Network Driver");
-MODULE_LICENSE("GPL v2");
+//MODULE_AUTHOR("Intel Corporation, <linux.nics@intel.com>");
+//MODULE_DESCRIPTION("Intel(R) PRO/1000 Network Driver");
+//MODULE_LICENSE("GPL v2");
 
 #define DEFAULT_MSG_ENABLE (NETIF_MSG_DRV|NETIF_MSG_PROBE|NETIF_MSG_LINK)
 static int debug = -1;
-module_param(debug, int, 0);
-MODULE_PARM_DESC(debug, "Debug level (0=none,...,16=all)");
+//module_param(debug, int, 0);
+//MODULE_PARM_DESC(debug, "Debug level (0=none,...,16=all)");
 
 /**
  * e1000_get_hw_dev - helper function for getting netdev
@@ -223,16 +219,16 @@ struct net_device *e1000_get_hw_dev(struct e1000_hw *hw)
 static int __init e1000_init_module(void)
 {
 	int ret;
-	pr_info("%s\n", e1000_driver_string);
+	printk("%s\n", e1000_driver_string);
 
-	pr_info("%s\n", e1000_copyright);
+	printk("%s\n", e1000_copyright);
 
 	ret = pci_register_driver(&e1000_driver);
 	if (copybreak != COPYBREAK_DEFAULT) {
 		if (copybreak == 0)
-			pr_info("copybreak disabled\n");
+			printk("copybreak disabled\n");
 		else
-			pr_info("copybreak enabled for "
+			printk("copybreak enabled for "
 				   "packets <= %u bytes\n", copybreak);
 	}
 	return ret;
@@ -246,12 +242,12 @@ module_init(e1000_init_module);
  * e1000_exit_module is called just before the driver is removed
  * from memory.
  **/
-static void __exit e1000_exit_module(void)
-{
-	pci_unregister_driver(&e1000_driver);
-}
+//static void __exit e1000_exit_module(void)
+//{
+//	pci_unregister_driver(&e1000_driver);
+//}
 
-module_exit(e1000_exit_module);
+//module_exit(e1000_exit_module);
 
 static int e1000_request_irq(struct e1000_adapter *adapter)
 {
@@ -2448,7 +2444,7 @@ static void e1000_watchdog(struct work_struct *work)
 						   &adapter->link_duplex);
 
 			ctrl = er32(CTRL);
-			pr_info("%s NIC Link is Up %d Mbps %s, "
+			printk("%s NIC Link is Up %d Mbps %s, "
 				"Flow Control: %s\n",
 				netdev->name,
 				adapter->link_speed,
@@ -2485,7 +2481,7 @@ static void e1000_watchdog(struct work_struct *work)
 		if (netif_carrier_ok(netdev)) {
 			adapter->link_speed = 0;
 			adapter->link_duplex = 0;
-			pr_info("%s NIC Link is Down\n",
+			printk("%s NIC Link is Down\n",
 				netdev->name);
 			netif_carrier_off(netdev);
 
@@ -3347,9 +3343,9 @@ static void e1000_regdump(struct e1000_adapter *adapter)
 	regs_buff[36] = er32(RDFTS);
 	regs_buff[37] = er32(RDFPC);
 
-	pr_info("Register dump\n");
+	printk("Register dump\n");
 	for (i = 0; i < NUM_REGS; i++)
-		pr_info("%-15s  %08x\n", reg_name[i], regs_buff[i]);
+		printk("%-15s  %08x\n", reg_name[i], regs_buff[i]);
 }
 
 /*
@@ -3369,7 +3365,7 @@ static void e1000_dump(struct e1000_adapter *adapter)
 	e1000_regdump(adapter);
 
 	/* transmit dump */
-	pr_info("TX Desc ring0 dump\n");
+	printk("TX Desc ring0 dump\n");
 
 	/* Transmit Descriptor Formats - DEXT[29] is 0 (Legacy) or 1 (Extended)
 	 *
@@ -3398,8 +3394,8 @@ static void e1000_dump(struct e1000_adapter *adapter)
 	 *   +----------------------------------------------------------------+
 	 *   63       48 47     40 39  36 35    32 31     24 23  20 19        0
 	 */
-	pr_info("Tc[desc]     [Ce CoCsIpceCoS] [MssHlRSCm0Plen] [bi->dma       ] leng  ntw timestmp         bi->skb\n");
-	pr_info("Td[desc]     [address 63:0  ] [VlaPoRSCm1Dlen] [bi->dma       ] leng  ntw timestmp         bi->skb\n");
+	printk("Tc[desc]     [Ce CoCsIpceCoS] [MssHlRSCm0Plen] [bi->dma       ] leng  ntw timestmp         bi->skb\n");
+	printk("Td[desc]     [address 63:0  ] [VlaPoRSCm1Dlen] [bi->dma       ] leng  ntw timestmp         bi->skb\n");
 
 	if (!netif_msg_tx_done(adapter))
 		goto rx_ring_summary;
@@ -3420,7 +3416,7 @@ static void e1000_dump(struct e1000_adapter *adapter)
 		else
 			type = "";
 
-		pr_info("T%c[0x%03X]    %016llX %016llX %016llX %04X  %3X %016llX %p %s\n",
+		printk("T%c[0x%03X]    %016llX %016llX %016llX %04X  %3X %016llX %p %s\n",
 			((le64_to_cpu(u->b) & (1<<20)) ? 'd' : 'c'), i,
 			le64_to_cpu(u->a), le64_to_cpu(u->b),
 			(u64)buffer_info->dma, buffer_info->length,
@@ -3430,7 +3426,7 @@ static void e1000_dump(struct e1000_adapter *adapter)
 
 rx_ring_summary:
 	/* receive dump */
-	pr_info("\nRX Desc ring dump\n");
+	printk("\nRX Desc ring dump\n");
 
 	/* Legacy Receive Descriptor Format
 	 *
@@ -3441,7 +3437,7 @@ rx_ring_summary:
 	 * +-----------------------------------------------------+
 	 * 63       48 47    40 39      32 31         16 15      0
 	 */
-	pr_info("R[desc]      [address 63:0  ] [vl er S cks ln] [bi->dma       ] [bi->skb]\n");
+	printk("R[desc]      [address 63:0  ] [vl er S cks ln] [bi->dma       ] [bi->skb]\n");
 
 	if (!netif_msg_rx_status(adapter))
 		goto exit;
@@ -3460,16 +3456,16 @@ rx_ring_summary:
 		else
 			type = "";
 
-		pr_info("R[0x%03X]     %016llX %016llX %016llX %p %s\n",
+		printk("R[0x%03X]     %016llX %016llX %016llX %p %s\n",
 			i, le64_to_cpu(u->a), le64_to_cpu(u->b),
 			(u64)buffer_info->dma, buffer_info->rxbuf.data, type);
 	} /* for */
 
 	/* dump the descriptor caches */
 	/* rx */
-	pr_info("Rx descriptor cache in 64bit format\n");
+	printk("Rx descriptor cache in 64bit format\n");
 	for (i = 0x6000; i <= 0x63FF ; i += 0x10) {
-		pr_info("R%04X: %08X|%08X %08X|%08X\n",
+		printk("R%04X: %08X|%08X %08X|%08X\n",
 			i,
 			readl(adapter->hw.hw_addr + i+4),
 			readl(adapter->hw.hw_addr + i),
@@ -3477,9 +3473,9 @@ rx_ring_summary:
 			readl(adapter->hw.hw_addr + i+8));
 	}
 	/* tx */
-	pr_info("Tx descriptor cache in 64bit format\n");
+	printk("Tx descriptor cache in 64bit format\n");
 	for (i = 0x7000; i <= 0x73FF ; i += 0x10) {
-		pr_info("T%04X: %08X|%08X %08X|%08X\n",
+		printk("T%04X: %08X|%08X %08X|%08X\n",
 			i,
 			readl(adapter->hw.hw_addr + i+4),
 			readl(adapter->hw.hw_addr + i),
@@ -5307,7 +5303,7 @@ static void e1000_io_resume(struct pci_dev *pdev)
 
 	if (netif_running(netdev)) {
 		if (e1000_up(adapter)) {
-			pr_info("can't bring device back up after reset\n");
+			printk("can't bring device back up after reset\n");
 			return;
 		}
 	}
