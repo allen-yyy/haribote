@@ -6,4 +6,3 @@ MAKE     = $(TOOLPATH)make.exe -r
 
 #e1000 is not ready
 default:
-	#$(MAKE) 

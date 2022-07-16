@@ -1,8 +1,7 @@
 TOOLPATH = ../../../z_tools/
 INCPATH  = ../../../z_tools/haribote/
-INCPATH2  = ../include/
-APILIBPATH   = ../apilib/
-CLIBPATH   = ../clib/
+INCPATH2  = ../../include/
+DPILIBPATH   = ../dpilib/
 
 MAKE     = $(TOOLPATH)make.exe -r
 NASK     = $(TOOLPATH)nask.exe
@@ -24,34 +23,31 @@ DEL      = del
 # デフォルト動作
 
 default :
-	$(MAKE) $(APP).hrb
+	$(MAKE) $(APP).sys
 
 # ファイル生成規則
-$(APP).bim : $(APP).obj Makefile ../app_make.txt
+$(APP).bim : $(APP).obj $(DPILIBPATH)dpilib.lib Makefile
 	$(OBJ2BIM) @$(RULEFILE) out:$(APP).bim map:$(APP).map stack:$(STACK) \
-		$(APP).obj $(APILIBPATH)apilib.lib $(CLIBPATH)haribotelibc.lib
+		$(APP).obj $(DPILIBPATH)dpilib.lib
 
 # 一般規則
 
-%.gas : %.c ../apilib.h Makefile ../app_make.txt
+%.gas : %.c ../dpilib.h Makefile
 	$(CC1) -o $*.gas $*.c
 
-%.nas : %.gas Makefile ../app_make.txt
+%.nas : %.gas Makefile
 	$(GAS2NASK) $*.gas $*.nas
 
-%.obj : %.nas Makefile ../app_make.txt
+%.obj : %.nas Makefile
 	$(NASK) $*.nas $*.obj $*.lst
-
-%.org : %.bim Makefile ../app_make.txt
-	$(BIM2HRB) $*.bim $*.org $(MALLOC)
-
-%.hrb : %.org Makefile ../app_make.txt
-	$(BIM2BIN) -osacmp in:$*.org out:$*.hrb
+	
+%.sys : %.bim Makefile
+	$(BIM2SYS) $*.bim $*.sys $(MALLOC)
 
 # コマンド
 
 full :
-	$(MAKE) $(APP).hrb
+	$(MAKE) $(APP).sys
 
 clean :
 	-$(DEL) *.lst
@@ -62,4 +58,4 @@ clean :
 
 src_only :
 	$(MAKE) clean
-	-$(DEL) $(APP).hrb
+	-$(DEL) $(APP).sys

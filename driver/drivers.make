@@ -1,6 +1,6 @@
 DRIVERS =  systest
 
-include net/net.make
+include driver/net/net.make
 
 SUBDRIVERS = $(NET)
 DRIVERS += $(SUBDRIVERS)

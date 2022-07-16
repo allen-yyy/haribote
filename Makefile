@@ -20,15 +20,15 @@ OBJS-y   =
 default :
 	$(MAKE) img
 
-haribote :	haribote $(OBJS) Makefile application driver include fonts
+img :	haribote $(OBJS) Makefile application driver include fonts
 	$(MAKE) -C haribote
 	$(MAKE) -C driver
 	$(MAKE) -C application
 	$(EDIMG)   imgin:../z_tools/fdimg0at.tek \
 		wbinimg src:haribote/ipl09.bin len:512 from:0 to:0 \
 		copy from:haribote/haribote.sys to:@: \
-		$(foreach n,$(APPS),copy from:application/$(n)/$(n).hrb to:@: \)
-		$(foreach n,$(DRIVERS),copy from:driver/$(n)/$(n).sys to:@: \)
-		$(foreach n,$(FONTS),copy from:fonts/$(n)/$(n).fnt to:@: \)
+		$(foreach n,$(APPS),copy from:application/$(n)/$(n).hrb to:@: ) \
+		$(foreach n,$(DRIVERS),copy from:driver/$(n)/$(n).sys to:@: ) \
+		$(foreach n,$(FONTS),copy from:fonts/$(n)/$(n).fnt to:@: ) \
 		imgout:haribote.img
 
