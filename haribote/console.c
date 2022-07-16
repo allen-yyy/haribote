@@ -1007,7 +1007,7 @@ int hrb_dpi(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx, int e
 			break;
 		case 7:
 			reg[7] = message_send(eax,(struct MESSAGE *)ecx);
-			break; 
+			break;
 		case 8:
 			break;
 		case 9:

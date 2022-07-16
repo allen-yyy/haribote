@@ -4,7 +4,7 @@
 
 MAKE     = $(TOOLPATH)make.exe -r
 
+include apps.make
 
 default:
-	$(MAKE) -C net
-	$(MAKE) -C systest
+	$(foreach n,$(APPS),$(MAKE) -C $(n))

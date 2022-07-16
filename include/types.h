@@ -9,7 +9,7 @@
  * The following typedefs are also protected by individual ifdefs for
  * historical reasons:
  */
-#ifndef _SIZE_T
+/*#ifndef _SIZE_T
 #define _SIZE_T
 typedef __kernel_size_t		size_t;
 #endif
@@ -32,7 +32,16 @@ typedef __kernel_clock_t	clock_t;
 #ifndef _CADDR_T
 #define _CADDR_T
 typedef __kernel_caddr_t	caddr_t;
-#endif
+#endif*/
+
+typedef unsigned char		u8;
+typedef unsigned short		u16;
+typedef unsigned int		u32;
+typedef unsigned long long	u64;
+typedef signed char		s8;
+typedef short			s16;
+typedef int			s32;
+typedef long long		s64;
 
 /* bsd */
 typedef unsigned char		u_char;
@@ -68,7 +77,7 @@ typedef u64			u_int64_t;
 typedef s64			int64_t;
 #endif
 
-/* this is a special 64bit data type that is 8-byte aligned */
+/* this is a special 64bit data type that is 8-byte aligned *
 #define aligned_u64		__aligned_u64
 #define aligned_be64		__aligned_be64
 #define aligned_le64		__aligned_le64
@@ -80,13 +89,13 @@ typedef s64			int64_t;
  * of the devices real block size.
  *
  * blkcnt_t is the type of the inode's block count.
- */
+ *
 typedef u64 sector_t;
 typedef u64 blkcnt_t;
 
 /*
  * The type of an index into the pagecache.
- */
+ *
 #define pgoff_t unsigned long
 
 /*
@@ -97,7 +106,7 @@ typedef u64 blkcnt_t;
  * bits wide.  Bus addresses, e.g., PCI BARs, may be wider than 32 bits,
  * but drivers do memory-mapped I/O to ioremapped kernel virtual addresses,
  * so they don't care about the size of the actual bus addresses.
- */
+ *
 #ifdef CONFIG_ARCH_DMA_ADDR_T_64BIT
 typedef u64 dma_addr_t;
 #else
@@ -119,7 +128,7 @@ typedef phys_addr_t resource_size_t;
 /*
  * This type is the placeholder for a hardware interrupt number. It has to be
  * big enough to enclose whatever representation is used by a given platform.
- */
+ *
 typedef unsigned long irq_hw_number_t;
 
 typedef struct {
@@ -171,7 +180,7 @@ struct ustat {
  *  - the structure shares storage space in struct page with @compound_head,
  *    which encode PageTail() in bit 0. The guarantee is needed to avoid
  *    false-positive PageTail().
- */
+ *
 struct callback_head {
 	struct callback_head *next;
 	void (*func)(struct callback_head *head);
