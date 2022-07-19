@@ -40,6 +40,8 @@
 //#include <asm/io.h>
 //#include <linux/interrupt.h>
 //#include <linux/sched.h>
+#include <driver/pci.h>
+#include <driver/debug.h>
 
 #ifndef msec_delay
 #define msec_delay(x)	do { if(in_interrupt()) { \

@@ -23,12 +23,12 @@ DEL      = del
 # デフォルト動作
 
 default :
-	$(MAKE) $(APP).sys
+	$(MAKE) $(DRIVER).sys
 
 # ファイル生成規則
-$(APP).bim : $(APP).obj $(DPILIBPATH)dpilib.lib Makefile
-	$(OBJ2BIM) @$(RULEFILE2) out:$(APP).bim map:$(APP).map stack:$(STACK) \
-		$(APP).obj $(DPILIBPATH)dpilib.lib
+$(DRIVER).bim : $(objs) $(DPILIBPATH)dpilib.lib Makefile
+	$(OBJ2BIM) @$(RULEFILE2) out:$(DRIVER).bim map:$(DRIVER).map stack:$(STACK) \
+		$(DRIVER).obj $(DPILIBPATH)dpilib.lib
 
 # 一般規則
 
