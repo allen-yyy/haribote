@@ -148,70 +148,59 @@
    148 0000015A                                 	GLOBAL	_do_mouse_click
    149 0000015A                                 _do_mouse_click:
    150 0000015A 55                              	PUSH	EBP
-   151 0000015B A1 [00000000]                   	MOV	EAX,DWORD [_mouse_click_num]
-   152 00000160 89 E5                           	MOV	EBP,ESP
-   153 00000162 57                              	PUSH	EDI
-   154 00000163 56                              	PUSH	ESI
-   155 00000164 31 F6                           	XOR	ESI,ESI
-   156 00000166 53                              	PUSH	EBX
-   157 00000167 8B 7D 0C                        	MOV	EDI,DWORD [12+EBP]
-   158 0000016A 39 C6                           	CMP	ESI,EAX
-   159 0000016C 7D 4C                           	JGE	L26
-   160 0000016E 31 DB                           	XOR	EBX,EBX
-   161 00000170                                 L24:
-   162 00000170 6B C0 18                        	IMUL	EAX,EAX,24
-   163 00000173 8B 88 [00000024]                	MOV	ECX,DWORD [_mouse_click_table+20+EAX]
-   164 00000179 8B 83 [00000010]                	MOV	EAX,DWORD [_mouse_click_table+EBX]
-   165 0000017F 8B 51 0C                        	MOV	EDX,DWORD [12+ECX]
-   166 00000182 01 D0                           	ADD	EAX,EDX
-   167 00000184 3B 45 08                        	CMP	EAX,DWORD [8+EBP]
-   168 00000187 7F 24                           	JG	L21
-   169 00000189 03 93 [00000018]                	ADD	EDX,DWORD [_mouse_click_table+8+EBX]
-   170 0000018F 39 55 08                        	CMP	DWORD [8+EBP],EDX
-   171 00000192 7D 19                           	JGE	L21
-   172 00000194 8B 51 10                        	MOV	EDX,DWORD [16+ECX]
-   173 00000197 8B 83 [00000014]                	MOV	EAX,DWORD [_mouse_click_table+4+EBX]
-   174 0000019D 01 D0                           	ADD	EAX,EDX
-   175 0000019F 39 F8                           	CMP	EAX,EDI
-   176 000001A1 7F 0A                           	JG	L21
-   177 000001A3 03 93 [0000001C]                	ADD	EDX,DWORD [_mouse_click_table+12+EBX]
-   178 000001A9 39 D7                           	CMP	EDI,EDX
-   179 000001AB 7C 15                           	JL	L27
-   180 000001AD                                 L21:
-   181 000001AD 46                              	INC	ESI
-   182 000001AE A1 [00000000]                   	MOV	EAX,DWORD [_mouse_click_num]
-   183 000001B3 83 C3 18                        	ADD	EBX,24
-   184 000001B6 39 C6                           	CMP	ESI,EAX
-   185 000001B8 7C B6                           	JL	L24
-   186 000001BA                                 L26:
-   187 000001BA 8D 65 F4                        	LEA	ESP,DWORD [-12+EBP]
-   188 000001BD 5B                              	POP	EBX
-   189 000001BE 5E                              	POP	ESI
-   190 000001BF 5F                              	POP	EDI
-   191 000001C0 5D                              	POP	EBP
-   192 000001C1 C3                              	RET
-   193 000001C2                                 L27:
-   194 000001C2 68 00000BB8                     	PUSH	3000
-   195 000001C7 FF B3 [00000020]                	PUSH	DWORD [_mouse_click_table+16+EBX]
-   196 000001CD E8 [00000000]                   	CALL	_fifo32_put
-   197 000001D2 58                              	POP	EAX
-   198 000001D3 5A                              	POP	EDX
-   199 000001D4 EB D7                           	JMP	L21
-   200 000001D6                                 	GLOBAL	_mousefifo
-   201                                          [SECTION .data]
-   202 00000004                                 	ALIGNB	4
-   203 00000004                                 _mousefifo:
-   204 00000004 00 00 00 00                     	RESB	4
-   205 00000008                                 	GLOBAL	_mousedata0
-   206                                          [SECTION .data]
-   207 00000008                                 	ALIGNB	4
-   208 00000008                                 _mousedata0:
-   209 00000008 00 00 00 00                     	RESB	4
-   210 0000000C                                 	GLOBAL	_mouse_click_table
-   211                                          [SECTION .data]
-   212 0000000C 00 00 00 00                     	ALIGNB	16
-   213 00000010                                 _mouse_click_table:
-   214 00000010 00 00 00 00 00 00 00 00 00 00   	RESB	240000
+   151 0000015B 89 E5                           	MOV	EBP,ESP
+   152 0000015D 57                              	PUSH	EDI
+   153 0000015E 56                              	PUSH	ESI
+   154 0000015F 31 F6                           	XOR	ESI,ESI
+   155 00000161 53                              	PUSH	EBX
+   156 00000162 8B 7D 0C                        	MOV	EDI,DWORD [12+EBP]
+   157 00000165 3B 35 [00000000]                	CMP	ESI,DWORD [_mouse_click_num]
+   158 0000016B 7D 31                           	JGE	L26
+   159 0000016D 31 DB                           	XOR	EBX,EBX
+   160 0000016F                                 L24:
+   161 0000016F 8B 45 08                        	MOV	EAX,DWORD [8+EBP]
+   162 00000172 39 83 [00000010]                	CMP	DWORD [_mouse_click_table+EBX],EAX
+   163 00000178 7F 18                           	JG	L21
+   164 0000017A 3B 83 [00000018]                	CMP	EAX,DWORD [_mouse_click_table+8+EBX]
+   165 00000180 7D 10                           	JGE	L21
+   166 00000182 39 BB [00000014]                	CMP	DWORD [_mouse_click_table+4+EBX],EDI
+   167 00000188 7F 08                           	JG	L21
+   168 0000018A 3B BB [0000001C]                	CMP	EDI,DWORD [_mouse_click_table+12+EBX]
+   169 00000190 7C 14                           	JL	L27
+   170 00000192                                 L21:
+   171 00000192 46                              	INC	ESI
+   172 00000193 83 C3 18                        	ADD	EBX,24
+   173 00000196 3B 35 [00000000]                	CMP	ESI,DWORD [_mouse_click_num]
+   174 0000019C 7C D1                           	JL	L24
+   175 0000019E                                 L26:
+   176 0000019E 8D 65 F4                        	LEA	ESP,DWORD [-12+EBP]
+   177 000001A1 5B                              	POP	EBX
+   178 000001A2 5E                              	POP	ESI
+   179 000001A3 5F                              	POP	EDI
+   180 000001A4 5D                              	POP	EBP
+   181 000001A5 C3                              	RET
+   182 000001A6                                 L27:
+   183 000001A6 68 00000BB8                     	PUSH	3000
+   184 000001AB FF B3 [00000020]                	PUSH	DWORD [_mouse_click_table+16+EBX]
+   185 000001B1 E8 [00000000]                   	CALL	_fifo32_put
+   186 000001B6 58                              	POP	EAX
+   187 000001B7 5A                              	POP	EDX
+   188 000001B8 EB D8                           	JMP	L21
+   189 000001BA                                 	GLOBAL	_mousefifo
+   190                                          [SECTION .data]
+   191 00000004                                 	ALIGNB	4
+   192 00000004                                 _mousefifo:
+   193 00000004 00 00 00 00                     	RESB	4
+   194 00000008                                 	GLOBAL	_mousedata0
+   195                                          [SECTION .data]
+   196 00000008                                 	ALIGNB	4
+   197 00000008                                 _mousedata0:
+   198 00000008 00 00 00 00                     	RESB	4
+   199 0000000C                                 	GLOBAL	_mouse_click_table
+   200                                          [SECTION .data]
+   201 0000000C 00 00 00 00                     	ALIGNB	16
+   202 00000010                                 _mouse_click_table:
+   203 00000010 00 00 00 00 00 00 00 00 00 00   	RESB	240000
        0000001A 00 00 00 00 00 00 00 00 00 00 
        00000024 00 00 00 00 00 00 00 00 00 00 
        0000002E 00 00 00 00 00 00 00 00 00 00 

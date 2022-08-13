@@ -481,6 +481,8 @@ typedef BOOL (*DEntry)(struct Dobject *);
 #define HD_WRITE		0x4
 #include "hd2fs.h"
 void inthandler2e(int *esp);
+void readhddisk(int driver,int sector,int lba,char *buf);
+void writehddisk(int driver,int sector,int lba,char *buf); 
 BOOL Identify(int nHdNum,BYTE* pBuffer);
 BOOL CmdSucc(WORD wPort);
 BOOL WaitForDrq(WORD wPort,DWORD dwMillionSecond);

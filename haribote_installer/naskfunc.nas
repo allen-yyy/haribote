@@ -70,7 +70,6 @@ INTN 0x2a
 INTN 0x2b
 INTN 0x2c
 INTN 0x2d
-INTN 0x2e
 INTN 0x2f
 
 _clts:          ; void clts(void);
@@ -243,7 +242,23 @@ _asm_inthandler2c:
 		POP		DS
 		POP		ES
 		IRETD
-
+		
+_asm_inthandler2e:
+		PUSH	ES
+		PUSH	DS
+		PUSHAD
+		MOV		EAX,ESP
+		PUSH	EAX
+		MOV		AX,SS
+		MOV		DS,AX
+		MOV		ES,AX
+		CALL	_inthandler2e
+		POP		EAX
+		POPAD
+		POP		DS
+		POP		ES
+		IRETD
+		
 _asm_inthandler0c:
 		STI
 		PUSH	ES
@@ -282,22 +297,6 @@ _asm_inthandler0d:
 		POP		DS
 		POP		ES
 		ADD		ESP,4			; INT 0x0d では、これが必要
-		IRETD
-
-_asm_inthandler2e:
-		PUSH	ES
-		PUSH	DS
-		PUSHAD
-		MOV		EAX,ESP
-		PUSH	EAX
-		MOV		AX,SS
-		MOV		DS,AX
-		MOV		ES,AX
-		CALL	_inthandler2e
-		POP		EAX
-		POPAD
-		POP		DS
-		POP		ES
 		IRETD
 
 
@@ -543,18 +542,18 @@ _WriteWordStringToPort:
 		retn
 
 _inws:
-	mov	edi, [esp + 4]	; buf
-	mov	ecx, [esp + 4 + 4]	; port
-	mov	edx, [esp + 4 + 4 + 4]   ; n
+	mov	esi, [esp + 4]	; buf
+	mov	edx, [esp + 4 + 4 + 4]	; port
+	mov	edx, [esp + 4 + 4]   ; n
 	shr	ecx, 1
 	cld
 	rep	insw
 	ret
 	
 _outws:
-	mov	edi, [esp + 4]	; buf
-	mov	ecx, [esp + 4 + 4]	; port
-	mov	edx, [esp + 4 + 4 + 4]   ; n
+	mov	esi, [esp + 4]	; buf
+	mov	edx, [esp + 4 + 4 + 4]	; port
+	mov	ecx, [esp + 4 + 4]   ; n
 	shr	ecx, 1
 	cld
 	rep	outsw

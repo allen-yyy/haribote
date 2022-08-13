@@ -1487,3 +1487,37 @@
 
 /* Part2: OS pci function */
 
+struct pci_dev pci_scan(struct pci_device_id *ids);
+struct pci_bar *pci_get_bar(struct pci_dev *dev,int index);
+
+/* Part3: pci structural*/
+struct pci_dev
+{
+	struct list_elem tag;
+	struct pci_bus *bus;
+	struct pci_bar bar[6];
+	int bus_slot;
+	int slot_func;
+	short vendor;
+	short device;
+	char header_type;
+	int class_revision;
+	char name[90];
+}; 
+struct pci_bar
+{
+	#define PCIBAR_MMIO 1
+	#define PCIBAR_IO	2
+	int type;
+	int prefetchable;
+	int base;
+	int size; 
+}
+struct pci_device_id{
+	short vendor;
+	short device;
+	short subvendor;
+	short subdevice;
+	int class;
+	int classmask;
+};

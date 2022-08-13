@@ -36,16 +36,19 @@ struct exdrivertable etable[DR_ENUM];/*= {
 
 
 
-BOOL LDevs(struct MEMMAN *memman) {
+BOOL LDevs(struct MEMMAN *memman)
+{
 	int i; 
 	io_cli();
-	for(i=0; i<DR_NUM; ++i) {
+	for(i=0; i<DR_NUM; ++i)
+	{
 		struct Dobject Devobj;
 		Devobj.name = dDevs[i].name;
 		Devobj.memman = memman;
 		dDevs[i].Dobj = &Devobj;
 		io_sti();
-		if(!(dDevs[i].entry)(&Devobj)) {
+		if(!(dDevs[i].entry)(&Devobj))
+		{
 			return FALSE;
 		}
 	}

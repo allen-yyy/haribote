@@ -102,7 +102,7 @@ void pci_check_func(int bus,int slot,int func)
 	dev.slot_func = func;
 	dev.header_type = _pci_read_byte(bus,slot,func,PCI_HEADER_TYPE);
 	struct pci_dev *dev2 = pci_add_dev(&dev);
-	printk("add dev %X %4X %d %d %d 0x%X %d\n",(unsigned short)dev2->vendor,(short)dev2->device,dev2->bus->number,slot,func,dev2->class_revision,devnum);
+	//printk("add dev %X %4X %d %d %d 0x%X %d\n",(unsigned short)dev2->vendor,(short)dev2->device,dev2->bus->number,slot,func,dev2->class_revision,devnum);
 	if(_pci_read_word(bus,slot,func,PCI_CLASS_DEVICE) == 0x604) //PCI bridge
 	{
 		pci_scan_bus(_pci_read_byte(bus,slot,func,PCI_SECONDARY_BUS));

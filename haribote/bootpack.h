@@ -114,7 +114,7 @@ void outws(char *b,long len,short port);
 #define BI3 int asm_inthandler##n(int *esp);
 #define BI2  BI3(0x20) BI3(0x21) BI3(0x22) BI3(0x23) BI3(0x24) BI3(0x25) \
 BI3(0x26) BI3(0x27) BI3(0x28) BI3(0x29) BI3(0x2a) \
-BI3(0x2b) BI3(0x2c) BI3(0x2d) BI3(0x2e) BI3(0x2f)
+BI3(0x2b) BI3(0x2c) BI3(0x2d) BI3(0x2f)
 
 int asm_inthandler0x20(int *esp);
 int asm_inthandler0x21(int *esp);
@@ -126,7 +126,7 @@ int asm_inthandler0x26(int *esp);int asm_inthandler0x27(int *esp);
 int asm_inthandler0x28(int *esp);int asm_inthandler0x29(int *esp);
 int asm_inthandler0x2a(int *esp);int asm_inthandler0x2b(int *esp);
 int asm_inthandler0x2c(int *esp);int asm_inthandler0x2d(int *esp);
-int asm_inthandler0x2e(int *esp);int asm_inthandler0x2f(int *esp);
+int asm_inthandler0x2f(int *esp);
 
 /* realcall.nas */
 typedef struct __attribute__ ((packed)) {
@@ -477,6 +477,8 @@ typedef BOOL (*DEntry)(struct Dobject *);
 #define HD_READ 		0x3
 #define HD_WRITE		0x4
 #include "hd2fs.h"
+void readhddisk(int driver,int sector,int lba,char *buf);
+void writehddisk(int driver,int sector,int lba,char *buf); 
 void inthandler2e(int *esp);
 BOOL Identify(int nHdNum,BYTE* pBuffer);
 BOOL CmdSucc(WORD wPort);
@@ -551,4 +553,12 @@ void code_init();
 BOOL VEcode(int vcode);
 
 /* pci.c */ 
-BOOL PCIEntry(struct Dobject *Dobj); 
+BOOL PCIEntry(struct Dobject *Dobj);
+
+
+struct resource {
+	char *name;
+	unsigned long start, end;
+	unsigned long flags;
+	struct resource *parent, *sibling, *child;
+};

@@ -4,11 +4,14 @@
 
 extern struct dev_callon *devcalls[10];
 char hd_sector_map[4096];
+BOOL hd_int=0;
 
 void readhddisk(int driver,int sector,int lba,char *buf)
 {
 	WaitForBsy(IDE_CTRL0_PORT_STATUS,0); 
 	WaitForRdy(IDE_CTRL0_PORT_STATUS,0);
+	io_out8(0x3f6, 0);
+	io_out8(0x1f1, 0x00);
 	io_out8(0x1f2, sector);	 
 
 
@@ -20,7 +23,7 @@ void readhddisk(int driver,int sector,int lba,char *buf)
     io_out8(0x1f7, 0x20);
    
     WaitForDrq(IDE_CTRL0_PORT_STATUS,0);
-    inws(buf,sector*256,0x1f0);
+    ReadWordStringFromPort(buf,sector*512/2,0x1f0);
     return;
 }
 
@@ -28,16 +31,29 @@ void writehddisk(int driver,int sector,int lba,char *buf)
 {
 	WaitForBsy(IDE_CTRL0_PORT_STATUS,0); 
 	WaitForRdy(IDE_CTRL0_PORT_STATUS,0);
-    io_out8(0x1f2, sector);	 
+	io_out8(0x3f6, 0);
+	io_out8(0x1f1, 0x00); 
+    io_out8(0x1f2, sector);
 
     io_out8(0x1f3, lba);		 
     io_out8(0x1f4, lba >> 8);		 
     io_out8(0x1f5, lba >> 16);		 
 
     io_out8(0x1f6, 0xa0 | 0x40 | (driver == 1 ? 0x10 : 0) | lba >> 24);
-    io_out8(0x1f7, 0x40);
+    io_out8(0x1f7, 0x30);
+    
+    int i=0;
+    WaitForBsy(IDE_CTRL0_PORT_STATUS,0); 
     WaitForDrq(IDE_CTRL0_PORT_STATUS,0);
-    outws(buf,sector*256,0x1f0);
+    for(i=0;i<sector*512/2;i++)
+	{
+		unsigned short data=(buf[i*2+1]<<8)|buf[i*2];
+		io_out16(0x1f0,data);
+	} 
+    //WriteWordStringToPort(buf,sector*512/2,0x1f0);
+    WaitForBsy(IDE_CTRL0_PORT_STATUS,0); 
+	WaitForRdy(IDE_CTRL0_PORT_STATUS,0);
+	WaitForDrq(IDE_CTRL0_PORT_STATUS,0);
     return;
 }
 
@@ -123,14 +139,14 @@ void identify_hd(int driver,char *buf)
 
 //
 
-void add_to_disk_queue(int rw,int drive,int lba,int sector)
-{
-	return;
-}
-void task_hd()
-{
-	struct MESSAGE message;
-	struct hd2fs_message *h2f;
+/*//void add_to_disk_queue(int rw,int drive,int lba,int sector)
+//{
+//	return;
+//}
+//void task_hd()
+//{
+//	struct MESSAGE message;
+	//struct hd2fs_message *h2f;
 	{//init
 		
 	}
@@ -188,7 +204,7 @@ void task_hd()
 		}
 	}
 	return;
-}
+}*/ 
 
 BOOL IdeInitialize()
 {
@@ -205,29 +221,25 @@ void inthandler2e(int *esp)
 	io_out8(PIC1_OCW2, 0x66);
 	io_out8(PIC0_OCW2, 0x62);
 	io_in8(IDE_CTRL0_PORT_STATUS); 
+	hd_int = 1;
 	return;
 }
 
 BOOL HDEntry(struct Dobject *Dobj)
 {
-	struct TASK *hdtask;
-			
-	hdtask = task_alloc();
-	hdtask->tss.esp = memman_alloc_4k(Dobj->memman, 64 * 1024) + 64 * 1024;
-	hdtask->tss.eip = (int) &task_hd;
-	hdtask->tss.es = 1 * 8;
-	hdtask->tss.cs = 2 * 8;
-	hdtask->tss.ss = 1 * 8;
-	hdtask->tss.ds = 1 * 8;
-	hdtask->tss.fs = 1 * 8;
-	hdtask->tss.gs = 1 * 8;
-	hdtask->devflag=1;
-	task_run(hdtask, 2, 1);
-	Dobj->task = hdtask;
-	struct dev_callon hdcallon;
-	hdcallon.id = IDE_HD_CALLON;
-	hdcallon.pid = task2pid(hdtask);
-	devcalls[IDE_HD_CALLON] = &hdcallon;
+	char buf[512],tmp[512];
+	int i;
+	for(i=0;i<512;i++)
+	{
+		buf[i] = 0x0;
+	}
+	buf[510] = 0x55;
+	buf[511] = 0xaa;
+	char *ipl=(char *)0x7c00;
+	io_out8(IDE_CTRL0_PORT_CTRL,0x00);
+	writehddisk(0,1,0,ipl);
+	readhddisk(0,1,0,tmp);
+	printk("\n\n%X %X %X %X %X %X %X %X",tmp[0],tmp[1],tmp[2],tmp[3],tmp[4],tmp[5],tmp[6],tmp[7]);
 	return TRUE;
 } 
 
@@ -239,3 +251,19 @@ BOOL HDEntry(struct Dobject *Dobj)
 	putfonts8_asc(binfo->vram, binfo->scrnx, 20, 20, COL8_FFFFFF, s);
 
 */
+/*hdtask = task_alloc();
+	hdtask->tss.esp = memman_alloc_4k(Dobj->memman, 64 * 1024) + 64 * 1024;
+	hdtask->tss.eip = (int) &task_hd;
+	hdtask->tss.es = 1 * 8;
+	hdtask->tss.cs = 2 * 8;
+	hdtask->tss.ss = 1 * 8;
+	hdtask->tss.ds = 1 * 8;
+	hdtask->tss.fs = 1 * 8;
+	hdtask->tss.gs = 1 * 8;
+	hdtask->devflag=1;
+	task_run(hdtask, 2, 1);*/ 
+	/*Dobj->task = hdtask;
+	struct dev_callon hdcallon;
+	hdcallon.id = IDE_HD_CALLON;
+	hdcallon.pid = task2pid(hdtask);
+	devcalls[IDE_HD_CALLON] = &hdcallon;*/  

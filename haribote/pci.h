@@ -6,10 +6,12 @@
 	Description: pci
 */
 struct pci_bus;
+struct pci_bar;
 struct pci_dev
 {
 	struct list_elem tag;
 	struct pci_bus *bus;
+	struct pci_bar bar[6];
 	int bus_slot;
 	int slot_func;
 	short vendor;
@@ -28,6 +30,16 @@ struct pci_bus
 	struct list devs;
 	struct list_elem tag;
 };
+
+struct pci_bar
+{
+	#define PCIBAR_MMIO 1
+	#define PCIBAR_IO	2
+	int type;
+	int prefetchable;
+	int base;
+	int size; 
+}
 
 /* from Linux */
 #define PCI_VENDOR_ID		0x00	/* 16 bits */

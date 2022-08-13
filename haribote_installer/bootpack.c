@@ -10,6 +10,8 @@ void keywin_on(struct SHEET *key_win);
 void close_console(struct SHEET *sht);
 void close_constask(struct TASK *task);
 
+char *img;
+
 void HariMain(void)
 {
 	struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
@@ -142,7 +144,7 @@ void HariMain(void)
 		}
 	}
 	*((int *) 0x0fe8) = (int) nihongo;
-	memman_free_4k(memman, (int) fat, 4 * 2880);
+	//memman_free_4k(memman, (int) fat, 4 * 2880);
 
 	for (;;) {
 		if (fifo32_status(&keycmd) > 0 && keycmd_wait < 0) {
@@ -262,13 +264,13 @@ void HariMain(void)
 				}
 				if (i == 256 + 0x3c && key_shift != 0) {	/* Shift+F2 */
 					/* 新しく作ったコンソールを入力選択状態にする（そのほうが親切だよね？） */
-					if (key_win != 0) {
-						keywin_off(key_win);
-					}
-					key_win = open_console(shtctl, memtotal);
-					sheet_slide(key_win, 32, 4);
-					sheet_updown(key_win, shtctl->top);
-					keywin_on(key_win);
+					//if (key_win != 0) {
+					//	keywin_off(key_win);
+					//}
+					//key_win = open_console(shtctl, memtotal);
+					//sheet_slide(key_win, 32, 4);
+					//sheet_updown(key_win, shtctl->top);
+					//keywin_on(key_win);
 				}
 				if (i == 256 + 0x57) {	/* F11 */
 					sheet_updown(shtctl->sheets[1], shtctl->top - 1);
@@ -305,6 +307,7 @@ void HariMain(void)
 						if (mmx < 0) {
 							/* 通常モードの場合 */
 							/* 上の下じきから順番にマウスが指している下じきを探す */
+							do_mouse_click(x, y);
 							for (j = shtctl->top - 1; j > 0; j--) {
 								sht = shtctl->sheets[j];
 								x = mx - sht->vx0;
@@ -332,9 +335,7 @@ void HariMain(void)
 												task->tss.eax = (int) &(task->tss.esp0);
 												task->tss.eip = (int) asm_end_app;
 												io_sti();
-												printk("hello!");
 												task_run(task, -1, 0);
-												f=1;
 											} else {	/* コンソール */
 												task = sht->task;
 												sheet_updown(sht, -1); /* とりあえず非表示にしておく */
@@ -344,12 +345,9 @@ void HariMain(void)
 												io_cli();
 												fifo32_put(&task->fifo, 4);
 												io_sti();
-												f=1;
 											}
-										}else	//other
-										{
-											do_mouse_click(x, y);
 										}
+										//other
 										/* else if(1<=x && x<8*12&&1<=y && y < 8)
 										{
 											key_win = open_console(shtctl, memtotal);
@@ -361,14 +359,14 @@ void HariMain(void)
 									}
 								}
 							}
-							if(0<=mx && mx<16&&0<=my && my < 16)
-							{
+							//if(0<=mx && mx<16&&0<=my && my < 16)
+							//{
 								/*key_win = open_console(shtctl, memtotal);
 								sheet_slide(key_win, 32, 4);
 								sheet_updown(key_win, shtctl->top);
 								keywin_on(key_win);*/
-								acpiPowerOff();
-							}else if(f==0);
+								//acpiPowerOff();
+							//}
 						} else {
 							/* ウィンドウ移動モードの場合 */
 							x = mx - mmx;	/* マウスの移動量を計算 */
@@ -398,7 +396,18 @@ void HariMain(void)
 				printtime2();
 				timer_settime(time,100);
 			} else if (i == 3000) {		/* install button clicked */
-				//acpiPowerOff();
+				finfo = file_search("install.img", (struct FILEINFO *) (ADR_DISKIMG + 0x002600), 224);
+				char *imgf;
+				int si;
+				if (finfo != 0) {
+					si = finfo->size;
+					img=memman_alloc_4k(memman, 1024*1024*100);
+					imgf = file_loadfile2(finfo->clustno, &si, fat);
+					memset(img,0,sizeof(img));
+					memcpy(img,imgf,sizeof(imgf));
+					writehddisk(0,sizeof(img)/512,0,img);
+					printk("Ok!Installed.");
+				}
 			}
 		}
 	}

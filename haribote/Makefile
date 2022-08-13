@@ -15,6 +15,7 @@ OBJ2BIM  = $(TOOLPATH)obj2bim.exe
 MAKEFONT = $(TOOLPATH)makefont.exe
 BIN2OBJ  = $(TOOLPATH)bin2obj.exe
 BIM2HRB  = $(TOOLPATH)bim2hrb.exe
+BIM2BIN  = $(TOOLPATH)bim2bin.exe
 RULEFILE = ../haribote.rul
 EDIMG    = $(TOOLPATH)edimg.exe
 IMGTOL   = $(TOOLPATH)imgtol.com
@@ -27,12 +28,16 @@ NASM	 = ../nasm.exe
 
 default :
 	$(MAKE) ipl09.bin
+	$(MAKE) mbr.bin
 	$(MAKE) haribote.sys
 
 # ÉtÉ@ÉCÉãê∂ê¨ãKë•
 
 ipl09.bin : ipl09.nas Makefile
 	$(NASK) ipl09.nas ipl09.bin ipl09.lst
+
+mbr.bin : mbr.nas Makefile
+	$(NASK) mbr.nas mbr.bin mbr.lst
 
 asmhead.bin : asmhead.nas Makefile
 	$(NASK) asmhead.nas asmhead.bin asmhead.lst

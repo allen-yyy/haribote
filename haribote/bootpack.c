@@ -123,9 +123,8 @@ void HariMain(void)
 	
 	io_cli();
 	code_init();
-	//load_external_device(fat,memman);
+	load_external_device(fat,memman);
 	io_sti(); 
-	//printk("\\\\\\\\");
 	make_button8(sht_back,0,0,0,"shutdown",&fifo);
 	finfo = file_search("nihongo.fnt", (struct FILEINFO *) (ADR_DISKIMG + 0x002600), 224);
 	if (finfo != 0) {
@@ -447,7 +446,7 @@ struct SHEET *open_console(struct SHTCTL *shtctl, unsigned int memtotal)
 	struct SHEET *sht = sheet_alloc(shtctl);
 	unsigned char *buf = (unsigned char *) memman_alloc_4k(memman, 256 * 165);
 	sheet_setbuf(sht, buf, 256, 165, -1); /* 透明色なし */
-	make_window8(buf, 256, 165, "console", 0);
+	make_window8(buf, 256, 165, "$commander$", 0);
 	make_textbox8(sht, 8, 28, 240, 128, COL8_000000);
 	sht->task = open_constask(sht, memtotal);
 	sht->flags |= 0x20;	/* カーソルあり */
@@ -515,4 +514,5 @@ void printtime2()
 	
     putfonts8_asc(vram,x,x-46,y-22,COL8_FFFFFF,s);
     sheet_refresh(task->cons->sht,x-48,y-25,x-1,y-1);
+    return;
 }

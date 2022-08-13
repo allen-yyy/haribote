@@ -77,6 +77,36 @@ int pci_write_dword(struct pci_dev *dev,int offset,int value){
 
 /* Software */
 
+void pci_config_dev(struct pci_dev *dev)
+{
+	int i;
+	for(i=0;i<6;i++)
+	{
+		int tmp = pci_read_dword(dev,PCI_BASE_ADDRESS_0 + i*4);
+		if ((tmp & 0x7) == 0x6)
+        {
+            dev->bar[i].type = PCIBAR_MMIO;
+            dev->bar[i].mem = tmp & 0xFFFFFFF0;
+            dev->bar[i].prefetchable = (tmp & 8) == 8;
+        }else if ((tmp & 0x7) == 0)
+        {
+            dev->bar[i].type = PCIBAR_MMIO;
+            dev->bar[i].base = tmp & 0xFFFFFFF0;
+            dev->bar[i].prefetchable = (tmp & 8) == 8;
+        }
+        else if ((tmp & 7) == 1)
+        {
+            dev->bar[i].type = PCIBAR_IO;
+            dev->bar[i].base = tmp & 0xFFFFFFFC;
+        }
+        pci_write_dword(dev,PCI_BASE_ADDRESS_0 + i*4,0xFFFFFFFF);
+        int tmp1 = pci_read_dword(dev,PCI_BASE_ADDRESS_0 + i*4);
+        pci_write_dword(dev,PCI_BASE_ADDRESS_0 + i*4,tmp);
+        dev->bar[i].size = ~(tmp1 & 0xFFFFFFF0) + 1;
+	}
+	return;
+}
+
 struct pci_dev *pci_add_dev(struct pci_dev *tmp)
 {
 	struct pci_dev *dev = (struct pci_dev *) kalloc(sizeof(struct pci_dev));
@@ -88,6 +118,7 @@ struct pci_dev *pci_add_dev(struct pci_dev *tmp)
 	dev->vendor = (unsigned short)_pci_read_word(dev->bus->number,dev->bus_slot,dev->slot_func,PCI_VENDOR_ID);
 	dev->device = (unsigned short)_pci_read_word(dev->bus->number,dev->bus_slot,dev->slot_func,PCI_DEVICE_ID);
 	dev->class_revision = _pci_read_dword(dev->bus->number,dev->bus_slot,dev->slot_func,PCI_CLASS_REVISION);
+	pci_config_dev(dev);
 	list_append(&pci_dev_list,&dev->tag);
 	devnum++;
 	//list_append(&dev->bus->devs,&dev->tag);
@@ -102,7 +133,6 @@ void pci_check_func(int bus,int slot,int func)
 	dev.slot_func = func;
 	dev.header_type = _pci_read_byte(bus,slot,func,PCI_HEADER_TYPE);
 	struct pci_dev *dev2 = pci_add_dev(&dev);
-	//printk("add dev %X %4X %d %d %d 0x%X %d\n",(unsigned short)dev2->vendor,(short)dev2->device,dev2->bus->number,slot,func,dev2->class_revision,devnum);
 	if(_pci_read_word(bus,slot,func,PCI_CLASS_DEVICE) == 0x604) //PCI bridge
 	{
 		pci_scan_bus(_pci_read_byte(bus,slot,func,PCI_SECONDARY_BUS));
@@ -183,7 +213,42 @@ void pci_test(struct CONSOLE *cons)
 
 BOOL PCIEntry(struct Dobject *Dobj)
 {
-	BOOL a=pci_init();
-	//printk("\n%X",_pci_read_dword(0,0,0,0));
-	return TRUE;
+	return pci_init();
 }
+
+
+/* Device function */
+struct pci_bar *pci_get_bar(struct pci_dev *dev,int index)
+{
+	return dev->bar[index];
+}
+
+
+/*int pci_enable_device(struct pci_dev *dev)
+{
+	unsigned short cmd, old_cmd;
+	int idx;
+	struct resource *r;
+
+	cmd = pci_read_config_word(dev, PCI_COMMAND);
+	old_cmd = cmd;
+	for(idx=0; idx<6; idx++)
+	{
+		r = &dev->resource[idx];
+		if (!r->start && r->end)
+		{
+			return -1;
+		}
+		if (r->flags & IORESOURCE_IO)
+			cmd |= PCI_COMMAND_IO;
+		if (r->flags & IORESOURCE_MEM)
+			cmd |= PCI_COMMAND_MEMORY;
+	}
+	if (dev->resource[PCI_ROM_RESOURCE].start)
+		cmd |= PCI_COMMAND_MEMORY;
+	if (cmd != old_cmd)
+	{
+		pci_write_config_word(dev, PCI_COMMAND, cmd);
+	}
+	return 1;
+}*/

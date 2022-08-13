@@ -102,7 +102,7 @@ void do_mouse_click(int x, int y)
 	int i;
 	for(i=0;i<mouse_click_num;i++)
 	{
-		if((mouse_click_table[i].x+mouse_click_table[mouse_click_num].sht->vx0)<=x && x<(mouse_click_table[i].x0+mouse_click_table[mouse_click_num].sht->vx0)&&(mouse_click_table[i].y+mouse_click_table[mouse_click_num].sht->vy0)<=y && y < (mouse_click_table[i].y0+mouse_click_table[mouse_click_num].sht->vy0))
+		if((mouse_click_table[i].x)<=x && x<(mouse_click_table[i].x0)&&(mouse_click_table[i].y)<=y && y < (mouse_click_table[i].y0))
 		{
 			fifo32_put(mouse_click_table[i].fifo, 3000);
 		}

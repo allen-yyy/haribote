@@ -1,209 +1,101 @@
-/*******************************************************************************
 
-  
-  Copyright(c) 1999 - 2002 Intel Corporation.
-  Copyright(c) 2022 Allen He.
-  
-  This program is free software; you can redistribute it and/or modify it 
-  under the terms of the GNU General Public License as published by the Free 
-  Software Foundation; either version 2 of the License, or (at your option) 
-  any later version.
-  
-  This program is distributed in the hope that it will be useful, but WITHOUT 
-  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
-  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for 
-  more details.
-  
-  You should have received a copy of the GNU General Public License along with
-  this program; if not, write to the Free Software Foundation, Inc., 59 
-  Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
-  The full GNU General Public License is included in this distribution in the
-  file called LICENSE.
-  
-  Contact Information:
-  Linux NICS <linux.nics@intel.com>
-  Intel Corporation, 5200 N.E. Elam Young Parkway, Hillsboro, OR 97124-6497
+#include <driver/driver.h>
+#include <driver/pci.h>
+#include <driver/net.h>
 
-*******************************************************************************/
+#define E1000_REG_CONTROL 0x0000
+#define E1000_REG_STATUS 0x0008
 
+#define E1000_REG_EEPROM 0x0014
+#define E1000_REG_IMASK 0x00D0
+#define E1000_REG_MAC_LOW 0x5400
+#define E1000_REG_MAC_HIGHT 0x5404
 
-/* Linux PRO/1000 Ethernet Driver main header file */
+#define E1000_REG_RX_CONTROL 0x0100
+#define E1000_REG_RX_LOW 0x2800
+#define E1000_REG_RX_HIGH 0x2804
+#define E1000_REG_RX_LENGTH 0x2808
+#define E1000_REG_RX_HEAD 0x2810
+#define E1000_REG_RX_TAIL 0x2818
 
-#ifndef _E1000_H_
-#define _E1000_H_
+#define RCTL_EN (1 << 1)            // Receiver Enable
+#define RCTL_SBP (1 << 2)           // Store Bad Packets
+#define RCTL_UPE (1 << 3)           // Unicast Promiscuous Enabled
+#define RCTL_MPE (1 << 4)           // Multicast Promiscuous Enabled
+#define RCTL_LPE (1 << 5)           // Long Packet Reception Enable
+#define RCTL_LBM_NONE (0 << 6)      // No Loopback
+#define RCTL_LBM_PHY (3 << 6)       // PHY or external SerDesc loopback
+#define RTCL_RDMTS_HALF (0 << 8)    // Free Buffer Threshold is 1/2 of RDLEN
+#define RTCL_RDMTS_QUARTER (1 << 8) // Free Buffer Threshold is 1/4 of RDLEN
+#define RTCL_RDMTS_EIGHTH (2 << 8)  // Free Buffer Threshold is 1/8 of RDLEN
+#define RCTL_MO_36 (0 << 12)        // Multicast Offset - bits 47:36
+#define RCTL_MO_35 (1 << 12)        // Multicast Offset - bits 46:35
+#define RCTL_MO_34 (2 << 12)        // Multicast Offset - bits 45:34
+#define RCTL_MO_32 (3 << 12)        // Multicast Offset - bits 43:32
+#define RCTL_BAM (1 << 15)          // Broadcast Accept Mode
+#define RCTL_VFE (1 << 18)          // VLAN Filter Enable
+#define RCTL_CFIEN (1 << 19)        // Canonical Form Indicator Enable
+#define RCTL_CFI (1 << 20)          // Canonical Form Indicator Bit Value
+#define RCTL_DPF (1 << 22)          // Discard Pause Frames
+#define RCTL_PMCF (1 << 23)         // Pass MAC Control Frames
+#define RCTL_SECRC (1 << 26)        // Strip Ethernet CRC
+#define RCTL_BSIZE_256 (3 << 16)
+#define RCTL_BSIZE_512 (2 << 16)
+#define RCTL_BSIZE_1024 (1 << 16)
+#define RCTL_BSIZE_2048 (0 << 16)
+#define RCTL_BSIZE_4096 ((3 << 16) | (1 << 25))
+#define RCTL_BSIZE_8192 ((2 << 16) | (1 << 25))
+#define RCTL_BSIZE_16384 ((1 << 16) | (1 << 25))
 
-/*#include <linux/stddef.h>
-#include <linux/config.h>
-#include <linux/module.h>
-#include <linux/types.h>
-#include <asm/byteorder.h>
-#include <linux/init.h>
-#include <linux/mm.h>
-#include <linux/errno.h>
-#include <linux/ioport.h>
-#include <linux/pci.h>
-#include <linux/kernel.h>
-#include <linux/netdevice.h>
-#include <linux/etherdevice.h>
-#include <linux/skbuff.h>
-#include <linux/delay.h>
-#include <linux/timer.h>
-#include <linux/slab.h>
-#include <linux/interrupt.h>
-#include <linux/string.h>
-#include <linux/pagemap.h>
-#include <asm/bitops.h>
-#include <asm/io.h>
-#include <asm/irq.h>
-#include <linux/capability.h>
-#include <linux/in.h>
-#include <linux/ip.h>
-#include <linux/tcp.h>
-#include <linux/udp.h>
-#include <net/pkt_sched.h>
-#include <linux/list.h>
-#include <linux/reboot.h>
-#include <linux/tqueue.h>
-#include <linux/ethtool.h>
-#include <linux/if_vlan.h>*/
-#include <types.h>
+#define E1000_REG_TX_CONTROL 0x0400
+#define E1000_REG_TX_LOW 0x3800
+#define E1000_REG_TX_HIGH 0x3804
+#define E1000_REG_TX_LENGTH 0x3808
+#define E1000_REG_TX_HEAD 0x3810
+#define E1000_REG_TX_TAIL 0x3818
 
-#define BAR_0		0
-#define BAR_1		1
-#define BAR_5		5
-#define PCI_DMA_64BIT	0xffffffffffffffffULL
-#define PCI_DMA_32BIT	0x00000000ffffffffULL
+#define TCTL_EN (1 << 1)      // Transmit Enable
+#define TCTL_PSP (1 << 3)     // Pad Short Packets
+#define TCTL_CT_SHIFT 4       // Collision Threshold
+#define TCTL_COLD_SHIFT 12    // Collision Distance
+#define TCTL_SWXOFF (1 << 22) // Software XOFF Transmission
+#define TCTL_RTLC (1 << 24)   // Re-transmit on Late Collision
 
+#define TSTA_DD (1 << 0) // Descriptor Done
+#define TSTA_EC (1 << 1) // Excess Collisions
+#define TSTA_LC (1 << 2) // Late Collision
+#define LSTA_TU (1 << 3) // Transmit Underrun
 
-struct e1000_adapter;
+#define CMD_EOP (1 << 0)  // End of Packet
+#define CMD_IFCS (1 << 1) // Insert FCS
+#define CMD_IC (1 << 2)   // Insert Checksum
+#define CMD_RS (1 << 3)   // Report Status
+#define CMD_RPS (1 << 4)  // Report Packet Sent
+#define CMD_VLE (1 << 6)  // VLAN Packet Enable
+#define CMD_IDE (1 << 7)  // Interrupt Delay Enable
 
-#include "e1000_hw.h"
+#define E1000_NUM_RX_DESC 32
+#define E1000_NUM_TX_DESC 8
 
-#if DBG
-#define E1000_DBG(args...) printk(KERN_DEBUG "e1000: " args)
-#else
-#define E1000_DBG(args...)
-#endif
+#define E1000_CTL_START_LINK 0x40 //set link up
 
-#define E1000_ERR(args...) printk(KERN_ERR "e1000: " args)
-
-#define E1000_MAX_INTR 10
-
-/* Supported Rx Buffer Sizes */
-#define E1000_RXBUFFER_2048  2048
-#define E1000_RXBUFFER_4096  4096
-#define E1000_RXBUFFER_8192  8192
-#define E1000_RXBUFFER_16384 16384
-
-/* Flow Control High-Watermark: 43464 bytes */
-#define E1000_FC_HIGH_THRESH 0xA9C8
-
-/* Flow Control Low-Watermark: 43456 bytes */
-#define E1000_FC_LOW_THRESH 0xA9C0
-
-/* Flow Control Pause Time: 858 usec */
-#define E1000_FC_PAUSE_TIME 0x0680
-
-/* How many Tx Descriptors do we need to call netif_wake_queue ? */
-#define E1000_TX_QUEUE_WAKE	16
-/* How many Rx Buffers do we bundle into one write to the hardware ? */
-#define E1000_RX_BUFFER_WRITE	16
-
-#define E1000_JUMBO_PBA      0x00000028
-#define E1000_DEFAULT_PBA    0x00000030
-
-#define AUTO_ALL_MODES       0
-
-/* only works for sizes that are powers of 2 */
-#define E1000_ROUNDUP(i, size) ((i) = (((i) + (size) - 1) & ~((size) - 1)))
-
-/* wrapper around a pointer to a socket buffer,
- * so a DMA handle can be stored along with the buffer */
-struct e1000_buffer {
-	struct sk_buff *skb;
-	uint64_t dma;
-	unsigned long length;
-	unsigned long time_stamp;
+struct __attribute__((packed)) E1000RXDescriptor
+{
+    uint64_t address;
+    uint16_t length;
+    uint16_t checksum;
+    uint8_t status;
+    uint8_t errors;
+    uint16_t special;
 };
 
-struct e1000_desc_ring {
-	/* pointer to the descriptor ring memory */
-	void *desc;
-	/* physical address of the descriptor ring */
-	dma_addr_t dma;
-	/* length of descriptor ring in bytes */
-	unsigned int size;
-	/* number of descriptors in the ring */
-	unsigned int count;
-	/* next descriptor to associate a buffer with */
-	unsigned int next_to_use;
-	/* next descriptor to check for DD status bit */
-	unsigned int next_to_clean;
-	/* array of buffer information structs */
-	struct e1000_buffer *buffer_info;
+struct __attribute__((packed)) E1000TXDescriptor
+{
+    uint64_t address;
+    uint16_t length;
+    uint8_t cso;
+    uint8_t command;
+    uint8_t status;
+    uint8_t css;
+    uint16_t special;
 };
-
-#define E1000_DESC_UNUSED(R) \
-((((R)->next_to_clean + (R)->count) - ((R)->next_to_use + 1)) % ((R)->count))
-
-#define E1000_GET_DESC(R, i, type)	(&(((struct type *)((R).desc))[i]))
-#define E1000_RX_DESC(R, i)		E1000_GET_DESC(R, i, e1000_rx_desc)
-#define E1000_TX_DESC(R, i)		E1000_GET_DESC(R, i, e1000_tx_desc)
-#define E1000_CONTEXT_DESC(R, i)	E1000_GET_DESC(R, i, e1000_context_desc)
-
-/* board specific private data structure */
-
-struct e1000_adapter {
-	struct timer_list watchdog_timer;
-	struct timer_list phy_info_timer;
-#ifdef CONFIG_PROC_FS
-	struct list_head proc_list_head;
-#endif
-	struct vlan_group *vlgrp;
-	char *id_string;
-	uint32_t bd_number;
-	uint32_t rx_buffer_len;
-	uint32_t part_num;
-	uint32_t wol;
-	uint16_t link_speed;
-	uint16_t link_duplex;
-	spinlock_t stats_lock;
-	atomic_t irq_sem;
-	struct tq_struct tx_timeout_task;
-
-	struct timer_list blink_timer;
-	unsigned long led_status;
-
-	/* TX */
-	struct e1000_desc_ring tx_ring;
-	uint32_t txd_cmd;
-	uint32_t tx_int_delay;
-	uint32_t tx_abs_int_delay;
-	int max_data_per_txd;
-
-	/* RX */
-	struct e1000_desc_ring rx_ring;
-	uint64_t hw_csum_err;
-	uint64_t hw_csum_good;
-	uint32_t rx_int_delay;
-	uint32_t rx_abs_int_delay;
-	boolean_t rx_csum;
-
-	/* OS defined structs */
-	struct net_device *netdev;
-	struct pci_dev *pdev;
-	struct net_device_stats net_stats;
-
-	/* structs defined in e1000_hw.h */
-	struct e1000_hw hw;
-	struct e1000_hw_stats stats;
-	struct e1000_phy_info phy_info;
-	struct e1000_phy_stats phy_stats;
-
-
-
-	uint32_t pci_state[16];
-	char ifname[IFNAMSIZ];
-};
-#endif /* _E1000_H_ */

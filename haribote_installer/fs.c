@@ -19,7 +19,7 @@ struct fs_partition{
 }; 
 struct fs_partition partitions[26]; 
 
-void FS_task(void)
+/*void FS_task(void)
 {
 	struct MEMMAN *memman = (struct MEMMAN *)MEMMAN_ADDR;
 	struct MESSAGE message,umess;
@@ -55,7 +55,7 @@ void FS_task(void)
 						partitions[fmess->letter-'A'].is_mount=1;
 						break;
 					default:
-						io_cli(); /*BUG£¡*/
+						io_cli(); /*BUG£¡*
 						io_hlt();
 				}
 				break; 
@@ -89,11 +89,11 @@ void FS_task(void)
 		}
 	} 
 	return;
-} 
+} */
 
 BOOL FSEntry(struct Dobject *Dobj)
 {
-	struct TASK *task;
+	/*struct TASK *task;
 	task = task_alloc();
 	task->tss.esp = memman_alloc_4k(Dobj->memman, 64 * 1024) + 64 * 1024;
 	task->tss.eip = (int) &FS_task;
@@ -109,7 +109,7 @@ BOOL FSEntry(struct Dobject *Dobj)
 	struct dev_callon fscallon;
 	fscallon.id = FS_CALLON;
 	fscallon.pid = task2pid(task);
-	devcalls[FS_CALLON] = &fscallon;
+	devcalls[FS_CALLON] = &fscallon;*/
 	return TRUE;
 }
 void fs_send2hd(struct MESSAGE *mess)

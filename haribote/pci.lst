@@ -279,334 +279,340 @@
    279 00000287 31 C0                           	XOR	EAX,EAX
    280 00000289 C9                              	LEAVE
    281 0000028A C3                              	RET
-   282 0000028B                                 	GLOBAL	_pci_add_dev
-   283 0000028B                                 _pci_add_dev:
+   282 0000028B                                 	GLOBAL	_pci_config_dev
+   283 0000028B                                 _pci_config_dev:
    284 0000028B 55                              	PUSH	EBP
    285 0000028C 89 E5                           	MOV	EBP,ESP
-   286 0000028E 56                              	PUSH	ESI
-   287 0000028F 53                              	PUSH	EBX
-   288 00000290 6A 7C                           	PUSH	124
-   289 00000292 8B 75 08                        	MOV	ESI,DWORD [8+EBP]
-   290 00000295 E8 [00000000]                   	CALL	_kalloc
-   291 0000029A 89 C3                           	MOV	EBX,EAX
-   292 0000029C 8B 46 08                        	MOV	EAX,DWORD [8+ESI]
-   293 0000029F 89 43 08                        	MOV	DWORD [8+EBX],EAX
-   294 000002A2 8B 46 0C                        	MOV	EAX,DWORD [12+ESI]
-   295 000002A5 89 43 0C                        	MOV	DWORD [12+EBX],EAX
-   296 000002A8 8B 46 10                        	MOV	EAX,DWORD [16+ESI]
-   297 000002AB 89 43 10                        	MOV	DWORD [16+EBX],EAX
-   298 000002AE 8A 46 18                        	MOV	AL,BYTE [24+ESI]
-   299 000002B1 88 43 18                        	MOV	BYTE [24+EBX],AL
-   300 000002B4 6A 00                           	PUSH	0
-   301 000002B6 FF 73 10                        	PUSH	DWORD [16+EBX]
-   302 000002B9 FF 73 0C                        	PUSH	DWORD [12+EBX]
-   303 000002BC 8B 43 08                        	MOV	EAX,DWORD [8+EBX]
-   304 000002BF FF 30                           	PUSH	DWORD [EAX]
-   305 000002C1 E8 FFFFFD91                     	CALL	__pci_read_word
-   306 000002C6 66 89 43 14                     	MOV	WORD [20+EBX],AX
-   307 000002CA 6A 02                           	PUSH	2
-   308 000002CC FF 73 10                        	PUSH	DWORD [16+EBX]
-   309 000002CF FF 73 0C                        	PUSH	DWORD [12+EBX]
-   310 000002D2 8B 43 08                        	MOV	EAX,DWORD [8+EBX]
-   311 000002D5 FF 30                           	PUSH	DWORD [EAX]
-   312 000002D7 E8 FFFFFD7B                     	CALL	__pci_read_word
-   313 000002DC 83 C4 24                        	ADD	ESP,36
-   314 000002DF 66 89 43 16                     	MOV	WORD [22+EBX],AX
-   315 000002E3 6A 08                           	PUSH	8
-   316 000002E5 FF 73 10                        	PUSH	DWORD [16+EBX]
-   317 000002E8 FF 73 0C                        	PUSH	DWORD [12+EBX]
-   318 000002EB 8B 43 08                        	MOV	EAX,DWORD [8+EBX]
-   319 000002EE FF 30                           	PUSH	DWORD [EAX]
-   320 000002F0 E8 FFFFFDB9                     	CALL	__pci_read_dword
-   321 000002F5 89 43 1C                        	MOV	DWORD [28+EBX],EAX
-   322 000002F8 53                              	PUSH	EBX
-   323 000002F9 68 [00000020]                   	PUSH	_pci_dev_list
-   324 000002FE E8 [00000000]                   	CALL	_list_append
-   325 00000303 89 D8                           	MOV	EAX,EBX
-   326 00000305 FF 05 [00000004]                	INC	DWORD [_devnum]
-   327 0000030B 8D 65 F8                        	LEA	ESP,DWORD [-8+EBP]
-   328 0000030E 5B                              	POP	EBX
-   329 0000030F 5E                              	POP	ESI
-   330 00000310 5D                              	POP	EBP
-   331 00000311 C3                              	RET
-   332 00000312                                 	GLOBAL	_pci_check_func
-   333 00000312                                 _pci_check_func:
-   334 00000312 55                              	PUSH	EBP
-   335 00000313 89 E5                           	MOV	EBP,ESP
-   336 00000315 57                              	PUSH	EDI
-   337 00000316 56                              	PUSH	ESI
-   338 00000317 53                              	PUSH	EBX
-   339 00000318 83 C4 80                        	ADD	ESP,-128
-   340 0000031B 8B 5D 10                        	MOV	EBX,DWORD [16+EBP]
-   341 0000031E 8B 7D 08                        	MOV	EDI,DWORD [8+EBP]
-   342 00000321 6A 0E                           	PUSH	14
-   343 00000323 8B 75 0C                        	MOV	ESI,DWORD [12+EBP]
-   344 00000326 53                              	PUSH	EBX
-   345 00000327 8B 04 BD [00000040]             	MOV	EAX,DWORD [_bus_list+EDI*4]
-   346 0000032E 56                              	PUSH	ESI
-   347 0000032F 89 85 FFFFFF7C                  	MOV	DWORD [-132+EBP],EAX
-   348 00000335 57                              	PUSH	EDI
-   349 00000336 89 75 80                        	MOV	DWORD [-128+EBP],ESI
-   350 00000339 89 5D 84                        	MOV	DWORD [-124+EBP],EBX
-   351 0000033C E8 FFFFFCBF                     	CALL	__pci_read_byte
-   352 00000341 88 45 8C                        	MOV	BYTE [-116+EBP],AL
-   353 00000344 8D 85 FFFFFF74                  	LEA	EAX,DWORD [-140+EBP]
-   354 0000034A 50                              	PUSH	EAX
-   355 0000034B E8 FFFFFF3B                     	CALL	_pci_add_dev
-   356 00000350 6A 0A                           	PUSH	10
-   357 00000352 53                              	PUSH	EBX
-   358 00000353 56                              	PUSH	ESI
-   359 00000354 57                              	PUSH	EDI
-   360 00000355 E8 FFFFFCFD                     	CALL	__pci_read_word
-   361 0000035A 83 C4 24                        	ADD	ESP,36
-   362 0000035D 3D 00000604                     	CMP	EAX,1540
-   363 00000362 74 08                           	JE	L16
-   364 00000364                                 L14:
-   365 00000364 8D 65 F4                        	LEA	ESP,DWORD [-12+EBP]
-   366 00000367 5B                              	POP	EBX
-   367 00000368 5E                              	POP	ESI
-   368 00000369 5F                              	POP	EDI
-   369 0000036A 5D                              	POP	EBP
-   370 0000036B C3                              	RET
-   371 0000036C                                 L16:
-   372 0000036C 6A 19                           	PUSH	25
-   373 0000036E 53                              	PUSH	EBX
-   374 0000036F 56                              	PUSH	ESI
-   375 00000370 57                              	PUSH	EDI
-   376 00000371 E8 FFFFFC8A                     	CALL	__pci_read_byte
-   377 00000376 83 C4 10                        	ADD	ESP,16
-   378 00000379 50                              	PUSH	EAX
-   379 0000037A E8 0000009B                     	CALL	_pci_scan_bus
-   380 0000037F 59                              	POP	ECX
-   381 00000380 EB E2                           	JMP	L14
-   382 00000382                                 	GLOBAL	_pci_check_dev
-   383 00000382                                 _pci_check_dev:
-   384 00000382 55                              	PUSH	EBP
-   385 00000383 89 E5                           	MOV	EBP,ESP
-   386 00000385 57                              	PUSH	EDI
-   387 00000386 56                              	PUSH	ESI
-   388 00000387 53                              	PUSH	EBX
-   389 00000388 8B 75 0C                        	MOV	ESI,DWORD [12+EBP]
-   390 0000038B 6A 00                           	PUSH	0
-   391 0000038D 8B 7D 08                        	MOV	EDI,DWORD [8+EBP]
-   392 00000390 6A 00                           	PUSH	0
-   393 00000392 56                              	PUSH	ESI
-   394 00000393 57                              	PUSH	EDI
-   395 00000394 E8 FFFFFCBE                     	CALL	__pci_read_word
-   396 00000399 83 C4 10                        	ADD	ESP,16
-   397 0000039C 3D 0000FFFF                     	CMP	EAX,65535
-   398 000003A1 74 12                           	JE	L17
-   399 000003A3 6A 00                           	PUSH	0
-   400 000003A5 6A 00                           	PUSH	0
-   401 000003A7 56                              	PUSH	ESI
-   402 000003A8 57                              	PUSH	EDI
-   403 000003A9 E8 FFFFFCA9                     	CALL	__pci_read_word
-   404 000003AE 83 C4 10                        	ADD	ESP,16
-   405 000003B1 85 C0                           	TEST	EAX,EAX
-   406 000003B3 75 08                           	JNE	L29
-   407 000003B5                                 L17:
-   408 000003B5 8D 65 F4                        	LEA	ESP,DWORD [-12+EBP]
-   409 000003B8 5B                              	POP	EBX
-   410 000003B9 5E                              	POP	ESI
-   411 000003BA 5F                              	POP	EDI
-   412 000003BB 5D                              	POP	EBP
-   413 000003BC C3                              	RET
-   414 000003BD                                 L29:
-   415 000003BD 6A 0E                           	PUSH	14
-   416 000003BF 6A 00                           	PUSH	0
-   417 000003C1 56                              	PUSH	ESI
-   418 000003C2 57                              	PUSH	EDI
-   419 000003C3 E8 FFFFFC38                     	CALL	__pci_read_byte
-   420 000003C8 83 C4 10                        	ADD	ESP,16
-   421 000003CB 83 E0 01                        	AND	EAX,1
-   422 000003CE 74 3C                           	JE	L20
-   423 000003D0 31 DB                           	XOR	EBX,EBX
-   424 000003D2                                 L26:
-   425 000003D2 6A 00                           	PUSH	0
-   426 000003D4 53                              	PUSH	EBX
-   427 000003D5 56                              	PUSH	ESI
-   428 000003D6 57                              	PUSH	EDI
-   429 000003D7 E8 FFFFFC7B                     	CALL	__pci_read_word
-   430 000003DC 83 C4 10                        	ADD	ESP,16
-   431 000003DF 3D 0000FFFF                     	CMP	EAX,65535
-   432 000003E4 74 11                           	JE	L23
-   433 000003E6 6A 00                           	PUSH	0
-   434 000003E8 53                              	PUSH	EBX
-   435 000003E9 56                              	PUSH	ESI
-   436 000003EA 57                              	PUSH	EDI
-   437 000003EB E8 FFFFFC67                     	CALL	__pci_read_word
-   438 000003F0 83 C4 10                        	ADD	ESP,16
-   439 000003F3 85 C0                           	TEST	EAX,EAX
-   440 000003F5 75 08                           	JNE	L30
-   441 000003F7                                 L23:
-   442 000003F7 43                              	INC	EBX
-   443 000003F8 83 FB 07                        	CMP	EBX,7
-   444 000003FB 7E D5                           	JLE	L26
-   445 000003FD EB B6                           	JMP	L17
-   446 000003FF                                 L30:
-   447 000003FF 53                              	PUSH	EBX
-   448 00000400 56                              	PUSH	ESI
-   449 00000401 57                              	PUSH	EDI
-   450 00000402 E8 FFFFFF0B                     	CALL	_pci_check_func
-   451 00000407 83 C4 0C                        	ADD	ESP,12
-   452 0000040A EB EB                           	JMP	L23
-   453 0000040C                                 L20:
-   454 0000040C 6A 00                           	PUSH	0
-   455 0000040E 56                              	PUSH	ESI
-   456 0000040F 57                              	PUSH	EDI
-   457 00000410 E8 FFFFFEFD                     	CALL	_pci_check_func
-   458 00000415 83 C4 0C                        	ADD	ESP,12
-   459 00000418 EB 9B                           	JMP	L17
-   460 0000041A                                 	GLOBAL	_pci_scan_bus
-   461 0000041A                                 _pci_scan_bus:
-   462 0000041A 55                              	PUSH	EBP
-   463 0000041B 89 E5                           	MOV	EBP,ESP
-   464 0000041D 56                              	PUSH	ESI
-   465 0000041E 53                              	PUSH	EBX
-   466 0000041F 31 DB                           	XOR	EBX,EBX
-   467 00000421 83 EC 30                        	SUB	ESP,48
-   468 00000424 8D 45 C8                        	LEA	EAX,DWORD [-56+EBP]
-   469 00000427 8B 75 08                        	MOV	ESI,DWORD [8+EBP]
-   470 0000042A 89 75 C8                        	MOV	DWORD [-56+EBP],ESI
-   471 0000042D 89 75 D0                        	MOV	DWORD [-48+EBP],ESI
-   472 00000430 89 75 CC                        	MOV	DWORD [-52+EBP],ESI
-   473 00000433 89 04 B5 [00000040]             	MOV	DWORD [_bus_list+ESI*4],EAX
-   474 0000043A                                 L36:
-   475 0000043A 53                              	PUSH	EBX
-   476 0000043B 43                              	INC	EBX
-   477 0000043C 56                              	PUSH	ESI
-   478 0000043D E8 FFFFFF40                     	CALL	_pci_check_dev
-   479 00000442 83 FB 1F                        	CMP	EBX,31
-   480 00000445 58                              	POP	EAX
-   481 00000446 5A                              	POP	EDX
-   482 00000447 7E F1                           	JLE	L36
-   483 00000449 FF 05 [00000000]                	INC	DWORD [_busnum]
-   484 0000044F 8D 65 F8                        	LEA	ESP,DWORD [-8+EBP]
-   485 00000452 5B                              	POP	EBX
-   486 00000453 5E                              	POP	ESI
-   487 00000454 5D                              	POP	EBP
-   488 00000455 C3                              	RET
-   489 00000456                                 	GLOBAL	_pci_probe
-   490 00000456                                 _pci_probe:
-   491 00000456 55                              	PUSH	EBP
-   492 00000457 89 E5                           	MOV	EBP,ESP
-   493 00000459 6A 00                           	PUSH	0
-   494 0000045B 6A 00                           	PUSH	0
-   495 0000045D 6A 00                           	PUSH	0
-   496 0000045F 6A 00                           	PUSH	0
-   497 00000461 E8 FFFFFC48                     	CALL	__pci_read_dword
-   498 00000466 83 C4 10                        	ADD	ESP,16
-   499 00000469 40                              	INC	EAX
-   500 0000046A 0F 95 C0                        	SETNE	AL
-   501 0000046D 0F B6 C0                        	MOVZX	EAX,AL
-   502 00000470 C9                              	LEAVE
-   503 00000471 C3                              	RET
-   504 00000472                                 	GLOBAL	_pci_init
-   505 00000472                                 _pci_init:
-   506 00000472 55                              	PUSH	EBP
-   507 00000473 89 E5                           	MOV	EBP,ESP
-   508 00000475 E8 FFFFFFDC                     	CALL	_pci_probe
-   509 0000047A 31 D2                           	XOR	EDX,EDX
-   510 0000047C 85 C0                           	TEST	EAX,EAX
-   511 0000047E 75 04                           	JNE	L43
-   512 00000480                                 L41:
-   513 00000480 89 D0                           	MOV	EAX,EDX
-   514 00000482 C9                              	LEAVE
-   515 00000483 C3                              	RET
-   516 00000484                                 L43:
-   517 00000484 68 [00000030]                   	PUSH	_pci_bus_list
-   518 00000489 E8 [00000000]                   	CALL	_list_init
-   519 0000048E 68 [00000020]                   	PUSH	_pci_dev_list
-   520 00000493 E8 [00000000]                   	CALL	_list_init
-   521 00000498 6A 00                           	PUSH	0
-   522 0000049A E8 FFFFFF7B                     	CALL	_pci_scan_bus
-   523 0000049F BA 00000001                     	MOV	EDX,1
-   524 000004A4 EB DA                           	JMP	L41
-   525                                          [SECTION .data]
-   526 00000008                                 LC0:
-   527 00000008 25 34 78 20 25 34 78 20 25 64   	DB	"%4x %4x %d %d %d",0x0A,0x00
+   286 0000028E 5D                              	POP	EBP
+   287 0000028F C3                              	RET
+   288 00000290                                 	GLOBAL	_pci_add_dev
+   289 00000290                                 _pci_add_dev:
+   290 00000290 55                              	PUSH	EBP
+   291 00000291 89 E5                           	MOV	EBP,ESP
+   292 00000293 56                              	PUSH	ESI
+   293 00000294 53                              	PUSH	EBX
+   294 00000295 6A 7C                           	PUSH	124
+   295 00000297 8B 75 08                        	MOV	ESI,DWORD [8+EBP]
+   296 0000029A E8 [00000000]                   	CALL	_kalloc
+   297 0000029F 89 C3                           	MOV	EBX,EAX
+   298 000002A1 8B 46 08                        	MOV	EAX,DWORD [8+ESI]
+   299 000002A4 89 43 08                        	MOV	DWORD [8+EBX],EAX
+   300 000002A7 8B 46 0C                        	MOV	EAX,DWORD [12+ESI]
+   301 000002AA 89 43 0C                        	MOV	DWORD [12+EBX],EAX
+   302 000002AD 8B 46 10                        	MOV	EAX,DWORD [16+ESI]
+   303 000002B0 89 43 10                        	MOV	DWORD [16+EBX],EAX
+   304 000002B3 8A 46 18                        	MOV	AL,BYTE [24+ESI]
+   305 000002B6 88 43 18                        	MOV	BYTE [24+EBX],AL
+   306 000002B9 6A 00                           	PUSH	0
+   307 000002BB FF 73 10                        	PUSH	DWORD [16+EBX]
+   308 000002BE FF 73 0C                        	PUSH	DWORD [12+EBX]
+   309 000002C1 8B 43 08                        	MOV	EAX,DWORD [8+EBX]
+   310 000002C4 FF 30                           	PUSH	DWORD [EAX]
+   311 000002C6 E8 FFFFFD8C                     	CALL	__pci_read_word
+   312 000002CB 66 89 43 14                     	MOV	WORD [20+EBX],AX
+   313 000002CF 6A 02                           	PUSH	2
+   314 000002D1 FF 73 10                        	PUSH	DWORD [16+EBX]
+   315 000002D4 FF 73 0C                        	PUSH	DWORD [12+EBX]
+   316 000002D7 8B 43 08                        	MOV	EAX,DWORD [8+EBX]
+   317 000002DA FF 30                           	PUSH	DWORD [EAX]
+   318 000002DC E8 FFFFFD76                     	CALL	__pci_read_word
+   319 000002E1 83 C4 24                        	ADD	ESP,36
+   320 000002E4 66 89 43 16                     	MOV	WORD [22+EBX],AX
+   321 000002E8 6A 08                           	PUSH	8
+   322 000002EA FF 73 10                        	PUSH	DWORD [16+EBX]
+   323 000002ED FF 73 0C                        	PUSH	DWORD [12+EBX]
+   324 000002F0 8B 43 08                        	MOV	EAX,DWORD [8+EBX]
+   325 000002F3 FF 30                           	PUSH	DWORD [EAX]
+   326 000002F5 E8 FFFFFDB4                     	CALL	__pci_read_dword
+   327 000002FA 89 43 1C                        	MOV	DWORD [28+EBX],EAX
+   328 000002FD 53                              	PUSH	EBX
+   329 000002FE E8 FFFFFF88                     	CALL	_pci_config_dev
+   330 00000303 53                              	PUSH	EBX
+   331 00000304 68 [00000020]                   	PUSH	_pci_dev_list
+   332 00000309 E8 [00000000]                   	CALL	_list_append
+   333 0000030E 89 D8                           	MOV	EAX,EBX
+   334 00000310 FF 05 [00000004]                	INC	DWORD [_devnum]
+   335 00000316 8D 65 F8                        	LEA	ESP,DWORD [-8+EBP]
+   336 00000319 5B                              	POP	EBX
+   337 0000031A 5E                              	POP	ESI
+   338 0000031B 5D                              	POP	EBP
+   339 0000031C C3                              	RET
+   340 0000031D                                 	GLOBAL	_pci_check_func
+   341 0000031D                                 _pci_check_func:
+   342 0000031D 55                              	PUSH	EBP
+   343 0000031E 89 E5                           	MOV	EBP,ESP
+   344 00000320 57                              	PUSH	EDI
+   345 00000321 56                              	PUSH	ESI
+   346 00000322 53                              	PUSH	EBX
+   347 00000323 83 C4 80                        	ADD	ESP,-128
+   348 00000326 8B 5D 10                        	MOV	EBX,DWORD [16+EBP]
+   349 00000329 8B 7D 08                        	MOV	EDI,DWORD [8+EBP]
+   350 0000032C 6A 0E                           	PUSH	14
+   351 0000032E 8B 75 0C                        	MOV	ESI,DWORD [12+EBP]
+   352 00000331 53                              	PUSH	EBX
+   353 00000332 8B 04 BD [00000040]             	MOV	EAX,DWORD [_bus_list+EDI*4]
+   354 00000339 56                              	PUSH	ESI
+   355 0000033A 89 85 FFFFFF7C                  	MOV	DWORD [-132+EBP],EAX
+   356 00000340 57                              	PUSH	EDI
+   357 00000341 89 75 80                        	MOV	DWORD [-128+EBP],ESI
+   358 00000344 89 5D 84                        	MOV	DWORD [-124+EBP],EBX
+   359 00000347 E8 FFFFFCB4                     	CALL	__pci_read_byte
+   360 0000034C 88 45 8C                        	MOV	BYTE [-116+EBP],AL
+   361 0000034F 8D 85 FFFFFF74                  	LEA	EAX,DWORD [-140+EBP]
+   362 00000355 50                              	PUSH	EAX
+   363 00000356 E8 FFFFFF35                     	CALL	_pci_add_dev
+   364 0000035B 6A 0A                           	PUSH	10
+   365 0000035D 53                              	PUSH	EBX
+   366 0000035E 56                              	PUSH	ESI
+   367 0000035F 57                              	PUSH	EDI
+   368 00000360 E8 FFFFFCF2                     	CALL	__pci_read_word
+   369 00000365 83 C4 24                        	ADD	ESP,36
+   370 00000368 3D 00000604                     	CMP	EAX,1540
+   371 0000036D 74 08                           	JE	L17
+   372 0000036F                                 L15:
+   373 0000036F 8D 65 F4                        	LEA	ESP,DWORD [-12+EBP]
+   374 00000372 5B                              	POP	EBX
+   375 00000373 5E                              	POP	ESI
+   376 00000374 5F                              	POP	EDI
+   377 00000375 5D                              	POP	EBP
+   378 00000376 C3                              	RET
+   379 00000377                                 L17:
+   380 00000377 6A 19                           	PUSH	25
+   381 00000379 53                              	PUSH	EBX
+   382 0000037A 56                              	PUSH	ESI
+   383 0000037B 57                              	PUSH	EDI
+   384 0000037C E8 FFFFFC7F                     	CALL	__pci_read_byte
+   385 00000381 83 C4 10                        	ADD	ESP,16
+   386 00000384 50                              	PUSH	EAX
+   387 00000385 E8 0000009B                     	CALL	_pci_scan_bus
+   388 0000038A 59                              	POP	ECX
+   389 0000038B EB E2                           	JMP	L15
+   390 0000038D                                 	GLOBAL	_pci_check_dev
+   391 0000038D                                 _pci_check_dev:
+   392 0000038D 55                              	PUSH	EBP
+   393 0000038E 89 E5                           	MOV	EBP,ESP
+   394 00000390 57                              	PUSH	EDI
+   395 00000391 56                              	PUSH	ESI
+   396 00000392 53                              	PUSH	EBX
+   397 00000393 8B 75 0C                        	MOV	ESI,DWORD [12+EBP]
+   398 00000396 6A 00                           	PUSH	0
+   399 00000398 8B 7D 08                        	MOV	EDI,DWORD [8+EBP]
+   400 0000039B 6A 00                           	PUSH	0
+   401 0000039D 56                              	PUSH	ESI
+   402 0000039E 57                              	PUSH	EDI
+   403 0000039F E8 FFFFFCB3                     	CALL	__pci_read_word
+   404 000003A4 83 C4 10                        	ADD	ESP,16
+   405 000003A7 3D 0000FFFF                     	CMP	EAX,65535
+   406 000003AC 74 12                           	JE	L18
+   407 000003AE 6A 00                           	PUSH	0
+   408 000003B0 6A 00                           	PUSH	0
+   409 000003B2 56                              	PUSH	ESI
+   410 000003B3 57                              	PUSH	EDI
+   411 000003B4 E8 FFFFFC9E                     	CALL	__pci_read_word
+   412 000003B9 83 C4 10                        	ADD	ESP,16
+   413 000003BC 85 C0                           	TEST	EAX,EAX
+   414 000003BE 75 08                           	JNE	L30
+   415 000003C0                                 L18:
+   416 000003C0 8D 65 F4                        	LEA	ESP,DWORD [-12+EBP]
+   417 000003C3 5B                              	POP	EBX
+   418 000003C4 5E                              	POP	ESI
+   419 000003C5 5F                              	POP	EDI
+   420 000003C6 5D                              	POP	EBP
+   421 000003C7 C3                              	RET
+   422 000003C8                                 L30:
+   423 000003C8 6A 0E                           	PUSH	14
+   424 000003CA 6A 00                           	PUSH	0
+   425 000003CC 56                              	PUSH	ESI
+   426 000003CD 57                              	PUSH	EDI
+   427 000003CE E8 FFFFFC2D                     	CALL	__pci_read_byte
+   428 000003D3 83 C4 10                        	ADD	ESP,16
+   429 000003D6 83 E0 01                        	AND	EAX,1
+   430 000003D9 74 3C                           	JE	L21
+   431 000003DB 31 DB                           	XOR	EBX,EBX
+   432 000003DD                                 L27:
+   433 000003DD 6A 00                           	PUSH	0
+   434 000003DF 53                              	PUSH	EBX
+   435 000003E0 56                              	PUSH	ESI
+   436 000003E1 57                              	PUSH	EDI
+   437 000003E2 E8 FFFFFC70                     	CALL	__pci_read_word
+   438 000003E7 83 C4 10                        	ADD	ESP,16
+   439 000003EA 3D 0000FFFF                     	CMP	EAX,65535
+   440 000003EF 74 11                           	JE	L24
+   441 000003F1 6A 00                           	PUSH	0
+   442 000003F3 53                              	PUSH	EBX
+   443 000003F4 56                              	PUSH	ESI
+   444 000003F5 57                              	PUSH	EDI
+   445 000003F6 E8 FFFFFC5C                     	CALL	__pci_read_word
+   446 000003FB 83 C4 10                        	ADD	ESP,16
+   447 000003FE 85 C0                           	TEST	EAX,EAX
+   448 00000400 75 08                           	JNE	L31
+   449 00000402                                 L24:
+   450 00000402 43                              	INC	EBX
+   451 00000403 83 FB 07                        	CMP	EBX,7
+   452 00000406 7E D5                           	JLE	L27
+   453 00000408 EB B6                           	JMP	L18
+   454 0000040A                                 L31:
+   455 0000040A 53                              	PUSH	EBX
+   456 0000040B 56                              	PUSH	ESI
+   457 0000040C 57                              	PUSH	EDI
+   458 0000040D E8 FFFFFF0B                     	CALL	_pci_check_func
+   459 00000412 83 C4 0C                        	ADD	ESP,12
+   460 00000415 EB EB                           	JMP	L24
+   461 00000417                                 L21:
+   462 00000417 6A 00                           	PUSH	0
+   463 00000419 56                              	PUSH	ESI
+   464 0000041A 57                              	PUSH	EDI
+   465 0000041B E8 FFFFFEFD                     	CALL	_pci_check_func
+   466 00000420 83 C4 0C                        	ADD	ESP,12
+   467 00000423 EB 9B                           	JMP	L18
+   468 00000425                                 	GLOBAL	_pci_scan_bus
+   469 00000425                                 _pci_scan_bus:
+   470 00000425 55                              	PUSH	EBP
+   471 00000426 89 E5                           	MOV	EBP,ESP
+   472 00000428 56                              	PUSH	ESI
+   473 00000429 53                              	PUSH	EBX
+   474 0000042A 31 DB                           	XOR	EBX,EBX
+   475 0000042C 83 EC 30                        	SUB	ESP,48
+   476 0000042F 8D 45 C8                        	LEA	EAX,DWORD [-56+EBP]
+   477 00000432 8B 75 08                        	MOV	ESI,DWORD [8+EBP]
+   478 00000435 89 75 C8                        	MOV	DWORD [-56+EBP],ESI
+   479 00000438 89 75 D0                        	MOV	DWORD [-48+EBP],ESI
+   480 0000043B 89 75 CC                        	MOV	DWORD [-52+EBP],ESI
+   481 0000043E 89 04 B5 [00000040]             	MOV	DWORD [_bus_list+ESI*4],EAX
+   482 00000445                                 L37:
+   483 00000445 53                              	PUSH	EBX
+   484 00000446 43                              	INC	EBX
+   485 00000447 56                              	PUSH	ESI
+   486 00000448 E8 FFFFFF40                     	CALL	_pci_check_dev
+   487 0000044D 83 FB 1F                        	CMP	EBX,31
+   488 00000450 58                              	POP	EAX
+   489 00000451 5A                              	POP	EDX
+   490 00000452 7E F1                           	JLE	L37
+   491 00000454 FF 05 [00000000]                	INC	DWORD [_busnum]
+   492 0000045A 8D 65 F8                        	LEA	ESP,DWORD [-8+EBP]
+   493 0000045D 5B                              	POP	EBX
+   494 0000045E 5E                              	POP	ESI
+   495 0000045F 5D                              	POP	EBP
+   496 00000460 C3                              	RET
+   497 00000461                                 	GLOBAL	_pci_probe
+   498 00000461                                 _pci_probe:
+   499 00000461 55                              	PUSH	EBP
+   500 00000462 89 E5                           	MOV	EBP,ESP
+   501 00000464 6A 00                           	PUSH	0
+   502 00000466 6A 00                           	PUSH	0
+   503 00000468 6A 00                           	PUSH	0
+   504 0000046A 6A 00                           	PUSH	0
+   505 0000046C E8 FFFFFC3D                     	CALL	__pci_read_dword
+   506 00000471 83 C4 10                        	ADD	ESP,16
+   507 00000474 40                              	INC	EAX
+   508 00000475 0F 95 C0                        	SETNE	AL
+   509 00000478 0F B6 C0                        	MOVZX	EAX,AL
+   510 0000047B C9                              	LEAVE
+   511 0000047C C3                              	RET
+   512 0000047D                                 	GLOBAL	_pci_init
+   513 0000047D                                 _pci_init:
+   514 0000047D 55                              	PUSH	EBP
+   515 0000047E 89 E5                           	MOV	EBP,ESP
+   516 00000480 E8 FFFFFFDC                     	CALL	_pci_probe
+   517 00000485 31 D2                           	XOR	EDX,EDX
+   518 00000487 85 C0                           	TEST	EAX,EAX
+   519 00000489 75 04                           	JNE	L44
+   520 0000048B                                 L42:
+   521 0000048B 89 D0                           	MOV	EAX,EDX
+   522 0000048D C9                              	LEAVE
+   523 0000048E C3                              	RET
+   524 0000048F                                 L44:
+   525 0000048F 68 [00000030]                   	PUSH	_pci_bus_list
+   526 00000494 E8 [00000000]                   	CALL	_list_init
+   527 00000499 68 [00000020]                   	PUSH	_pci_dev_list
+   528 0000049E E8 [00000000]                   	CALL	_list_init
+   529 000004A3 6A 00                           	PUSH	0
+   530 000004A5 E8 FFFFFF7B                     	CALL	_pci_scan_bus
+   531 000004AA BA 00000001                     	MOV	EDX,1
+   532 000004AF EB DA                           	JMP	L42
+   533                                          [SECTION .data]
+   534 00000008                                 LC0:
+   535 00000008 25 34 78 20 25 34 78 20 25 64   	DB	"%4x %4x %d %d %d",0x0A,0x00
        00000012 20 25 64 20 25 64 0A 00 
-   528                                          [SECTION .text]
-   529 000004A6                                 	GLOBAL	_pci_test_f
-   530 000004A6                                 _pci_test_f:
-   531 000004A6 55                              	PUSH	EBP
-   532 000004A7 89 E5                           	MOV	EBP,ESP
-   533 000004A9 53                              	PUSH	EBX
-   534 000004AA 81 EC 000003F0                  	SUB	ESP,1008
-   535 000004B0 8B 55 08                        	MOV	EDX,DWORD [8+EBP]
-   536 000004B3 8D 9D FFFFFC0C                  	LEA	EBX,DWORD [-1012+EBP]
-   537 000004B9 FF 72 10                        	PUSH	DWORD [16+EDX]
-   538 000004BC FF 72 0C                        	PUSH	DWORD [12+EDX]
-   539 000004BF 8B 42 08                        	MOV	EAX,DWORD [8+EDX]
-   540 000004C2 FF 30                           	PUSH	DWORD [EAX]
-   541 000004C4 0F BF 42 16                     	MOVSX	EAX,WORD [22+EDX]
-   542 000004C8 50                              	PUSH	EAX
-   543 000004C9 0F BF 42 14                     	MOVSX	EAX,WORD [20+EDX]
-   544 000004CD 50                              	PUSH	EAX
-   545 000004CE 68 [00000008]                   	PUSH	LC0
-   546 000004D3 53                              	PUSH	EBX
-   547 000004D4 E8 [00000000]                   	CALL	_sprintf
-   548 000004D9 53                              	PUSH	EBX
-   549 000004DA FF 75 0C                        	PUSH	DWORD [12+EBP]
-   550 000004DD E8 [00000000]                   	CALL	_cons_putstr0
-   551 000004E2 8B 5D FC                        	MOV	EBX,DWORD [-4+EBP]
-   552 000004E5 31 C0                           	XOR	EAX,EAX
-   553 000004E7 C9                              	LEAVE
-   554 000004E8 C3                              	RET
-   555                                          [SECTION .data]
-   556 0000001A                                 LC1:
-   557 0000001A 25 64 0A 0A 00                  	DB	"%d",0x0A,0x0A,0x00
-   558                                          [SECTION .text]
-   559 000004E9                                 	GLOBAL	_pci_test
-   560 000004E9                                 _pci_test:
-   561 000004E9 55                              	PUSH	EBP
-   562 000004EA 89 E5                           	MOV	EBP,ESP
-   563 000004EC 56                              	PUSH	ESI
-   564 000004ED 53                              	PUSH	EBX
-   565 000004EE 83 EC 70                        	SUB	ESP,112
-   566 000004F1 8D 5D 88                        	LEA	EBX,DWORD [-120+EBP]
-   567 000004F4 8B 75 08                        	MOV	ESI,DWORD [8+EBP]
-   568 000004F7 56                              	PUSH	ESI
-   569 000004F8 68 [000004A6]                   	PUSH	_pci_test_f
-   570 000004FD 68 [00000020]                   	PUSH	_pci_dev_list
-   571 00000502 E8 [00000000]                   	CALL	_list_traversal
-   572 00000507 FF 35 [00000000]                	PUSH	DWORD [_busnum]
-   573 0000050D 68 [0000001A]                   	PUSH	LC1
-   574 00000512 53                              	PUSH	EBX
-   575 00000513 E8 [00000000]                   	CALL	_sprintf
-   576 00000518 53                              	PUSH	EBX
-   577 00000519 56                              	PUSH	ESI
-   578 0000051A E8 [00000000]                   	CALL	_cons_putstr0
-   579 0000051F 8D 65 F8                        	LEA	ESP,DWORD [-8+EBP]
-   580 00000522 5B                              	POP	EBX
-   581 00000523 5E                              	POP	ESI
-   582 00000524 5D                              	POP	EBP
-   583 00000525 C3                              	RET
-   584 00000526                                 	GLOBAL	_PCIEntry
-   585 00000526                                 _PCIEntry:
-   586 00000526 55                              	PUSH	EBP
-   587 00000527 89 E5                           	MOV	EBP,ESP
-   588 00000529 E8 FFFFFF44                     	CALL	_pci_init
-   589 0000052E 5D                              	POP	EBP
-   590 0000052F B8 00000001                     	MOV	EAX,1
-   591 00000534 C3                              	RET
-   592 00000535                                 	GLOBAL	_pci_dev_list
-   593                                          [SECTION .data]
-   594 0000001F 00                              	ALIGNB	16
-   595 00000020                                 _pci_dev_list:
-   596 00000020 00 00 00 00 00 00 00 00 00 00   	RESB	16
+   536                                          [SECTION .text]
+   537 000004B1                                 	GLOBAL	_pci_test_f
+   538 000004B1                                 _pci_test_f:
+   539 000004B1 55                              	PUSH	EBP
+   540 000004B2 89 E5                           	MOV	EBP,ESP
+   541 000004B4 53                              	PUSH	EBX
+   542 000004B5 81 EC 000003F0                  	SUB	ESP,1008
+   543 000004BB 8B 55 08                        	MOV	EDX,DWORD [8+EBP]
+   544 000004BE 8D 9D FFFFFC0C                  	LEA	EBX,DWORD [-1012+EBP]
+   545 000004C4 FF 72 10                        	PUSH	DWORD [16+EDX]
+   546 000004C7 FF 72 0C                        	PUSH	DWORD [12+EDX]
+   547 000004CA 8B 42 08                        	MOV	EAX,DWORD [8+EDX]
+   548 000004CD FF 30                           	PUSH	DWORD [EAX]
+   549 000004CF 0F BF 42 16                     	MOVSX	EAX,WORD [22+EDX]
+   550 000004D3 50                              	PUSH	EAX
+   551 000004D4 0F BF 42 14                     	MOVSX	EAX,WORD [20+EDX]
+   552 000004D8 50                              	PUSH	EAX
+   553 000004D9 68 [00000008]                   	PUSH	LC0
+   554 000004DE 53                              	PUSH	EBX
+   555 000004DF E8 [00000000]                   	CALL	_sprintf
+   556 000004E4 53                              	PUSH	EBX
+   557 000004E5 FF 75 0C                        	PUSH	DWORD [12+EBP]
+   558 000004E8 E8 [00000000]                   	CALL	_cons_putstr0
+   559 000004ED 8B 5D FC                        	MOV	EBX,DWORD [-4+EBP]
+   560 000004F0 31 C0                           	XOR	EAX,EAX
+   561 000004F2 C9                              	LEAVE
+   562 000004F3 C3                              	RET
+   563                                          [SECTION .data]
+   564 0000001A                                 LC1:
+   565 0000001A 25 64 0A 0A 00                  	DB	"%d",0x0A,0x0A,0x00
+   566                                          [SECTION .text]
+   567 000004F4                                 	GLOBAL	_pci_test
+   568 000004F4                                 _pci_test:
+   569 000004F4 55                              	PUSH	EBP
+   570 000004F5 89 E5                           	MOV	EBP,ESP
+   571 000004F7 56                              	PUSH	ESI
+   572 000004F8 53                              	PUSH	EBX
+   573 000004F9 83 EC 70                        	SUB	ESP,112
+   574 000004FC 8D 5D 88                        	LEA	EBX,DWORD [-120+EBP]
+   575 000004FF 8B 75 08                        	MOV	ESI,DWORD [8+EBP]
+   576 00000502 56                              	PUSH	ESI
+   577 00000503 68 [000004B1]                   	PUSH	_pci_test_f
+   578 00000508 68 [00000020]                   	PUSH	_pci_dev_list
+   579 0000050D E8 [00000000]                   	CALL	_list_traversal
+   580 00000512 FF 35 [00000000]                	PUSH	DWORD [_busnum]
+   581 00000518 68 [0000001A]                   	PUSH	LC1
+   582 0000051D 53                              	PUSH	EBX
+   583 0000051E E8 [00000000]                   	CALL	_sprintf
+   584 00000523 53                              	PUSH	EBX
+   585 00000524 56                              	PUSH	ESI
+   586 00000525 E8 [00000000]                   	CALL	_cons_putstr0
+   587 0000052A 8D 65 F8                        	LEA	ESP,DWORD [-8+EBP]
+   588 0000052D 5B                              	POP	EBX
+   589 0000052E 5E                              	POP	ESI
+   590 0000052F 5D                              	POP	EBP
+   591 00000530 C3                              	RET
+   592 00000531                                 	GLOBAL	_PCIEntry
+   593 00000531                                 _PCIEntry:
+   594 00000531 55                              	PUSH	EBP
+   595 00000532 89 E5                           	MOV	EBP,ESP
+   596 00000534 5D                              	POP	EBP
+   597 00000535 E9 FFFFFF43                     	JMP	_pci_init
+   598 0000053A                                 	GLOBAL	_pci_dev_list
+   599                                          [SECTION .data]
+   600 0000001F 00                              	ALIGNB	16
+   601 00000020                                 _pci_dev_list:
+   602 00000020 00 00 00 00 00 00 00 00 00 00   	RESB	16
        0000002A 00 00 00 00 00 00 
-   597 00000030                                 	GLOBAL	_pci_bus_list
-   598                                          [SECTION .data]
-   599 00000030                                 	ALIGNB	16
-   600 00000030                                 _pci_bus_list:
-   601 00000030 00 00 00 00 00 00 00 00 00 00   	RESB	16
+   603 00000030                                 	GLOBAL	_pci_bus_list
+   604                                          [SECTION .data]
+   605 00000030                                 	ALIGNB	16
+   606 00000030                                 _pci_bus_list:
+   607 00000030 00 00 00 00 00 00 00 00 00 00   	RESB	16
        0000003A 00 00 00 00 00 00 
-   602 00000040                                 	GLOBAL	_bus_list
-   603                                          [SECTION .data]
-   604 00000040                                 	ALIGNB	16
-   605 00000040                                 _bus_list:
-   606 00000040 00 00 00 00 00 00 00 00 00 00   	RESB	1024
+   608 00000040                                 	GLOBAL	_bus_list
+   609                                          [SECTION .data]
+   610 00000040                                 	ALIGNB	16
+   611 00000040                                 _bus_list:
+   612 00000040 00 00 00 00 00 00 00 00 00 00   	RESB	1024
        0000004A 00 00 00 00 00 00 00 00 00 00 
        00000054 00 00 00 00 00 00 00 00 00 00 
        0000005E 00 00 00 00 00 00 00 00 00 00 
