@@ -23,6 +23,7 @@ char *_rx_buffers[E1000_NUM_RX_DESC];
 char *_tx_buffers[E1000_NUM_TX_DESC];
 int _current_rx_descriptors = 0;
 int _current_tx_descriptors = 0;
+int mem_base=0,io_base=0;
 
 void write_register(unsigned short offset, unsigned int value)
 {
@@ -174,6 +175,7 @@ void enable_interrupt()
     write_register(E1000_REG_IMASK, 0x1F6DC);
     write_register(E1000_REG_IMASK, 0xff & ~4);
     read_register(0xc0);
+    return; 
 }
 
 int receive_packet(void *buffer, int size)
@@ -208,20 +210,22 @@ struct pci_device_id e1000id[]=
 	{0x8086,0x153A,0xFFFF,0xFFFF,0,0},
 	{0x8086,0x10EA,0xFFFF,0xFFFF,0,0},
 	{0x8086,0x100F,0xFFFF,0xFFFF,0,0},
+	{0,0} 
 }
 
 int E1000_init()
 {
-	if(!pci_scan(e1000id)) return 0;
-    struct pci_bar bar0 = pci_get_bar(0);
+	struct pci_dev *e1000dev;
+	if(!(e1000dev=pci_scan(e1000id))) return 0;
+    struct pci_bar *bar0 = pci_get_bar(e1000dev,0);
 
-    if (bar0.type() == PCIBAR_MMIO)
+    if (bar0->type == PCIBAR_MMIO)
     {
-        _mmio_range = make<MMIORange>(bar0.range());
+        mem_base = bar0->base;
     }
     else
     {
-        _pio_base = bar0.base();
+        io_base = bar0->base;
     }
 
     _has_eeprom = detect_eeprom();

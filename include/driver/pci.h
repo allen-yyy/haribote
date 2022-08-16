@@ -1487,14 +1487,14 @@
 
 /* Part2: OS pci function */
 
-struct pci_dev pci_scan(struct pci_device_id *ids);
+struct pci_dev *pci_scan(struct pci_device_id *ids);
 struct pci_bar *pci_get_bar(struct pci_dev *dev,int index);
 
 /* Part3: pci structural*/
+struct pci_bar;
 struct pci_dev
 {
-	struct list_elem tag;
-	struct pci_bus *bus;
+	int unused[3];
 	struct pci_bar bar[6];
 	int bus_slot;
 	int slot_func;
@@ -1512,7 +1512,7 @@ struct pci_bar
 	int prefetchable;
 	int base;
 	int size; 
-}
+};
 struct pci_device_id{
 	short vendor;
 	short device;

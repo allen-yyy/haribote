@@ -218,6 +218,19 @@ BOOL PCIEntry(struct Dobject *Dobj)
 
 
 /* Device function */
+
+BOOL pci_scan_func()
+{
+	
+}
+
+struct pci_dev *pci_scan(struct pci_device_id *ids)
+{
+	list_traversal(&pci_dev_list,pci_test_f,(int) ids);
+	
+	return NULL;
+}
+
 struct pci_bar *pci_get_bar(struct pci_dev *dev,int index)
 {
 	return dev->bar[index];

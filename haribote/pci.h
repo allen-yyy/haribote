@@ -39,7 +39,16 @@ struct pci_bar
 	int prefetchable;
 	int base;
 	int size; 
-}
+};
+
+struct pci_device_id{
+	short vendor;
+	short device;
+	short subvendor;
+	short subdevice;
+	int class;
+	int classmask;
+};
 
 /* from Linux */
 #define PCI_VENDOR_ID		0x00	/* 16 bits */
