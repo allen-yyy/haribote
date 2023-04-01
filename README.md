@@ -1,3 +1,3 @@
-This is haribote os's repository
+# This is haribote os's repository
 
-这是与haribote相关的库
+### Warning : Development of this system has stopped. See the new operating system : https://github.com/allen-yyy/HariboteForMetaverse.
